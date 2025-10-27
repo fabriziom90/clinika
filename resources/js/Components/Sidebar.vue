@@ -43,11 +43,14 @@ const currentMenu = computed(() => {
             :key="section.id"
             class="menu-section"
         >
-            <h3>{{ section.title }}</h3>
+            <h3><i :class="`${section.icon} me-2`"></i>{{ section.title }}</h3>
             <hr class="text-white" />
             <ul>
                 <li v-for="link in section.links" :key="link.route">
-                    <Link :href="route(link.route)">{{ link.name }}</Link>
+                    <Link :href="route(link.route)"
+                        ><i :class="`${link.icon} me-2`"></i
+                        >{{ link.name }}</Link
+                    >
                 </li>
             </ul>
         </div>
