@@ -34,6 +34,13 @@ const currentMenu = computed(() => {
             ),
         }));
 });
+
+const isRouteActive = (route) => {
+    console.log(window.location.pathname);
+    console.log(route);
+    console.log(window.location.pathname.includes(route));
+    return window.location.pathname.includes(route);
+};
 </script>
 
 <template>
@@ -46,7 +53,11 @@ const currentMenu = computed(() => {
             <h3><i :class="`${section.icon} me-2`"></i>{{ section.title }}</h3>
             <hr class="text-white" />
             <ul>
-                <li v-for="link in section.links" :key="link.route">
+                <li
+                    :class="isRouteActive(link.path) ? 'active' : ''"
+                    v-for="link in section.links"
+                    :key="link.route"
+                >
                     <Link :href="route(link.route)"
                         ><i :class="`${link.icon} me-2`"></i
                         >{{ link.name }}</Link
@@ -63,17 +74,27 @@ const currentMenu = computed(() => {
 
 #sidebar {
     height: 100%;
-    width: 200px;
+    width: 250px;
     background-color: $mainRed;
     color: #fff;
-    padding: 10px;
+
+    h3 {
+        padding: 10px;
+    }
 
     ul {
         list-style-type: none;
         padding: 0;
 
         li {
-            padding: 10px 0;
+            padding: 10px;
+
+            &.active {
+                a {
+                    color: $mainRed;
+                }
+                background-color: #fff;
+            }
 
             a {
                 color: #fff;

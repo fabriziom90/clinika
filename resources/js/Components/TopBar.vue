@@ -1,6 +1,18 @@
 <script lang="ts" setup>
 import ApplicationLogo from "./ApplicationLogo.vue";
-import { Link } from "@inertiajs/vue3";
+import { Link, usePage } from "@inertiajs/vue3";
+
+const page = usePage();
+
+const isRouteActive = (routes) => {
+    let flag = false;
+    routes.forEach((route) => {
+        if (window.location.pathname.includes(route)) {
+            flag = true;
+        }
+    });
+    return flag;
+};
 </script>
 <template lang="">
     <div class="top-bar">
@@ -21,15 +33,29 @@ import { Link } from "@inertiajs/vue3";
                 </ul>
             </li>
             <li class="list-item">
-                <Link :href="route('patients.index')">Pazienti</Link>
+                <Link
+                    :class="isRouteActive(['patients']) ? 'active' : ''"
+                    :href="route('patients.index')"
+                    >Pazienti</Link
+                >
             </li>
             <li class="list-item"><a href="#">Fatture</a></li>
             <li class="list-item submenu-open">
-                <a href="#">Amministrazione</a>
+                <a
+                    href="#"
+                    :class="
+                        isRouteActive(['specialties', 'roles']) ? 'active' : ''
+                    "
+                    >Amministrazione</a
+                >
                 <ul class="submenu">
                     <li class="list-item"><a href="#">Ruoli</a></li>
                     <li class="list-item">
-                        <Link :href="route('specialties.index')"
+                        <Link
+                            :class="
+                                isRouteActive(['specialties']) ? 'active' : ''
+                            "
+                            :href="route('specialties.index')"
                             >Specializzazioni</Link
                         >
                     </li>
@@ -69,6 +95,11 @@ ul {
             color: $mainRed;
             font-weight: 600;
             font-size: 20px;
+
+            &.active,
+            &:hover {
+                color: $mainGreen;
+            }
         }
 
         .submenu {

@@ -1,5 +1,13 @@
 
 export const sidebarMenus = {
+    dashboard: [
+        {
+            id: "dashboard-section",
+            title: "Dashboard",
+            roles: ["superadmin", "doctor", 'nurse'],
+            icon: "fas fa-home"
+        }
+    ],
     patients: [
         {
             id: "patients-section",
@@ -7,10 +15,11 @@ export const sidebarMenus = {
             roles: ["superadmin", "doctor", "nurse"],
             icon: "fas fa-user-injured",
             links: [
-                { name: "Lista Pazienti", route: "patients.index", icon: "fas fa-list" },
+                { name: "Lista Pazienti", route: "patients.index", path:'/', icon: "fas fa-list" },
                 {
                     name: "Nuovo Paziente",
                     route: "patients.create",
+                    path: '/create',
                     roles: ["superadmin", "doctor"],
                     icon: "fas fa-plus"
                 },
@@ -24,8 +33,8 @@ export const sidebarMenus = {
             roles: ["superadmin"],
             icon: "fas fa-user-doctor",
             links: [
-                { name: "Lista Dottori", route: "doctors.index", icon: "fas fa-list" },
-                { name: "Aggiungi Dottore", route: "doctors.create", icon: "fas fa-plus" },
+                { name: "Lista Dottori", route: "doctors.index", path: '/', icon: "fas fa-list" },
+                { name: "Aggiungi Dottore", route: "doctors.create", path: '/create',icon: "fas fa-plus" },
             ],
         },
     ],
@@ -36,10 +45,19 @@ export const sidebarMenus = {
             roles: ["superadmin"],
             icon: "fas fa-user-nurse",
             links: [
-                { name: "Lista Infermieri", route: "nurses.index", icon: "fas fa-list" },
-                { name: "Aggiungi Infermiere", route: "nurses.create", icon: "fas fa-plus" },
+                { name: "Lista Infermieri", route: "nurses.index", path: '/', icon: "fas fa-list" },
+                { name: "Aggiungi Infermiere", route: "nurses.create", path: '/create', icon: "fas fa-plus" },
             ],
         },
+    ],
+    specialties: [
+        {
+            id: 'specialties-section',
+            title: "Gestione Specializzazioni",
+            roles: ["superadmin"],
+            path: '/',
+            icon: "fas fa-book-medical"
+        }
     ],
     superadmin: [], 
 };
