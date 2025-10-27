@@ -28,7 +28,11 @@ import { Link } from "@inertiajs/vue3";
                 <a href="#">Amministrazione</a>
                 <ul class="submenu">
                     <li class="list-item"><a href="#">Ruoli</a></li>
-                    <li class="list-item"><a href="#">Specializzazioni</a></li>
+                    <li class="list-item">
+                        <Link :href="route('specialties.index')"
+                            >Specializzazioni</Link
+                        >
+                    </li>
                 </ul>
             </li>
         </ul>

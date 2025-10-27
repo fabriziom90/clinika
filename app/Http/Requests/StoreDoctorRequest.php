@@ -38,9 +38,9 @@ class StoreDoctorRequest extends FormRequest
     public function messages(){
         return [
             'personal_code.required'    => 'Il codice fiscale è obbligatorio',
-            'personal_code.size'        => 'Il codice fiscale deve essere di 16 caratteri',
+            'personal_code.size'        => 'Il codice fiscale deve essere di :max caratteri',
             'vat.required'              => 'La partita iva è obbligatoria',
-            'vat.size'                  => 'La partita iva deve essere di 13 caratteri',
+            'vat.size'                  => 'La partita iva deve essere di :max caratteri',
             'birthday.required'         => 'La data di nascita è obbligatorio',
             'birthday.date'             => 'La data di nascita deve essere in un formato valido', 
             'birth_city.required'       => 'La città di nascita è obbligatoria',

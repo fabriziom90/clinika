@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Specialty;
+use Inertia\Inertia;
+use App\Http\Requests\StoreSpecialtyRequest;
+use App\Http\Requests\UpdateSpecialtyRequest;
 
 class SpecialtyController extends Controller
 {
@@ -13,7 +16,8 @@ class SpecialtyController extends Controller
      */
     public function index()
     {
-        //
+        $specialties = Specialty::all();
+        return Inertia::render('Specialties/IndexSpecialties', ['specialties' => $specialties]);
     }
 
     /**
