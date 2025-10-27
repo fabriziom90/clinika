@@ -25,11 +25,13 @@ const props = defineProps({
 <style lang="scss" scoped>
 main {
     display: flex;
-    overflow-y: auto;
+
     height: calc(100% - 100px);
 
     .main-content {
         padding: 10px;
+        overflow-y: auto;
+        width: calc(100% - 250px);
     }
 }
 </style>

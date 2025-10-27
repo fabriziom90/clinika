@@ -18,5 +18,20 @@
     background-color: $hover-bg;
   }
 
-  
+}
+
+@mixin button-link($bg-color, $hover-bg){
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background-color:($bg-color);
+  color: #fff;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: $hover-bg;
+  }
+
+  &:active {
+    background-color: $hover-bg;
+  }
 }

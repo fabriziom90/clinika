@@ -17,7 +17,8 @@ class SpecialtyController extends Controller
     public function index()
     {
         $specialties = Specialty::all();
-        return Inertia::render('Specialties/IndexSpecialties', ['specialties' => $specialties]);
+        
+        return Inertia::render('Specialties/IndexSpecialties', ['specialties' => $specialties, 'columns' => ['id' => 'ID', 'name' => 'Nome']]);
     }
 
     /**

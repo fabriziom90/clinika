@@ -20,3 +20,15 @@ a{
 .main-button{
     @include button-submit($mainRed, $mainGreen);
 }
+
+.show-button{
+    @include button-link($mainGreen, $mainGreenHover);
+}
+
+.edit-button{
+    @include button-link($mainYellow, $mainYellowHover);
+}
+
+.delete-button{
+    @include button-link($mainRed, $mainRedHover);
+}
