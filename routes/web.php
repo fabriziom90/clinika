@@ -5,6 +5,11 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+use App\Http\Controllers\Admin\PatientController;
+use App\Http\Controllers\Admin\DoctorController;
+use App\Http\Controllers\Admin\NurseController;
+use App\Http\Controllers\Admin\SpecialtyController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -28,6 +33,17 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware(['auth', 'role:superadmin'])->group(function () {
+    Route::prefix('admin')->group(function () {
+        Route::resource('doctors', DoctorController::class);
+        Route::resource('nurses', NurseController::class);
+    });
+});
+
+Route::middleware(['auth', 'role:superadmin,doctor,nurse'])->group(function(){
+    Route::resource('patients', PatientController::class);
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
