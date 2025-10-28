@@ -18,7 +18,7 @@ class SpecialtyController extends Controller
     {
         $specialties = Specialty::all();
         
-        return Inertia::render('Specialties/IndexSpecialties', ['specialties' => $specialties, 'columns' => ['id' => 'ID', 'name' => 'Nome'], 'toast' => session('toast')]);
+        return Inertia::render('Specialties/IndexSpecialties', ['specialties' => $specialties, 'columns' => ['id' => 'ID', 'name' => 'Nome']]);
     }
 
     /**
@@ -44,7 +44,7 @@ class SpecialtyController extends Controller
         return redirect()->route('specialties.index')->with([
             'toast' => [
                 'type' => 'success',
-                'message' => 'Specializzazione aggiunta correttamente!',
+                'message' => 'Specializzazione aggiunta correttamente.',
             ]]);
     }
 

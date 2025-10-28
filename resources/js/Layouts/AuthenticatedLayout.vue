@@ -1,6 +1,9 @@
 <script setup>
 import TopBar from "@/Components/TopBar.vue";
 import Sidebar from "@/Components/Sidebar.vue";
+import { useGlobalToast } from "@/composables/useGlobalToast";
+
+useGlobalToast();
 
 const props = defineProps({
     section: "patients" | "doctors" | "nurses" | "superadmin",

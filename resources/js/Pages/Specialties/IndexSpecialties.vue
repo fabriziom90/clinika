@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from "vue";
 import { Head, useForm, router } from "@inertiajs/vue3";
-import { useToast } from "vue-toast-notification";
+
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Table from "@/Components/Table.vue";
 
@@ -12,7 +12,6 @@ const props = defineProps({
 
 const showAddForm = ref(false);
 const localSpecialties = ref([...props.specialties]);
-const $toast = useToast();
 
 const form = useForm({
     name: "",
@@ -26,11 +25,6 @@ const handleSubmitForm = () => {
 
             form.reset();
             showAddForm.value = false;
-
-            $toast.success("Specializzazione aggiunta correttamente!", {
-                position: "top-right",
-                duration: 3000,
-            });
         },
         onError: (errors) => {
             $toast.error("Errore durante il salvataggio", {
