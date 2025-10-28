@@ -17,18 +17,26 @@ a{
     text-decoration: none;
 }
 
+.bg-main-red{
+    background-color: $mainRed;
+}
+
 .main-button{
-    @include button-submit($mainRed, $mainGreen);
+    @include button-submit($mainRed, $mainGreen, #fff);
 }
 
 .show-button{
-    @include button-link($mainGreen, $mainGreenHover);
+    @include button-link($mainGreen, $mainGreenHover, #fff);
 }
 
 .edit-button{
-    @include button-link($mainYellow, $mainYellowHover);
+    @include button-link($mainYellow, $mainYellowHover, #fff);
 }
 
 .delete-button{
-    @include button-link($mainRed, $mainRedHover);
+    @include button-link($mainRed, $mainRedHover, #fff);
+}
+
+.btn-negative{
+    @include button-negative(#fff, $mainWhiteHover, $mainRed);
 }

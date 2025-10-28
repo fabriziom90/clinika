@@ -25,12 +25,6 @@ const globalFilter = ref("");
 // Filtri per colonna
 const columnFilters = ref({});
 
-// Ricaviamo le chiavi (colonne)
-// const columns = computed(() => {
-//     if (!props.items.length) return [];
-//     return Object.keys(props.items[0]);
-// });
-
 // Filtro globale + per colonna
 const filteredItems = computed(() => {
     let filtered = props.items;
@@ -97,6 +91,13 @@ const paginatedItems = computed(() => {
 watch([perPage, filteredItems], () => {
     currentPage.value = 1;
 });
+
+watch(
+    () => props.items.length,
+    () => {
+        currentPage.value = totalPages.value || 1;
+    }
+);
 
 // Azioni (edit, show, delete)
 function showUrl(id) {
@@ -208,7 +209,6 @@ function confirmDelete(id) {
 @use "../../scss/_partials/variables" as *;
 @use "../../scss/app.scss";
 .table-wrapper {
-    padding: 20px;
     width: 100%;
 }
 
@@ -280,7 +280,7 @@ select {
 
     button {
         margin: 0 8px;
-        @include button-link($mainRed, $mainRedHover);
+        @include button-link($mainRed, $mainRedHover, #fff);
     }
 }
 </style>

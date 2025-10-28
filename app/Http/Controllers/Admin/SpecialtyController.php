@@ -18,7 +18,7 @@ class SpecialtyController extends Controller
     {
         $specialties = Specialty::all();
         
-        return Inertia::render('Specialties/IndexSpecialties', ['specialties' => $specialties, 'columns' => ['id' => 'ID', 'name' => 'Nome']]);
+        return Inertia::render('Specialties/IndexSpecialties', ['specialties' => $specialties, 'columns' => ['id' => 'ID', 'name' => 'Nome'], 'toast' => session('toast')]);
     }
 
     /**
@@ -32,9 +32,20 @@ class SpecialtyController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreSpecialtyRequest $request)
     {
-        //
+        $form_data = $request->validated();
+        
+        $specialty = Specialty::create([
+            'name' => $request->name,
+        ]);
+
+        // Ritorna alla pagina con i dati aggiornati e flash message
+        return redirect()->route('specialties.index')->with([
+            'toast' => [
+                'type' => 'success',
+                'message' => 'Specializzazione aggiunta correttamente!',
+            ]]);
     }
 
     /**

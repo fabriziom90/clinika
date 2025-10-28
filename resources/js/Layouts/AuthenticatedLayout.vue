@@ -29,7 +29,7 @@ main {
     height: calc(100% - 100px);
 
     .main-content {
-        padding: 10px;
+        padding: 20px;
         overflow-y: auto;
         width: calc(100% - 250px);
     }
