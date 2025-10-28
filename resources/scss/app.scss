@@ -33,6 +33,10 @@ a{
     @include button-link($mainYellow, $mainYellowHover, #fff);
 }
 
+.secondary-button{
+    @include button-link($mainGrey, $mainGreyHover, #fff);
+}
+
 .delete-button, .cancel-edit-button{
     @include button-link($mainRed, $mainRedHover, #fff);
 }

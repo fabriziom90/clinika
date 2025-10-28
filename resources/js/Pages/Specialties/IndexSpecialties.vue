@@ -36,7 +36,6 @@ const handleSubmitForm = () => {
 };
 
 const handleInlineUpdate = (updatedData) => {
-    console.log(updatedData);
     localSpecialties.value = updatedData;
 };
 </script>

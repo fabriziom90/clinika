@@ -1,4 +1,5 @@
 <script setup>
+import Modal from "./Modal.vue";
 import { ref, computed, watch } from "vue";
 import { Link, useForm, usePage } from "@inertiajs/vue3";
 
@@ -23,20 +24,25 @@ const props = defineProps({
 
 const emit = defineEmits(["updated"]);
 
-// Stato
+// state
 const perPage = ref(10);
 const currentPage = ref(1);
 const globalFilter = ref("");
 const page = usePage();
 
-// Filtri per colonna
+// delete state
+const deletingItem = ref(null);
+const showDeleteModal = ref(false);
+const preventPageReset = ref(false);
+
+// filter by column
 const columnFilters = ref({});
 
 // Editing inline
 const editingItem = ref(null);
 const editForms = ref({});
 
-// Filtro globale + per colonna
+// global filtering + per column
 const filteredItems = computed(() => {
     let filtered = props.items;
 
@@ -59,7 +65,7 @@ const filteredItems = computed(() => {
     return filtered;
 });
 
-// Ordinamento
+// sorting
 const sortColumn = ref(null);
 const sortDirection = ref("asc");
 
@@ -84,7 +90,7 @@ const sortedItems = computed(() => {
     });
 });
 
-// Paginazione
+// pagination
 const totalPages = computed(() =>
     Math.ceil(sortedItems.value.length / perPage.value)
 );
@@ -96,17 +102,23 @@ const paginatedItems = computed(() => {
 });
 
 watch([perPage, filteredItems], () => {
-    currentPage.value = 1;
+    if (!preventPageReset.value) {
+        currentPage.value = 1;
+    }
+    preventPageReset.value = false;
 });
 
 watch(
     () => props.items.length,
     () => {
-        currentPage.value = totalPages.value || 1;
+        if (!preventPageReset.value) {
+            currentPage.value = totalPages.value || 1;
+        }
+        preventPageReset.value = false;
     }
 );
 
-// Azioni (edit, show, delete)
+// actions (show, edit, delete)
 function showUrl(id) {
     return route(`${props.baseRoute}.show`, id);
 }
@@ -120,7 +132,7 @@ function confirmDelete(id) {
     }
 }
 
-// --- Editing inline (solo per specializzazioni)
+// --- editing online (for specializations...)
 function startEdit(item) {
     if (!props.editableColumns.length) return;
     editingItem.value = item.id;
@@ -141,7 +153,7 @@ function saveEdit(id) {
         preserveScroll: true,
         onSuccess: () => {
             form.editing = false;
-
+            preventPageReset.value = true;
             emit("updated", page.props.specialties || page.props.items);
         },
         onError: (err) => {
@@ -151,6 +163,21 @@ function saveEdit(id) {
     });
 
     editingItem.value = null;
+}
+
+// delete functions
+function openDeleteModal(item) {
+    deletingItem.value = item;
+    showDeleteModal.value = true;
+}
+
+function closeDeleteModal() {
+    deletingItem.value = null;
+    showDeleteModal.value = false;
+}
+
+function handleDeleted(updatedItems) {
+    emit("updated", updatedItems);
 }
 </script>
 
@@ -236,7 +263,12 @@ function saveEdit(id) {
 
                         <button
                             class="delete-button"
-                            @click="confirmDelete(item.id)"
+                            @click="
+                                () => {
+                                    deletingItem = item;
+                                    showDeleteModal = true;
+                                }
+                            "
                         >
                             <i class="fas fa-trash"></i>
                         </button>
@@ -263,6 +295,13 @@ function saveEdit(id) {
             </button>
         </div>
     </div>
+    <Modal
+        :show="showDeleteModal"
+        :item="deletingItem"
+        :baseRoute="baseRoute"
+        @close="closeDeleteModal"
+        @deleted="handleDeleted"
+    />
 </template>
 
 <style lang="scss" scoped>
