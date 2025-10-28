@@ -33,10 +33,16 @@ a{
     @include button-link($mainYellow, $mainYellowHover, #fff);
 }
 
-.delete-button{
+.delete-button, .cancel-edit-button{
     @include button-link($mainRed, $mainRedHover, #fff);
 }
 
 .btn-negative{
     @include button-negative(#fff, $mainWhiteHover, $mainRed);
 }
+
+.save-edit-button{
+    @include button-link(#147e14, #147e14bb, #fff);
+}
+
+

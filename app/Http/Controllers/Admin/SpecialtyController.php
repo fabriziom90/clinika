@@ -21,13 +21,6 @@ class SpecialtyController extends Controller
         return Inertia::render('Specialties/IndexSpecialties', ['specialties' => $specialties, 'columns' => ['id' => 'ID', 'name' => 'Nome']]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -41,7 +34,7 @@ class SpecialtyController extends Controller
         ]);
 
         // Ritorna alla pagina con i dati aggiornati e flash message
-        return redirect()->route('specialties.index')->with([
+        return redirect()->route('admin.specialties.index')->with([
             'toast' => [
                 'type' => 'success',
                 'message' => 'Specializzazione aggiunta correttamente.',
@@ -49,27 +42,22 @@ class SpecialtyController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(Specialty $specialty)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Specialty $specialty)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Specialty $specialty)
+    public function update(UpdateSpecialtyRequest $request, Specialty $specialty)
     {
-        //
+        $form_data = $request->validated();
+        
+        $specialty->update($form_data);
+
+        return redirect()->route('admin.specialties.index')->with(
+            [
+                'toast' => [
+                    'type' => 'success',
+                    'message' => 'Specializzazione modificata correttamente'
+                ]
+            ]
+        );
     }
 
     /**
@@ -77,6 +65,13 @@ class SpecialtyController extends Controller
      */
     public function destroy(Specialty $specialty)
     {
-        //
+        $specialty->delete();
+
+        return redirect()->route('admin.specialties.index')->with([
+            'toast' => [
+                'type' => 'success',
+                'message'   => 'Specializzazione cancellata con successo'
+            ]
+        ]);
     }
 }

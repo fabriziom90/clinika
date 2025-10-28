@@ -55,7 +55,7 @@ const isRouteActive = (routes) => {
                             :class="
                                 isRouteActive(['specialties']) ? 'active' : ''
                             "
-                            :href="route('specialties.index')"
+                            :href="route('admin.specialties.index')"
                             >Specializzazioni</Link
                         >
                     </li>

@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from "vue";
-import { Head, useForm, router } from "@inertiajs/vue3";
+import { Head, useForm } from "@inertiajs/vue3";
 
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Table from "@/Components/Table.vue";
@@ -18,7 +18,7 @@ const form = useForm({
 });
 
 const handleSubmitForm = () => {
-    form.post(route("specialties.store"), {
+    form.post(route("admin.specialties.store"), {
         onSuccess: (page) => {
             // aggiorna la tabella con i nuovi dati passati dal controller
             localSpecialties.value = page.props.specialties;
@@ -33,6 +33,11 @@ const handleSubmitForm = () => {
             });
         },
     });
+};
+
+const handleInlineUpdate = (updatedData) => {
+    console.log(updatedData);
+    localSpecialties.value = updatedData;
 };
 </script>
 
@@ -72,7 +77,9 @@ const handleSubmitForm = () => {
             <Table
                 :items="localSpecialties"
                 :columns="columns"
-                baseRoute="specialties"
+                baseRoute="admin.specialties"
+                :editableColumns="['name']"
+                @updated="handleInlineUpdate"
             />
         </div>
     </AuthenticatedLayout>

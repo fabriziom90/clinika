@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch } from "vue";
-import { Link } from "@inertiajs/vue3";
+import { Link, useForm, usePage } from "@inertiajs/vue3";
 
 const props = defineProps({
     items: {
@@ -15,21 +15,31 @@ const props = defineProps({
         type: String,
         required: true,
     },
+    editableColumns: {
+        type: Array,
+        default: () => [], // es. ['name'] per le specializzazioni
+    },
 });
+
+const emit = defineEmits(["updated"]);
 
 // Stato
 const perPage = ref(10);
 const currentPage = ref(1);
 const globalFilter = ref("");
+const page = usePage();
 
 // Filtri per colonna
 const columnFilters = ref({});
+
+// Editing inline
+const editingItem = ref(null);
+const editForms = ref({});
 
 // Filtro globale + per colonna
 const filteredItems = computed(() => {
     let filtered = props.items;
 
-    // filtro globale
     if (globalFilter.value) {
         const g = globalFilter.value.toLowerCase();
         filtered = filtered.filter((item) =>
@@ -37,9 +47,7 @@ const filteredItems = computed(() => {
         );
     }
 
-    // filtro per colonna
     Object.keys(columnFilters.value).forEach((key) => {
-        console.log(columnFilters);
         const val = columnFilters.value[key];
         if (val) {
             filtered = filtered.filter((item) =>
@@ -56,7 +64,6 @@ const sortColumn = ref(null);
 const sortDirection = ref("asc");
 
 function sortBy(column) {
-    console.log(column);
     if (sortColumn.value === column) {
         sortDirection.value = sortDirection.value === "asc" ? "desc" : "asc";
     } else {
@@ -108,71 +115,125 @@ function editUrl(id) {
 }
 function confirmDelete(id) {
     if (confirm("Vuoi davvero eliminare questo elemento?")) {
-        // qui potresti emettere un evento per il parent
-        // o chiamare una route di eliminazione via Inertia.delete()
+        // qui potresti emettere un evento al parent o usare Inertia.delete()
         alert(`Eliminato elemento con id ${id}`);
     }
+}
+
+// --- Editing inline (solo per specializzazioni)
+function startEdit(item) {
+    if (!props.editableColumns.length) return;
+    editingItem.value = item.id;
+    editForms.value[item.id] = {};
+    props.editableColumns.forEach((col) => {
+        editForms.value[item.id][col] = item[col];
+    });
+}
+
+function cancelEdit() {
+    editingItem.value = null;
+}
+
+function saveEdit(id) {
+    const form = useForm({ ...editForms.value[id] });
+
+    form.put(route(`${props.baseRoute}.update`, id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            form.editing = false;
+
+            emit("updated", page.props.specialties || page.props.items);
+        },
+        onError: (err) => {
+            // eventuale gestione errori locali
+            console.log(err);
+        },
+    });
+
+    editingItem.value = null;
 }
 </script>
 
 <template>
     <div class="table-wrapper">
-        <div class="table-controls">
-            <label>
-                Mostra
-                <select v-model.number="perPage">
-                    <option :value="5">5</option>
-                    <option :value="10">10</option>
-                    <option :value="25">25</option>
-                    <option :value="50">50</option>
-                    <option :value="100">100</option>
-                </select>
-                risultati
-            </label>
-
-            <input
-                v-model="globalFilter"
-                type="text"
-                placeholder="Filtra..."
-                class="global-filter"
-            />
-        </div>
-
         <table class="custom-table">
             <thead>
                 <tr>
                     <th
-                        v-for="(col, index) in columns"
-                        :key="col"
-                        @click="sortBy(index)"
+                        v-for="(col, key) in columns"
+                        :key="key"
+                        @click="sortBy(key)"
                     >
                         {{ col }}
-                        <span v-if="sortColumn === index">
-                            {{
-                                sortDirection === "asc" ? "&#9650;" : "&#9660;"
-                            }}
-                        </span>
-                        <input
-                            v-model="columnFilters[index]"
-                            placeholder="Filtra"
-                            class="column-filter"
-                        />
                     </th>
                     <th>Strumenti</th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-for="item in paginatedItems" :key="item.id">
-                    <td v-for="(col, key) in columns" :key="col">
-                        {{ item[key] }}
+                    <td v-for="(col, key) in columns" :key="key">
+                        <!-- Editing inline -->
+                        <template
+                            v-if="
+                                editingItem === item.id &&
+                                props.editableColumns.includes(key)
+                            "
+                        >
+                            <input
+                                v-model="editForms[item.id][key]"
+                                class="form-control"
+                            />
+                        </template>
+                        <template v-else>
+                            {{ item[key] }}
+                        </template>
                     </td>
                     <td class="actions">
-                        <Link class="show-button" :href="showUrl(item.id)"
-                            ><i class="fas fa-eye"></i
-                        ></Link>
-                        <Link class="edit-button" :href="editUrl(item.id)"
-                            ><i class="fas fa-edit"></i
-                        ></Link>
+                        <template
+                            v-if="
+                                props.editableColumns.length &&
+                                editingItem !== item.id
+                            "
+                        >
+                            <button
+                                class="edit-button"
+                                @click="startEdit(item)"
+                            >
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </template>
+
+                        <template v-else-if="editingItem === item.id">
+                            <button
+                                class="save-edit-button"
+                                @click="saveEdit(item.id)"
+                            >
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button
+                                class="cancel-edit-button"
+                                @click="cancelEdit"
+                            >
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </template>
+
+                        <!-- Pulsanti standard per altre entità -->
+                        <Link
+                            v-if="!props.editableColumns.length"
+                            class="show-button"
+                            :href="showUrl(item.id)"
+                        >
+                            <i class="fas fa-eye"></i>
+                        </Link>
+                        <Link
+                            v-if="!props.editableColumns.length"
+                            class="edit-button"
+                            :href="editUrl(item.id)"
+                        >
+                            <i class="fas fa-edit"></i>
+                        </Link>
+
                         <button
                             class="delete-button"
                             @click="confirmDelete(item.id)"
@@ -188,7 +249,7 @@ function confirmDelete(id) {
                 </tr>
             </tbody>
         </table>
-
+        <!-- Paginazione -->
         <div class="pagination">
             <button :disabled="currentPage === 1" @click="currentPage--">
                 <i class="fas fa-angle-left"></i>

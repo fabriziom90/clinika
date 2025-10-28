@@ -5,7 +5,7 @@ import { useToast } from "vue-toast-notification";
 export function useGlobalToast() {
     const page = usePage();
     const $toast = useToast();
-    console.log(page);
+    
     watch(
         () => page.props.toast,
         (toast) => {

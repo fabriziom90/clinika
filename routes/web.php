@@ -35,7 +35,7 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'role:superadmin'])->group(function () {
-    Route::prefix('admin')->group(function () {
+    Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('doctors', DoctorController::class);
         Route::resource('nurses', NurseController::class);
         Route::resource('specialties', SpecialtyController::class);
