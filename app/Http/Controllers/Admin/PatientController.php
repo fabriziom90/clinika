@@ -56,7 +56,7 @@ class PatientController extends Controller
         return redirect()->route('admin.patients.index')->with([
             'toast' => [
                 'type' => 'success',
-                'message' => 'Specializzazione aggiunta correttamente.',
+                'message' => 'Paziente aggiunto correttamente.',
             ]]);
     }
 
@@ -73,7 +73,8 @@ class PatientController extends Controller
      */
     public function edit(Patient $patient)
     {
-        //
+        $nationalities = Nationality::all();
+        return Inertia::render('Patients/EditPatient', ['nationalities' => $nationalities, 'patient' => $patient]);
     }
 
     /**
@@ -81,7 +82,15 @@ class PatientController extends Controller
      */
     public function update(UpdatePatientRequest $request, Patient $patient)
     {
-        //
+        $form_data = $request->validated();
+        $patient->update($form_data);
+
+        return redirect()->route('admin.patients.index')->with([
+                'toast' => [
+                    'type' => 'success',
+                    'message' => 'Paziente modificato correttamente.',
+                ]
+            ]);
     }
 
     /**

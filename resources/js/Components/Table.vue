@@ -182,6 +182,13 @@ function closeDeleteModal() {
 function handleDeleted(updatedItems) {
     emit("updated", updatedItems);
 }
+
+function formatDate(value) {
+    if (!value) return "";
+    const date = new Date(value);
+    if (isNaN(date)) return value; // non è una data valida
+    return date.toLocaleDateString("it-IT"); // formato dd/mm/yyyy
+}
 </script>
 
 <template>
@@ -195,8 +202,31 @@ function handleDeleted(updatedItems) {
                         @click="sortBy(key)"
                     >
                         {{ col }}
+                        <i
+                            v-if="sortColumn === key"
+                            :class="[
+                                'fa',
+                                sortDirection === 'asc'
+                                    ? 'fa-sort-up'
+                                    : 'fa-sort-down',
+                            ]"
+                            class="ms-1"
+                        ></i>
                     </th>
                     <th>Strumenti</th>
+                </tr>
+
+                <!-- 🔽 Riga filtri per colonna -->
+                <tr>
+                    <th v-for="(col, key) in columns" :key="key">
+                        <input
+                            v-model="columnFilters[key]"
+                            type="text"
+                            class="form-control column-filter"
+                            placeholder="Filtra..."
+                        />
+                    </th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -215,7 +245,11 @@ function handleDeleted(updatedItems) {
                             />
                         </template>
                         <template v-else>
-                            {{ item[key] }}
+                            {{
+                                key.toLowerCase().includes("created_at")
+                                    ? formatDate(item[key])
+                                    : item[key]
+                            }}
                         </template>
                     </td>
                     <td class="actions">

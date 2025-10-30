@@ -8,6 +8,7 @@ import { useToast } from "vue-toast-notification";
 
 const props = defineProps({
     nationalities: Array,
+    patient: Object,
 });
 
 const citiesList = ref(cities);
@@ -18,17 +19,17 @@ const showResidenceSuggestions = ref(false);
 const $toast = useToast();
 
 const form = useForm({
-    name: "",
-    surname: "",
-    email: "",
-    phone: "",
-    genre: "",
-    birthday: "",
-    birth_city: "",
-    city: "",
-    address: "",
-    nationality_id: "",
-    personal_code: "",
+    name: props.patient.name,
+    surname: props.patient.surname,
+    email: props.patient.email,
+    phone: props.patient.phone,
+    genre: props.patient.genre,
+    birthday: props.patient.birthday,
+    birth_city: props.patient.birth_city,
+    city: props.patient.city,
+    address: props.patient.address,
+    nationality_id: props.patient.nationality_id,
+    personal_code: props.patient.personal_code,
 });
 
 // filter functions
@@ -95,7 +96,7 @@ watch(
 );
 
 const handleSubmitForm = () => {
-    form.post(route(`admin.patients.store`), {
+    form.put(route(`admin.patients.update`, { patient: props.patient.id }), {
         onError: (errors) => {
             console.log(errors);
             $toast.error("Errore durante il salvataggio", {
@@ -107,10 +108,10 @@ const handleSubmitForm = () => {
 };
 </script>
 <template lang="">
-    <Head title="Aggiungi paziente"></Head>
+    <Head title="Modifica paziente"></Head>
     <AuthenticatedLayout section="patients">
         <div>
-            <h2>Aggiungi paziente</h2>
+            <h2>Modifica paziente</h2>
         </div>
         <form @submit.prevent="handleSubmitForm" class="mt-4">
             <div class="row g-3">
@@ -314,5 +315,11 @@ const handleSubmitForm = () => {
     </AuthenticatedLayout>
 </template>
 <style lang="scss" scoped>
-@use "../../../scss/app.scss" as *;
+@use "../../../scss/app.scss";
+@use "../../../scss/_partials/variables" as *;
+hr {
+    color: $mainRed;
+    border-width: 5px;
+    margin: 30px 0px;
+}
 </style>

@@ -25,7 +25,7 @@ class Patient extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function nationalities(){
+    public function nationality(){
         return $this->belongsTo(Nationality::class);
     }
 

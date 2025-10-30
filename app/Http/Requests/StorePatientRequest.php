@@ -31,7 +31,8 @@ class StorePatientRequest extends FormRequest
             'address'       => 'required|string|max:70',
             'phone'         => 'required|string|max:15',
             'email'         => 'required|string|max:70',
-            'genre'         => 'required'
+            'genre'         => 'required',
+            'nationality_id'=> 'required'
         ];
     }
 
@@ -53,7 +54,8 @@ class StorePatientRequest extends FormRequest
             'phone.max'             => 'Il numero di telefono deve essere al massimo di :max caratteri',
             'email.required'        => 'L\'indirizzo email p obbligatorio',
             'email.max'             => 'L\'indirizzo email deve essere al massimo di :max caratteri',
-            'genre.required'        => 'Il genere dell\'utente è obbligatorio'
+            'genre.required'        => 'Il genere dell\'utente è obbligatorio',
+            'nationality_id.required'   => 'La nazionalità è obbligatoria'
         ];
     }
 }
