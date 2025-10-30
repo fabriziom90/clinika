@@ -13,6 +13,21 @@ const isRouteActive = (routes) => {
     });
     return flag;
 };
+
+import { router } from "@inertiajs/vue3";
+
+const logout = () => {
+    router.post(
+        route("logout"),
+        {},
+        {
+            preserveScroll: true,
+            onError: (error) => {
+                console.error("Errore durante il logout:", error);
+            },
+        }
+    );
+};
 </script>
 <template lang="">
     <div class="top-bar">
@@ -62,7 +77,7 @@ const isRouteActive = (routes) => {
                 </ul>
             </li>
         </ul>
-        <button class="main-button">Logout</button>
+        <button class="main-button" @click="logout()">Logout</button>
     </div>
 </template>
 <style lang="scss" scoped>
