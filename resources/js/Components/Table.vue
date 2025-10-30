@@ -2,6 +2,7 @@
 import Modal from "./Modal.vue";
 import { ref, computed, watch } from "vue";
 import { Link, useForm, usePage } from "@inertiajs/vue3";
+import { formatDate } from "@/utilities/formatDateFunction";
 
 const props = defineProps({
     items: {
@@ -122,34 +123,34 @@ watch(
 );
 
 // actions (show, edit, delete)
-function showUrl(id) {
+const showUrl = (id) => {
     return route(`${props.baseRoute}.show`, id);
-}
-function editUrl(id) {
+};
+const editUrl = (id) => {
     return route(`${props.baseRoute}.edit`, id);
-}
-function confirmDelete(id) {
+};
+const confirmDelete = (id) => {
     if (confirm("Vuoi davvero eliminare questo elemento?")) {
         // qui potresti emettere un evento al parent o usare Inertia.delete()
         alert(`Eliminato elemento con id ${id}`);
     }
-}
+};
 
 // --- editing online (for specializations...)
-function startEdit(item) {
+const startEdit = (item) => {
     if (!props.editableColumns.length) return;
     editingItem.value = item.id;
     editForms.value[item.id] = {};
     props.editableColumns.forEach((col) => {
         editForms.value[item.id][col] = item[col];
     });
-}
+};
 
-function cancelEdit() {
+const cancelEdit = () => {
     editingItem.value = null;
-}
+};
 
-function saveEdit(id) {
+const saveEdit = (id) => {
     const form = useForm({ ...editForms.value[id] });
 
     form.put(route(`${props.baseRoute}.update`, id), {
@@ -166,29 +167,22 @@ function saveEdit(id) {
     });
 
     editingItem.value = null;
-}
+};
 
 // delete functions
-function openDeleteModal(item) {
+const openDeleteModal = (item) => {
     deletingItem.value = item;
     showDeleteModal.value = true;
-}
+};
 
-function closeDeleteModal() {
+const closeDeleteModal = () => {
     deletingItem.value = null;
     showDeleteModal.value = false;
-}
+};
 
-function handleDeleted(updatedItems) {
+const handleDeleted = (updatedItems) => {
     emit("updated", updatedItems);
-}
-
-function formatDate(value) {
-    if (!value) return "";
-    const date = new Date(value);
-    if (isNaN(date)) return value; // non è una data valida
-    return date.toLocaleDateString("it-IT"); // formato dd/mm/yyyy
-}
+};
 </script>
 
 <template>

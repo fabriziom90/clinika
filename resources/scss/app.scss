@@ -17,6 +17,12 @@ a{
     text-decoration: none;
 }
 
+hr {
+    color: $mainRed;
+    border-width: 5px;
+    margin: 30px 0px;
+}
+
 .bg-main-red{
     background-color: $mainRed;
 }

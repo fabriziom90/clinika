@@ -317,9 +317,4 @@ const handleSubmitForm = () => {
 <style lang="scss" scoped>
 @use "../../../scss/app.scss";
 @use "../../../scss/_partials/variables" as *;
-hr {
-    color: $mainRed;
-    border-width: 5px;
-    margin: 30px 0px;
-}
 </style>
