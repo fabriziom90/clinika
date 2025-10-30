@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Inertia\Inertia;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Route;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,6 +26,8 @@ class AppServiceProvider extends ServiceProvider
             'toast' => fn () => session('toast'),
             // (opzionale) condividi eventuali flash legacy:
             'flash' => fn () => session()->get('flash'),
+            'currentRouteName' => fn () => Route::currentRouteName()
+            
         ]);
     }
 }

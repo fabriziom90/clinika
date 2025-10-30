@@ -15,10 +15,10 @@ export const sidebarMenus = {
             roles: ["superadmin", "doctor", "nurse"],
             icon: "fas fa-user-injured",
             links: [
-                { name: "Lista Pazienti", route: "patients.index", path:'/', icon: "fas fa-list" },
+                { name: "Lista Pazienti", route: "admin.patients.index", path:'/', icon: "fas fa-list" },
                 {
                     name: "Nuovo Paziente",
-                    route: "patients.create",
+                    route: "admin.patients.create",
                     path: '/create',
                     roles: ["superadmin", "doctor"],
                     icon: "fas fa-plus"

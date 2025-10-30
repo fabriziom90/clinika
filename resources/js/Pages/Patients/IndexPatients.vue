@@ -1,11 +1,33 @@
 <script setup lang="ts">
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head } from "@inertiajs/vue3";
+import Table from "@/Components/Table.vue";
+import { Head, Link } from "@inertiajs/vue3";
+import { ref } from "vue";
+
+const props = defineProps({
+    patients: Array,
+    columns: Object,
+});
 </script>
 <template lang="">
     <Head title="Pazienti" />
     <AuthenticatedLayout section="patients">
-        <div>Pazienti</div>
+        <div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2>Elenco pazienti</h2>
+                <Link :href="route('admin.patients.create')" class="main-button"
+                    >Aggiungi paziente</Link
+                >
+            </div>
+        </div>
+        <Table
+            :items="patients"
+            :columns="columns"
+            baseRoute="admin.patients"
+            :editableColumns="[]"
+        />
     </AuthenticatedLayout>
 </template>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+@use "../../../scss/app.scss";
+</style>

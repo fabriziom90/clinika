@@ -38,6 +38,9 @@ const preventPageReset = ref(false);
 // filter by column
 const columnFilters = ref({});
 
+// count number of columns
+const columnCount = computed(() => Object.keys(props.columns).length + 1);
+
 // Editing inline
 const editingItem = ref(null);
 const editForms = ref({});
@@ -275,7 +278,7 @@ function handleDeleted(updatedItems) {
                     </td>
                 </tr>
                 <tr v-if="!paginatedItems.length">
-                    <td :colspan="columns.length + 1" class="text-center">
+                    <td :colspan="columnCount" class="text-center">
                         Nessun risultato
                     </td>
                 </tr>

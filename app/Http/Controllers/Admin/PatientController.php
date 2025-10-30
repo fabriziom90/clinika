@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Patient;
+use App\Models\Nationality;
 use App\Http\Requests\StorePatientRequest;
 use App\Http\Requests\UpdatePatientRequest;
 use Inertia\Inertia;
@@ -17,15 +18,27 @@ class PatientController extends Controller
     public function index()
     {   
         $patients = Patient::all();
-        return Inertia::render('Patients/IndexPatients', ['patients' => $patients]);
+        return Inertia::render('Patients/IndexPatients', 
+            [
+                'patients' => $patients, 
+                'columns' => [
+                    'id'    => 'ID',
+                    'name'  => 'Nome',
+                    'surname'   => 'Cognome',
+                    'email'     => 'Email',
+                    'phone'     => 'Telefono',
+                    'created_at'    => 'Inserito il'
+                ] 
+            ]);
     }
 
     /**
      * Show the form for creating a new resource.
      */
     public function create()
-    {
-        //
+    {   
+        $nationalities = Nationality::all();
+        return Inertia::render('Patients/CreatePatient', ['nationalities' => $nationalities]);
     }
 
     /**
@@ -33,7 +46,18 @@ class PatientController extends Controller
      */
     public function store(StorePatientRequest $request)
     {
-        //
+        $form_data = $request->validated();
+
+        $newPatient = new Patient();
+        $newPatient->fill($form_data);
+
+        $newPatient->save();
+
+        return redirect()->route('admin.patients.index')->with([
+            'toast' => [
+                'type' => 'success',
+                'message' => 'Specializzazione aggiunta correttamente.',
+            ]]);
     }
 
     /**

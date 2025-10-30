@@ -35,7 +35,7 @@ const isRouteActive = (routes) => {
             <li class="list-item">
                 <Link
                     :class="isRouteActive(['patients']) ? 'active' : ''"
-                    :href="route('patients.index')"
+                    :href="route('admin.patients.index')"
                     >Pazienti</Link
                 >
             </li>

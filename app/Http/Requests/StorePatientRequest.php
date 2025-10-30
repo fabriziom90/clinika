@@ -22,14 +22,13 @@ class StorePatientRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'name' => 'required',
+            'surname' => 'required',
             'personal_code' => 'required|string|size:16',
-            'vat'           => 'required|string|size:13',
             'birthday'      => 'required|date',
             'birth_city'    => 'required|string|max:30',
             'city'          => 'required|string|max:30',
             'address'       => 'required|string|max:70',
-            'cap'           => 'required|string|max:5',
-            'province'      => 'required|string|max:30',
             'phone'         => 'required|string|max:15',
             'email'         => 'required|string|max:70',
             'genre'         => 'required'
@@ -38,10 +37,10 @@ class StorePatientRequest extends FormRequest
 
     public function messages(){
         return [
+            'name.required'             => 'Il nome è obbligatorio',
+            'surname.required'          => 'Il cognome è obbligatorio',
             'personal_code.required'    => 'Il codice fiscale è obbligatorio',
             'personal_code.size'        => 'Il codice fiscale deve essere di :max caratteri',
-            'vat.required'              => 'La partita iva è obbligatoria',
-            'vat.size'                  => 'La partita iva deve essere di :max caratteri',
             'birthday.required'         => 'La data di nascita è obbligatorio',
             'birthday.date'             => 'La data di nascita deve essere in un formato valido', 
             'birth_city.required'       => 'La città di nascita è obbligatoria',

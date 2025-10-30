@@ -21,6 +21,10 @@ a{
     background-color: $mainRed;
 }
 
+.z-10{
+    z-index: 10;
+}
+
 .main-button{
     @include button-submit($mainRed, $mainGreen, #fff);
 }

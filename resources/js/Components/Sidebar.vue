@@ -1,8 +1,8 @@
 <script setup>
 import { computed } from "vue";
-import { Link } from "@inertiajs/vue3";
+import { Link, usePage } from "@inertiajs/vue3";
 import { sidebarMenus } from "@/data/sidebarMenu.js"; // ← attenzione: ora è .js
-// props senza tipi TypeScript
+// props
 const props = defineProps({
     currentSection: {
         type: String,
@@ -14,17 +14,21 @@ const props = defineProps({
     },
 });
 
-// logica menu
+const page = usePage();
+const currentRouteName = computed(() => page.props.currentRouteName);
+
+// menu logic
 const currentMenu = computed(() => {
     const section = sidebarMenus[props.currentSection];
+
     if (!section) return [];
 
-    // superadmin vede tutto nella sezione corrente
+    // superadmin sees all
     if (props.userRole === "superadmin") {
         return section;
     }
 
-    // altri ruoli vedono solo quello consentito
+    // other roles sees only some route
     return section
         .filter((s) => !s.roles || s.roles.includes(props.userRole))
         .map((s) => ({
@@ -35,12 +39,7 @@ const currentMenu = computed(() => {
         }));
 });
 
-const isRouteActive = (route) => {
-    console.log(window.location.pathname);
-    console.log(route);
-    console.log(window.location.pathname.includes(route));
-    return window.location.pathname.includes(route);
-};
+const isRouteActive = (routeName) => currentRouteName.value === routeName;
 </script>
 
 <template>
@@ -54,14 +53,13 @@ const isRouteActive = (route) => {
             <hr class="text-white" />
             <ul>
                 <li
-                    :class="isRouteActive(link.path) ? 'active' : ''"
+                    :class="isRouteActive(link.route) ? 'active' : ''"
                     v-for="link in section.links"
                     :key="link.route"
                 >
-                    <Link :href="route(link.route)"
-                        ><i :class="`${link.icon} me-2`"></i
-                        >{{ link.name }}</Link
-                    >
+                    <Link :href="route(link.route)">
+                        <i :class="`${link.icon} me-2`"></i>{{ link.name }}
+                    </Link>
                 </li>
             </ul>
         </div>

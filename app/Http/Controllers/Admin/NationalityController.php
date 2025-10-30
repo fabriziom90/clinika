@@ -14,7 +14,8 @@ class NationalityController extends Controller
      */
     public function index()
     {
-        //
+        
+        
     }
 
     /**

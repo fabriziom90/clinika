@@ -39,11 +39,12 @@ Route::middleware(['auth', 'role:superadmin'])->group(function () {
         Route::resource('doctors', DoctorController::class);
         Route::resource('nurses', NurseController::class);
         Route::resource('specialties', SpecialtyController::class);
+        Route::resource('patients', PatientController::class);
     });
 });
 
 Route::middleware(['auth', 'role:superadmin,doctor,nurse'])->group(function(){
-    Route::resource('patients', PatientController::class);
+    
 });
 
 Route::middleware('auth')->group(function () {
