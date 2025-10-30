@@ -10,7 +10,7 @@ const props = defineProps({
 
 const emit = defineEmits(["close", "deleted"]);
 
-function confirmDelete() {
+const confirmDelete = () => {
     if (!props.item) return;
 
     router.delete(route(`${props.baseRoute}.destroy`, props.item.id), {
@@ -23,7 +23,28 @@ function confirmDelete() {
             console.error(err);
         },
     });
-}
+};
+
+const displayName = (item) => {
+    if (!item) return "";
+
+    // caso pazienti, medici, infermieri
+    if (item.name && item.surname) {
+        return `${item.name} ${item.surname}`;
+    }
+
+    // caso entità con solo 'name'
+    if (item.name) {
+        return item.name;
+    }
+
+    // fallback: mostra eventuale titolo, email, ecc.
+    if (item.title) return item.title;
+    if (item.email) return item.email;
+
+    // altrimenti solo ID
+    return `#${item.id}`;
+};
 </script>
 
 <template>
@@ -39,7 +60,7 @@ function confirmDelete() {
                     ></button>
                 </div>
                 <div class="modal-body">
-                    <p>Vuoi davvero eliminare "{{ item?.name }}"?</p>
+                    <p>Vuoi davvero eliminare "{{ displayName(item) }}"?</p>
                 </div>
                 <div class="modal-footer">
                     <button class="secondary-button" @click="$emit('close')">

@@ -98,6 +98,13 @@ class PatientController extends Controller
      */
     public function destroy(Patient $patient)
     {
-        //
+        $patient->delete();
+
+        return redirect()->route('admin.patients.index')->with([
+                'toast' => [
+                    'type' => 'success',
+                    'message' => 'Paziente cancellato correttamente'
+                ]
+            ]);
     }
 }
