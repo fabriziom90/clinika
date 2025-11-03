@@ -41,9 +41,21 @@ const logout = () => {
             </li>
             <li class="list-item"><a href="#">Agenda</a></li>
             <li class="list-item submenu-open">
-                <a href="#">Utenti</a>
+                <a
+                    href="#"
+                    :class="
+                        isRouteActive(['doctors', 'nurses']) ? 'active' : ''
+                    "
+                    >Utenti</a
+                >
                 <ul class="submenu">
-                    <li class="list-item"><a href="#">Dottori</a></li>
+                    <li class="list-item">
+                        <Link
+                            :class="isRouteActive(['doctors']) ? 'active' : ''"
+                            :href="route('admin.doctors.index')"
+                            >Dottori</Link
+                        >
+                    </li>
                     <li class="list-item"><a href="#">Infermieri</a></li>
                 </ul>
             </li>

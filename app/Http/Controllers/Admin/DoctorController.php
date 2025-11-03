@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDoctorRequest;
 use App\Http\Requests\UpdateDoctorRequest;
 use App\Models\Doctor;
+use Inertia\Inertia;
 
 class DoctorController extends Controller
 {   
@@ -19,7 +20,18 @@ class DoctorController extends Controller
      */
     public function index()
     {
-        //
+        $doctors = Doctor::all();
+        return Inertia::render('Doctors/IndexDoctors', [
+            'doctors' => $doctors, 
+            'columns' => [
+                'id'    => 'ID',
+                'name'  => 'Nome',
+                'surname'   => 'Cognome',
+                'email'     => 'Email',
+                'phone'     => 'Telefono',
+                'created_at'    => 'Inserito il'
+            ]
+        ]);
     }
 
     /**

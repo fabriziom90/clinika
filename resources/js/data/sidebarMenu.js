@@ -33,8 +33,8 @@ export const sidebarMenus = {
             roles: ["superadmin"],
             icon: "fas fa-user-doctor",
             links: [
-                { name: "Lista Dottori", route: "doctors.index", path: '/', icon: "fas fa-list" },
-                { name: "Aggiungi Dottore", route: "doctors.create", path: '/create',icon: "fas fa-plus" },
+                { name: "Lista Dottori", route: "admin.doctors.index", path: '/', icon: "fas fa-list" },
+                { name: "Aggiungi Dottore", route: "admin.doctors.create", path: '/create',icon: "fas fa-plus" },
             ],
         },
     ],
