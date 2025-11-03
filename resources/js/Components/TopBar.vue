@@ -64,7 +64,13 @@ const logout = () => {
                     >Amministrazione</a
                 >
                 <ul class="submenu">
-                    <li class="list-item"><a href="#">Ruoli</a></li>
+                    <li class="list-item">
+                        <Link
+                            :class="isRouteActive(['roles']) ? 'active' : ''"
+                            :href="route('admin.roles-permissions.index')"
+                            >Ruoli</Link
+                        >
+                    </li>
                     <li class="list-item">
                         <Link
                             :class="

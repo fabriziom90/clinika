@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Admin\DoctorController;
 use App\Http\Controllers\Admin\NurseController;
 use App\Http\Controllers\Admin\SpecialtyController;
+use App\Http\Controllers\Admin\RoleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,18 +35,20 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware(['auth', 'role:superadmin'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('doctors', DoctorController::class);
         Route::resource('nurses', NurseController::class);
         Route::resource('specialties', SpecialtyController::class);
         Route::resource('patients', PatientController::class);
+        Route::get('roles-permissions', [RoleController::class, 'index'])->name('roles-permissions.index');
+        Route::post('roles-permissions/toggle', [RoleController::class, 'togglePermission'])->name('roles-permissions.toggle');
     });
 });
 
-Route::middleware(['auth', 'role:superadmin,doctor,nurse'])->group(function(){
-    
-});
+
+
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

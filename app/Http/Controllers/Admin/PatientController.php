@@ -11,7 +11,12 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 class PatientController extends Controller
-{
+{   
+    public function __construct()
+    {
+        $this->authorizeResource(\App\Models\Patient::class, 'patient');
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -64,7 +69,9 @@ class PatientController extends Controller
      * Display the specified resource.
      */
     public function show(Patient $patient)
-    {
+    {   
+        $patient = Patient::with('nationality')->findOrFail($patient->id);
+        
         return Inertia::render('Patients/ShowPatient', ['patient' => $patient]);
     }
 

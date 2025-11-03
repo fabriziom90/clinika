@@ -8,7 +8,12 @@ use App\Http\Requests\UpdateDoctorRequest;
 use App\Models\Doctor;
 
 class DoctorController extends Controller
-{
+{   
+    public function __construct()
+    {
+        $this->authorizeResource(\App\Models\Doctor::class, 'doctor');
+    }
+
     /**
      * Display a listing of the resource.
      */

@@ -6,7 +6,7 @@ import { useGlobalToast } from "@/composables/useGlobalToast";
 useGlobalToast();
 
 const props = defineProps({
-    section: "patients" | "doctors" | "nurses" | "superadmin",
+    section: "patients" | "doctors" | "nurses" | "roles" | "superadmin",
 });
 </script>
 

@@ -59,5 +59,14 @@ export const sidebarMenus = {
             icon: "fas fa-book-medical"
         }
     ],
+    roles: [
+        {
+            id: 'roles-section',
+            title: "Gestione Ruoli",
+            roles: ["superadmin"],
+            path: '/',
+            icon: "fas fa-user-shield"
+        }
+    ],
     superadmin: [], 
 };

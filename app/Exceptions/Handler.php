@@ -3,6 +3,9 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Inertia\Inertia;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -26,5 +29,33 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    public function render($request, Throwable $exception)
+    {
+        // Se è una richiesta Inertia
+        if ($request->header('X-Inertia')) {
+
+            // 403 (Forbidden)
+            if ($exception instanceof \Illuminate\Auth\Access\AuthorizationException ||
+                $exception instanceof \Symfony\Component\HttpKernel\Exception\HttpException &&
+                $exception->getStatusCode() === 403) {
+
+                return Inertia::render('Errors/403', [
+                    'status' => 403,
+                    'message' => 'Non sei autorizzato ad accedere a questa sezione.',
+                ])->toResponse($request)->setStatusCode(403);
+            }
+
+            // 404 (Not Found)
+            if ($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
+                return Inertia::render('Errors/404', [
+                    'status' => 404,
+                    'message' => 'Pagina non trovata.',
+                ])->toResponse($request)->setStatusCode(404);
+            }
+        }
+
+        return parent::render($request, $exception);
     }
 }

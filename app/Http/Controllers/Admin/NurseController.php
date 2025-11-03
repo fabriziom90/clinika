@@ -8,7 +8,12 @@ use App\Http\Requests\UpdateNurseRequest;
 use App\Models\Nurse;
 
 class NurseController extends Controller
-{
+{   
+    public function __construct()
+    {
+        $this->authorizeResource(\App\Models\Nurse::class, 'nurse');
+    }
+
     /**
      * Display a listing of the resource.
      */

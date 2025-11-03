@@ -10,7 +10,12 @@ use App\Http\Requests\StoreSpecialtyRequest;
 use App\Http\Requests\UpdateSpecialtyRequest;
 
 class SpecialtyController extends Controller
-{
+{   
+    public function __construct()
+    {
+        $this->authorizeResource(\App\Models\Specialty::class, 'specialty');
+    }
+
     /**
      * Display a listing of the resource.
      */

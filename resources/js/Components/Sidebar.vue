@@ -50,7 +50,7 @@ const isRouteActive = (routeName) => currentRouteName.value === routeName;
             class="menu-section"
         >
             <h3><i :class="`${section.icon} me-2`"></i>{{ section.title }}</h3>
-            <hr class="text-white" />
+            <hr />
             <ul>
                 <li
                     :class="isRouteActive(link.route) ? 'active' : ''"
@@ -77,12 +77,19 @@ const isRouteActive = (routeName) => currentRouteName.value === routeName;
     color: #fff;
 
     h3 {
-        padding: 10px;
+        margin: 20px 10px;
+    }
+
+    hr {
+        margin: 0px;
+        color: white;
+        height: 1px;
     }
 
     ul {
         list-style-type: none;
         padding: 0;
+        margin-top: 20px;
 
         li {
             padding: 10px;

@@ -21,6 +21,7 @@ hr {
     color: $mainRed;
     border-width: 5px;
     margin: 30px 0px;
+    opacity: 1;
 }
 
 .bg-main-red{
@@ -58,5 +59,18 @@ hr {
 .save-edit-button{
     @include button-link(#147e14, #147e14bb, #fff);
 }
+
+input.form-check-inline{
+    height: 30px;
+    width: 30px;
+    vertical-align: middle;
+    margin: 10px;
+    
+}
+
+input.form-check-inline:checked{
+    accent-color: $mainRed
+}
+
 
 

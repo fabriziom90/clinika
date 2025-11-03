@@ -50,7 +50,13 @@ const props = defineProps({
                 </div>
                 <div class="col-12 col-md-4">
                     <label for="" class="form-label">Nazionalità</label>
-                    <p>{{ patient.nationality_id }}</p>
+                    <p>
+                        {{
+                            patient.nationality === null
+                                ? "Nazionalità non valorizzata"
+                                : patient.nationality.name
+                        }}
+                    </p>
                 </div>
                 <div class="col-12 col-md-4">
                     <label for="" class="form-label">Sesso</label>
@@ -96,7 +102,6 @@ const props = defineProps({
 @use "../../../scss/app.scss";
 @use "../../../scss/_partials/variables" as *;
 
-h2,
 h3,
 label {
     color: $mainRed;
