@@ -25,7 +25,8 @@ class UpdateUserRequest extends FormRequest
             'name' => 'required',
             'surname' => 'required',
             'username' => 'required',
-            'password' => 'required'
+            'password' => 'required',
+            'email'     => 'required'
         ];
     }
 
@@ -34,7 +35,8 @@ class UpdateUserRequest extends FormRequest
             'name.required' => 'Il nome è obbligatorio',
             'surname.required' => 'Il cognome è obbligatorio',
             'username.required' => 'Il nome utente è obbligatorio',
-            'passowrd.required' => 'La password è obbligatoria'
+            'passowrd.required' => 'La password è obbligatoria',
+            'email.required'    => 'L\'indirizzo email è obbligatorio'
         ];
     }
 }

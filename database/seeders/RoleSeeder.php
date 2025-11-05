@@ -38,6 +38,8 @@ class RoleSeeder extends Seeder
             'nurse' => 'Infermiere',
             'appointment' => 'Appuntamento',
             'user' => 'Utente di sistema',
+            'role' => 'Ruolo',
+            'specialty' => 'Specializzazioni'
         ];
 
         // === AZIONI CRUD ===

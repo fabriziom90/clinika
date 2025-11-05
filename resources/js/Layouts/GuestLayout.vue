@@ -1,4 +1,4 @@
-<script setup lang="ts"></script>
+<script setup></script>
 
 <template>
     <div>
@@ -7,3 +7,6 @@
         </div>
     </div>
 </template>
+<style lang="scss" scoped>
+@use "../../scss/app.scss";
+</style>

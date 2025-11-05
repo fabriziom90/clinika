@@ -18,7 +18,8 @@ class Nurse extends Model
         'city',
         'address',
         'phone',
-        'email',
+        'pec',
+        'genre',
         'nationality_id'
     ];
 

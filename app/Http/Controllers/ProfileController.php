@@ -12,7 +12,11 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 class ProfileController extends Controller
-{
+{   
+    public function show(Request $request): Response
+    {
+        return Inertia::render('Profile/Show', ['user' => $request->user()]);
+    }
     /**
      * Display the user's profile form.
      */

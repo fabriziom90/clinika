@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('cap', 7);
             $table->string('province', 30);
             $table->string('phone', 15);
-            $table->string('pec', 80)->unique();
+            $table->string('pec', 80)->unique()->nullable();
             $table->unsignedBigInteger('nationality_id')->nullable();
             $table->timestamps();
             

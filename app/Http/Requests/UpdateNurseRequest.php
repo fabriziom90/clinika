@@ -13,14 +13,13 @@ class UpdateNurseRequest extends FormRequest
     {
         return [
             'personal_code' => 'required|string|size:16',
-            'vat'           => 'required|string|size:13',
+            'vat'           => 'required|string|size:11',
             'birthday'      => 'required|date',
             'birth_city'    => 'required|string|max:30',
             'city'          => 'required|string|max:30',
             'address'       => 'required|string|max:70',
             'phone'         => 'required|string|max:15',
-            'cap'           => 'required|string|max:5',
-            'province'      => 'required|string|max:30',
+            'genre'        => 'required',
             'email'         => 'required|string|max:70'
         ];
     }
@@ -39,10 +38,7 @@ class UpdateNurseRequest extends FormRequest
             'city.max'            => 'La città di nascita deve essere al massimo di :max caratteri',
             'address.required'      => 'L\'indirizzo è obbligatorio',
             'address.max'           => 'L\'indirizzo deve essere al massimo di :max caratteri',
-            'cap.required'          => 'Il cap è obbligatorio',
-            'cap.max'               => 'Il cap deve avere al massimo di :max caratteri',
-            'province.required'     => 'La provincia è obbligatorio',
-            'province.max'          => 'La provincia deve avere al massimo :max caratteri',
+            'genre.required'        => 'Il genere dell\'utente è obbligatorio',
             'phone.required'        => 'Il numero di telefono è obbligatorio',
             'phone.max'             => 'Il numero di telefono deve essere al massimo di :max caratteri',
             'email.required'        => 'L\'indirizzo email p obbligatorio',

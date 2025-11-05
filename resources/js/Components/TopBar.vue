@@ -1,8 +1,12 @@
-<script lang="ts" setup>
+<script setup>
 import ApplicationLogo from "./ApplicationLogo.vue";
 import { Link, usePage } from "@inertiajs/vue3";
+import { computed } from "vue";
 
 const page = usePage();
+const user = computed(() => page.props.auth.user);
+
+const hasRole = (role) => user.value?.roles?.includes(role);
 
 const isRouteActive = (routes) => {
     let flag = false;
@@ -40,7 +44,7 @@ const logout = () => {
                 />
             </li>
             <li class="list-item"><a href="#">Agenda</a></li>
-            <li class="list-item submenu-open">
+            <li class="list-item submenu-open" v-if="hasRole('superadmin')">
                 <a
                     href="#"
                     :class="
@@ -59,15 +63,20 @@ const logout = () => {
                     <li class="list-item"><a href="#">Infermieri</a></li>
                 </ul>
             </li>
-            <li class="list-item">
+            <li
+                class="list-item"
+                v-if="hasRole('superadmin') || hasRole('doctor')"
+            >
                 <Link
                     :class="isRouteActive(['patients']) ? 'active' : ''"
                     :href="route('admin.patients.index')"
                     >Pazienti</Link
                 >
             </li>
-            <li class="list-item"><a href="#">Fatture</a></li>
-            <li class="list-item submenu-open">
+            <li class="list-item" v-if="hasRole('superadmin')">
+                <a href="#">Fatture</a>
+            </li>
+            <li class="list-item submenu-open" v-if="hasRole('superadmin')">
                 <a
                     href="#"
                     :class="

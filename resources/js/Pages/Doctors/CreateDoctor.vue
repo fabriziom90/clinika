@@ -3,27 +3,24 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import PersonForm from "@/Components/PersonForm.vue";
 import { Head, useForm } from "@inertiajs/vue3";
 import { useToast } from "vue-toast-notification";
-import { ref, computed, watch } from "vue";
 
 const props = defineProps({
     nationalities: Array,
+    specialties: Array,
 });
-
-const $toast = useToast();
 </script>
 <template lang="">
-    <Head title="Aggiungi paziente"></Head>
-    <AuthenticatedLayout section="patients">
+    <Head title="Aggiungi dottore"></Head>
+    <AuthenticatedLayout section="doctors">
         <div>
-            <h2>Aggiungi paziente</h2>
+            <h2>Aggiungi dottore</h2>
         </div>
         <PersonForm
             :nationalities="nationalities"
-            formType="patient"
+            :specialties="specialties"
+            formType="doctor"
             @submit="handleSubmitForm"
         ></PersonForm>
     </AuthenticatedLayout>
 </template>
-<style lang="scss" scoped>
-@use "../../../scss/app.scss" as *;
-</style>
+<style lang=""></style>
