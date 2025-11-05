@@ -142,4 +142,19 @@ class DoctorController extends Controller
     {
         //
     }
+
+    public function sendResetEmail($id)
+    {
+        $doctor = Doctor::findOrFail($id);
+        $user = $doctor->user;
+
+        $token = Password::createToken($user);
+    
+        Mail::to($user->email)->send(new DoctorSetPasswordMail($user, $token));
+
+        return back()->with(['toast', [
+            'type' => 'success',
+            'message' => 'Email di impostazione password inviata con successo'
+        ]]);
+    }
 }

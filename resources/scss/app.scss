@@ -60,6 +60,10 @@ hr {
     @include button-link(#147e14, #147e14bb, #fff);
 }
 
+.btn-blue{
+    @include button-link($mainBlue, $mainBlueHover, #fff);
+}
+
 input.form-check-inline{
     height: 30px;
     width: 30px;

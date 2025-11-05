@@ -22,7 +22,7 @@ const props = defineProps({
         <main>
             <Sidebar
                 :current-section="props.section"
-                :user-role="$page.props.auth.user.roles?.[0]?.name || ''"
+                :userRole="$page.props.auth.user.roles[0] || ''"
             />
             <div class="main-content">
                 <slot />

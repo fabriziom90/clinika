@@ -2,6 +2,7 @@
 import Modal from "./Modal.vue";
 import { ref, computed, watch } from "vue";
 import { Link, useForm, usePage } from "@inertiajs/vue3";
+import { router } from "@inertiajs/vue3";
 import { formatDate } from "@/utilities/formatDateFunction";
 
 const props = defineProps({
@@ -129,12 +130,6 @@ const showUrl = (id) => {
 const editUrl = (id) => {
     return route(`${props.baseRoute}.edit`, id);
 };
-const confirmDelete = (id) => {
-    if (confirm("Vuoi davvero eliminare questo elemento?")) {
-        // qui potresti emettere un evento al parent o usare Inertia.delete()
-        alert(`Eliminato elemento con id ${id}`);
-    }
-};
 
 // --- editing online (for specializations...)
 const startEdit = (item) => {
@@ -169,12 +164,6 @@ const saveEdit = (id) => {
     editingItem.value = null;
 };
 
-// delete functions
-const openDeleteModal = (item) => {
-    deletingItem.value = item;
-    showDeleteModal.value = true;
-};
-
 const closeDeleteModal = () => {
     deletingItem.value = null;
     showDeleteModal.value = false;
@@ -182,6 +171,18 @@ const closeDeleteModal = () => {
 
 const handleDeleted = (updatedItems) => {
     emit("updated", updatedItems);
+};
+
+const sendResetEmail = (item) => {
+    const routeName = `${props.baseRoute}.sendResetEmail`;
+
+    router.post(
+        route(routeName, item.id),
+        {},
+        {
+            preserveScroll: true,
+        }
+    );
 };
 </script>
 
@@ -302,6 +303,16 @@ const handleDeleted = (updatedItems) => {
                             "
                         >
                             <i class="fas fa-trash"></i>
+                        </button>
+                        <button
+                            v-if="
+                                baseRoute === 'admin.doctors' ||
+                                baseRoute === 'admin.nurses'
+                            "
+                            class="btn-blue"
+                            @click="sendResetEmail(item)"
+                        >
+                            <i class="fas fa-envelope"></i>
                         </button>
                     </td>
                 </tr>

@@ -41,6 +41,8 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('nurses', NurseController::class);
         Route::resource('specialties', SpecialtyController::class);
         Route::resource('patients', PatientController::class);
+        Route::post('/doctors/{id}/send-reset-email', [DoctorController::class, 'sendResetEmail'])->name('doctors.sendResetEmail');
+        Route::post('/nurses/{id}/send-reset-email', [NurseController::class, 'sendResetEmail'])->name('nurses.sendResetEmail');
         Route::get('roles-permissions', [RoleController::class, 'index'])->name('roles-permissions.index');
         Route::post('roles-permissions/toggle', [RoleController::class, 'togglePermission'])->name('roles-permissions.toggle');
     });
