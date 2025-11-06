@@ -96,19 +96,16 @@ const isRouteActive = (routeName) => currentRouteName.value === routeName;
     background-color: $mainRed;
     color: #fff;
 
-    #bottom-sidebar {
-        height: 100px;
-    }
-
     .button-profile {
         display: flex;
         align-items: center;
         justify-content: center;
         box-shadow: inset 0px 0px 0px 5px #fff;
         border: 5px solid $mainRed;
-        height: 100%;
+
         color: #fff;
         transition: 0.3s;
+        padding: 10px 0px;
 
         &:hover {
             background-color: #fff;
@@ -117,7 +114,7 @@ const isRouteActive = (routeName) => currentRouteName.value === routeName;
     }
 
     #top-sidebar {
-        height: calc(100% - 100px);
+        height: calc(100% - 120px);
     }
 
     h3 {

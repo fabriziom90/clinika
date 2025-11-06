@@ -1,7 +1,7 @@
 <script setup>
 import cities from "@/data/cities.json";
 import { calculatePersonalCode } from "@/utilities/calculatePersonalCode";
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { useForm } from "@inertiajs/vue3";
 import { useToast } from "vue-toast-notification";
 
@@ -9,8 +9,10 @@ const props = defineProps({
     nationalities: Array,
     specialties: { type: Array, default: () => [] },
     formType: { type: String, default: "patient" },
+    person: { type: Object, default: null },
 });
 
+const onSaving = ref(false);
 const citiesList = ref(cities);
 const birthSearch = ref("");
 const residenceSearch = ref("");
@@ -19,10 +21,10 @@ const showResidenceSuggestions = ref(false);
 const $toast = useToast();
 
 const routeMap = {
-    doctor: "admin.doctors.store",
-    nurse: "admin.nurses.store",
-    patient: "admin.patients.store",
-    operator: "admin.operators.store",
+    doctor: "admin.doctors",
+    nurse: "admin.nurses",
+    patient: "admin.patients",
+    operator: "admin.operators",
 };
 
 const form = useForm({
@@ -41,6 +43,33 @@ const form = useForm({
     vat: "",
     specialty_id: "",
     user_id: "",
+});
+
+onMounted(() => {
+    if (!props.person) return;
+    const person = props.person;
+
+    form.defaults({ ...person });
+
+    // if p.user exists then it's doctor or nurse
+    // otherwise it's patient
+    const source = person.user ?? person;
+
+    form.name = source.name ?? "";
+    form.surname = source.surname ?? "";
+    form.email = source.email ?? "";
+    form.phone = person.phone ?? "";
+    form.genre = person.genre ?? "";
+    form.birthday = person.birthday ?? "";
+    form.birth_city = person.birth_city ?? "";
+    form.city = person.city ?? "";
+    form.address = person.address ?? "";
+    form.nationality_id = person.nationality_id ?? "";
+    form.personal_code = person.personal_code ?? "";
+    form.pec = person.pec ?? "";
+    form.vat = person.vat ?? "";
+    form.specialty_id = person.specialty_id ?? "";
+    form.user_id = person.user_id ?? "";
 });
 
 // filter functions
@@ -107,13 +136,23 @@ watch(
 );
 
 const handleSubmitForm = () => {
-    const routeName =
-        routeMap[props.formType] ?? `admin.${props.formType}s.store`;
-    console.log(routeName);
-    form.post(route(routeName), {
+    onSaving.value = true;
+    const isEdit = props.person ? true : false;
+
+    const routeName = isEdit
+        ? `admin.${props.formType}s.update`
+        : `admin.${props.formType}s.store`;
+
+    const url = isEdit ? route(routeName, props.person.id) : route(routeName);
+
+    form[isEdit ? "put" : "post"](url, {
+        onSuccess: () => {
+            onSaving.value = false;
+        },
         onError: (err) => {
-            console.log(err);
-            $toast.error();
+            const flat = Object.values(err).flat();
+            $toast.error(flat.join("\n"));
+            onSaving.value = false;
         },
     });
 };
@@ -126,6 +165,7 @@ const handleSubmitForm = () => {
                 <input
                     type="text"
                     class="form-control"
+                    :class="{ 'is-invalid': form.errors.name }"
                     placeholder="Inserisci nome"
                     name="name"
                     id="name"
@@ -138,6 +178,7 @@ const handleSubmitForm = () => {
                 <input
                     type="text"
                     class="form-control"
+                    :class="{ 'is-invalid': form.errors.surname }"
                     placeholder="Inserisci cognome"
                     name="surname"
                     id="surname"
@@ -150,6 +191,7 @@ const handleSubmitForm = () => {
                 <input
                     type="mail"
                     class="form-control"
+                    :class="{ 'is-invalid': form.errors.email }"
                     placeholder="Inserisci email"
                     name="email"
                     id="email"
@@ -164,6 +206,7 @@ const handleSubmitForm = () => {
                     name="phone"
                     id="phone"
                     class="form-control"
+                    :class="{ 'is-invalid': form.errors.phone }"
                     placeholder="Inserisci telefono"
                     v-model="form.phone"
                     required
@@ -175,6 +218,7 @@ const handleSubmitForm = () => {
                     name="genre"
                     id="genre"
                     class="form-select"
+                    :class="{ 'is-invalid': form.errors.genre }"
                     v-model="form.genre"
                     required
                 >
@@ -194,6 +238,7 @@ const handleSubmitForm = () => {
                 <input
                     type="date"
                     class="form-control"
+                    :class="{ 'is-invalid': form.errors.birthday }"
                     placeholder="Inserisci data di nascita"
                     name="birth"
                     id="birth"
@@ -206,6 +251,7 @@ const handleSubmitForm = () => {
                 <input
                     type="text"
                     class="form-control"
+                    :class="{ 'is-invalid': form.errors.birth_city }"
                     v-model="form.birth_city"
                     placeholder="Inserisci città di nascita"
                     @focus="showBirthSuggestions = true"
@@ -236,6 +282,7 @@ const handleSubmitForm = () => {
                     name="nationality"
                     id="nationality"
                     class="form-select"
+                    :class="{ 'is-invalid': form.errors.nationality_id }"
                     v-model="form.nationality_id"
                     required
                 >
@@ -260,6 +307,7 @@ const handleSubmitForm = () => {
                 <input
                     type="text"
                     class="form-control"
+                    :class="{ 'is-invalid': form.errors.city }"
                     v-model="form.city"
                     placeholder="Inserisci città di residenza"
                     @focus="showResidenceSuggestions = true"
@@ -292,6 +340,7 @@ const handleSubmitForm = () => {
                 <input
                     type="text"
                     class="form-control"
+                    :class="{ 'is-invalid': form.errors.address }"
                     placeholder="Inserisci indirizzo"
                     name="address"
                     id="address"
@@ -306,6 +355,7 @@ const handleSubmitForm = () => {
                     name="personal_code"
                     id="personal_code"
                     class="form-control"
+                    :class="{ 'is-invalid': form.errors.personal_code }"
                     placeholder="Inserisci codice fiscale"
                     v-model="form.personal_code"
                     required
@@ -325,6 +375,7 @@ const handleSubmitForm = () => {
                 <input
                     v-model="form.vat"
                     class="form-control"
+                    :class="{ 'is-invalid': form.errors.vat }"
                     name="vat"
                     id="vat"
                     placeholder="Inserisci Partita IVA"
@@ -336,6 +387,7 @@ const handleSubmitForm = () => {
                     v-model="form.pec"
                     type="email"
                     class="form-control"
+                    :class="{ 'is-invalid': form.errors.pec }"
                     name="pec"
                     id="pec"
                     placeholder="Inserisci PEC"
@@ -345,7 +397,11 @@ const handleSubmitForm = () => {
             <!-- Solo per medici -->
             <div class="col-md-4" v-if="formType === 'doctor'">
                 <label class="form-label">Specializzazione</label>
-                <select v-model="form.specialty_id" class="form-select">
+                <select
+                    v-model="form.specialty_id"
+                    class="form-select"
+                    :class="{ 'is-invalid': form.errors.specialty_id }"
+                >
                     <option value="">Seleziona</option>
                     <option v-for="s in specialties" :key="s.id" :value="s.id">
                         {{ s.name }}
@@ -355,7 +411,13 @@ const handleSubmitForm = () => {
         </div>
         <div class="row mt-4">
             <div class="col-12 col-md-4">
-                <button type="submit" class="main-button">Salva</button>
+                <button type="submit" class="main-button">
+                    <span v-if="onSaving">
+                        "Salvataggio in corso...
+                        <i class="fa-solid fa-spinner fa-spin ms-2"></i> :
+                    </span>
+                    <span v-else> Salva </span>
+                </button>
             </div>
         </div>
     </form>

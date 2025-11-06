@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateDoctorRequest extends FormRequest
 {
@@ -12,6 +13,8 @@ class UpdateDoctorRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'name'          => 'required',
+            'surname'       => 'required',
             'personal_code' => 'required|string|size:16',
             'vat'           => 'required|string|size:11',
             'birthday'      => 'required|date',
@@ -19,9 +22,14 @@ class UpdateDoctorRequest extends FormRequest
             'city'          => 'required|string|max:30',
             'address'       => 'required|string|max:70',
             'phone'         => 'required|string|max:15',
-            'email'         => 'required|string|max:70',
+            'email'         => [
+                'required',
+                'string',
+                'max:70',
+                Rule::unique('users', 'email')->ignore($this->route('doctor')->user_id)
+            ],
             'genre'        => 'required',
-             'pec'           => 'required',
+            'pec'           => 'required',
             'specialty_id'  => 'required',
             'nationality_id'=> 'required'
         ];
@@ -29,6 +37,8 @@ class UpdateDoctorRequest extends FormRequest
 
     public function messages(){
         return [
+            'name.required'             => 'Il nome è obbligatorio',
+            'surname.required'          => 'Il cognome è obbligatorio',      
             'personal_code.required'    => 'Il codice fiscale è obbligatorio',
             'personal_code.size'        => 'Il codice fiscale deve essere di :size caratteri',
             'vat.required'              => 'La partita iva è obbligatoria',
@@ -45,6 +55,7 @@ class UpdateDoctorRequest extends FormRequest
             'phone.max'             => 'Il numero di telefono deve essere al massimo di :max caratteri',
             'email.required'        => 'L\'indirizzo email p obbligatorio',
             'email.max'             => 'L\'indirizzo email deve essere al massimo di :max caratteri',
+            'email.unique'          => 'E\' già presente un utente con questo indirizzo email',
             'genre.required'        => 'Il genere dell\'utente è obbligatorio',
             'pec.required'          => 'La pec è obbligatoria',
             'nationality_id'        => 'La nazionalità è obbligatoria',

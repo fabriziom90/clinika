@@ -85,8 +85,6 @@ class DoctorController extends Controller
         
         $doctor = Doctor::create([
             'user_id' => $newUser->id,
-            'name' => $form_data['name'],
-            'surname' => $form_data['surname'],
             'personal_code' => $form_data['personal_code'],
             'vat' => $form_data['vat'],
             'birthday' => $form_data['birthday'],
@@ -123,8 +121,12 @@ class DoctorController extends Controller
      * Show the form for editing the specified resource.
      */
     public function edit(Doctor $doctor)
-    {
-        //
+    {   
+        $doctor->load('user');
+        $nationalities = Nationality::all();
+        $specialties = Specialty::all();
+
+        return Inertia::render('Doctors/EditDoctor', ['doctor' => $doctor, 'nationalities' => $nationalities, 'specialties' => $specialties]);
     }
 
     /**
@@ -132,7 +134,35 @@ class DoctorController extends Controller
      */
     public function update(UpdateDoctorRequest $request, Doctor $doctor)
     {
-        //
+        $form_data = $request->validated();
+        
+        $doctor->user->update([
+            'name' => $form_data['name'],
+            'surname' => $form_data['surname'],
+            'email'     => $form_data['email']
+        ]);
+
+        $doctor->update([
+            'user_id' => $doctor->user->id,
+            'personal_code' => $form_data['personal_code'],
+            'vat' => $form_data['vat'],
+            'birthday' => $form_data['birthday'],
+            'birth_city' => $form_data['birth_city'],
+            'city' => $form_data['city'],
+            'address' => $form_data['address'],
+            'phone' => $form_data['phone'],
+            'genre' => $form_data['genre'],
+            'pec' => $form_data['pec'] ?? null,
+            'specialty_id' => $form_data['specialty_id'],
+            'nationality_id'    => $form_data['nationality_id']
+        ]);
+
+        return redirect()->route('admin.doctors.index')->with([
+                'toast' => [
+                    'type' => 'success',
+                    'message' => 'Dottore aggiornato con successo'
+                ]
+            ]);
     }
 
     /**

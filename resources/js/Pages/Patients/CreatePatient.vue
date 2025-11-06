@@ -1,9 +1,8 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import PersonForm from "@/Components/PersonForm.vue";
-import { Head, useForm } from "@inertiajs/vue3";
+import { Head } from "@inertiajs/vue3";
 import { useToast } from "vue-toast-notification";
-import { ref, computed, watch } from "vue";
 
 const props = defineProps({
     nationalities: Array,
@@ -20,7 +19,6 @@ const $toast = useToast();
         <PersonForm
             :nationalities="nationalities"
             formType="patient"
-            @submit="handleSubmitForm"
         ></PersonForm>
     </AuthenticatedLayout>
 </template>
