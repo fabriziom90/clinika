@@ -171,7 +171,16 @@ class DoctorController extends Controller
      */
     public function destroy(Doctor $doctor)
     {
-        //
+        $doctor->user()->delete();
+
+        $doctor->delete();
+
+        return redirect()->route('admin.doctors.index')->with([
+            'toast' => [
+                    'type' => 'success',
+                    'message' => 'Dottore cancellato correttamente'
+            ]
+        ]);
     }
 
     public function sendResetEmail($id)
