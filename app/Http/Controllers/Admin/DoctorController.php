@@ -114,7 +114,8 @@ class DoctorController extends Controller
      */
     public function show(Doctor $doctor)
     {
-        //
+        $doctor = Doctor::with(['user', 'nationality', 'specialty'])->findOrFail($doctor->id);
+        return Inertia::render('Doctors/ShowDoctor', ['doctor' => $doctor]);
     }
 
     /**

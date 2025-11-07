@@ -1,6 +1,5 @@
-<script setup lang="ts">
+<script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import TopBar from "@/Components/TopBar.vue";
 import { Head } from "@inertiajs/vue3";
 </script>
 

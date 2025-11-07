@@ -27,7 +27,7 @@ const currentMenu = computed(() => {
     if (props.userRole === "superadmin") {
         return section;
     }
-    console.log(props.userRole);
+
     const menu = section
         .filter((s) => !s.roles || s.roles.includes(props.userRole))
         .map((s) => ({
