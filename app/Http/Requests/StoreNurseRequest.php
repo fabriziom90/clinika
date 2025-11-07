@@ -22,6 +22,8 @@ class StoreNurseRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'name'          => 'required',
+            'surname'       => 'required',
             'personal_code' => 'required|string|size:16',
             'vat'           => 'required|string|size:11',
             'birthday'      => 'required|date',
@@ -31,11 +33,14 @@ class StoreNurseRequest extends FormRequest
             'phone'         => 'required|string|max:15',
             'email'         => 'required|string|max:70',
             'genre'         => 'required',
+            'nationality_id'=> 'required'
         ];
     }
 
     public function messages(){
         return [
+            'name.required'             => 'Il nome è obbligatorio',
+            'surname.required'          => 'Il cognome è obbligatorio',  
             'personal_code.required'    => 'Il codice fiscale è obbligatorio',
             'personal_code.size'        => 'Il codice fiscale deve essere di :max caratteri',
             'vat.required'              => 'La partita iva è obbligatoria',
@@ -53,6 +58,7 @@ class StoreNurseRequest extends FormRequest
             'email.required'        => 'L\'indirizzo email p obbligatorio',
             'email.max'             => 'L\'indirizzo email deve essere al massimo di :max caratteri',
             'genre.required'        => 'Il genere dell\'utente è obbligatorio',
+            'nationality_id'        => 'La nazionalità è obbligatoria',
         ];
     }
 }

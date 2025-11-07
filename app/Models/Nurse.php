@@ -23,11 +23,11 @@ class Nurse extends Model
         'nationality_id'
     ];
 
-    public function users(){
+    public function user(){
         return $this->belongsTo(User::class);
     }
 
-    public function nationalities(){
+    public function nationality(){
         return $this->belongsTo(Nationality::class);
     }
 

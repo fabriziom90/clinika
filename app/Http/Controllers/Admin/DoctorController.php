@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\DoctorSetPasswordMail;
+use App\Mail\PersonSetPasswordMail;
 
 class DoctorController extends Controller
 {   
@@ -99,7 +99,7 @@ class DoctorController extends Controller
         ]);
 
         $token = Password::createToken($newUser);
-        Mail::to($newUser->email)->send(new DoctorSetPasswordMail($newUser, $token));
+        Mail::to($newUser->email)->send(new PersonSetPasswordMail($newUser, $token));
 
         return redirect()->route('admin.doctors.index')->with([
                 'toast' => [
@@ -190,7 +190,7 @@ class DoctorController extends Controller
 
         $token = Password::createToken($user);
     
-        Mail::to($user->email)->send(new DoctorSetPasswordMail($user, $token));
+        Mail::to($user->email)->send(new PersonSetPasswordMail($user, $token));
 
         return back()->with(['toast', [
             'type' => 'success',

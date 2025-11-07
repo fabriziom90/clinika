@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateNurseRequest extends FormRequest
 {
@@ -12,6 +13,8 @@ class UpdateNurseRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'name'          => 'required',
+            'surname'       => 'required',
             'personal_code' => 'required|string|size:16',
             'vat'           => 'required|string|size:11',
             'birthday'      => 'required|date',
@@ -20,12 +23,20 @@ class UpdateNurseRequest extends FormRequest
             'address'       => 'required|string|max:70',
             'phone'         => 'required|string|max:15',
             'genre'        => 'required',
-            'email'         => 'required|string|max:70'
+            'email'         => [
+                'required',
+                'string',
+                'max:70',
+                Rule::unique('users', 'email')->ignore($this->route('nurse')->user_id)
+            ],
+            'nationality_id'=> 'required'
         ];
     }
 
     public function messages(){
         return [
+            'name.required'             => 'Il nome è obbligatorio',
+            'surname.required'          => 'Il cognome è obbligatorio',    
             'personal_code.required'    => 'Il codice fiscale è obbligatorio',
             'personal_code.size'        => 'Il codice fiscale deve essere di 16 caratteri',
             'vat.required'              => 'La partita iva è obbligatoria',
@@ -42,7 +53,9 @@ class UpdateNurseRequest extends FormRequest
             'phone.required'        => 'Il numero di telefono è obbligatorio',
             'phone.max'             => 'Il numero di telefono deve essere al massimo di :max caratteri',
             'email.required'        => 'L\'indirizzo email p obbligatorio',
-            'email.max'             => 'L\'indirizzo email deve essere al massimo di :max caratteri' 
+            'email.max'             => 'L\'indirizzo email deve essere al massimo di :max caratteri',
+            'email.unique'          => 'E\' già presente un utente con questo indirizzo email', 
+            'nationality_id'        => 'La nazionalità è obbligatoria',
         ];
     }
 }

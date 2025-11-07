@@ -6,6 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreNurseRequest;
 use App\Http\Requests\UpdateNurseRequest;
 use App\Models\Nurse;
+use App\Models\Nationality;
+use App\Models\User;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\PersonSetPasswordMail;
 
 class NurseController extends Controller
 {   
@@ -19,7 +27,30 @@ class NurseController extends Controller
      */
     public function index()
     {
-        //
+        $nurses = Nurse::with('user')->get();
+        
+        $nurses = $nurses->map(function ($nurse) {
+            return [
+                'id' => $nurse->id,
+                'name' => $nurse->user->name ?? '',
+                'surname' => $nurse->user->surname ?? '',
+                'email' => $nurse->user->email ?? '',
+                'phone' => $nurse->phone,
+                'created_at' => $nurse->created_at->format('d/m/Y'),
+            ];
+        });
+        
+        return Inertia::render('Nurses/IndexNurses', [
+            'nurses' => $nurses, 
+            'columns' => [
+                'id'    => 'ID',
+                'name'  => 'Nome',
+                'surname'   => 'Cognome',
+                'email'     => 'Email',
+                'phone'     => 'Telefono',
+                'created_at'    => 'Inserito il'
+            ]
+        ]);
     }
 
     /**
@@ -27,7 +58,8 @@ class NurseController extends Controller
      */
     public function create()
     {
-        //
+        $nationalities = Nationality::all();
+        return Inertia::render('Nurses/CreateNurse', ['nationalities' => $nationalities]);
     }
 
     /**
@@ -35,7 +67,42 @@ class NurseController extends Controller
      */
     public function store(StoreNurseRequest $request)
     {
-        //
+        $form_data = $request->validated();
+        
+        $password = Str::random(12);
+        $user = [
+            'name' => $form_data['name'],
+            'surname' => $form_data['surname'],
+            'email'   => $form_data['email'],
+            'password' => Hash::make($password)
+        ];
+        
+        $newUser = User::create($user);
+        $newUser->assignRole('nurse');
+        
+        $nurse = Nurse::create([
+            'user_id' => $newUser->id,
+            'personal_code' => $form_data['personal_code'],
+            'vat' => $form_data['vat'],
+            'birthday' => $form_data['birthday'],
+            'birth_city' => $form_data['birth_city'],
+            'city' => $form_data['city'],
+            'address' => $form_data['address'],
+            'phone' => $form_data['phone'],
+            'genre' => $form_data['genre'],
+            'pec' => $form_data['pec'] ?? null,
+            'nationality_id'    => $form_data['nationality_id']
+        ]);
+
+        $token = Password::createToken($newUser);
+        Mail::to($newUser->email)->send(new PersonSetPasswordMail($newUser, $token));
+
+        return redirect()->route('admin.nurses.index')->with([
+                'toast' => [
+                    'type' => 'success',
+                    'message' => "Infermiere creato con successo."
+                ]
+            ]);
     }
 
     /**
@@ -43,7 +110,9 @@ class NurseController extends Controller
      */
     public function show(Nurse $nurse)
     {
-        //
+        $nurse = Nurse::with(['user', 'nationality'])->findOrFail($nurse->id);
+        dd($nurse);
+        return Inertia::render('Nurses/ShowNurse', ['nurse' => $nurse]);
     }
 
     /**
@@ -51,7 +120,10 @@ class NurseController extends Controller
      */
     public function edit(Nurse $nurse)
     {
-        //
+        $nurse->load('user');
+        $nationalities = Nationality::all();
+
+        return Inertia::render('Nurses/EditNurse', ['nurse' => $nurse, 'nationalities' => $nationalities]);
     }
 
     /**
@@ -59,7 +131,34 @@ class NurseController extends Controller
      */
     public function update(UpdateNurseRequest $request, Nurse $nurse)
     {
-        //
+        $form_data = $request->validated();
+        
+        $nurse->user->update([
+            'name' => $form_data['name'],
+            'surname' => $form_data['surname'],
+            'email'     => $form_data['email']
+        ]);
+
+        $nurse->update([
+            'user_id' => $nurse->user->id,
+            'personal_code' => $form_data['personal_code'],
+            'vat' => $form_data['vat'],
+            'birthday' => $form_data['birthday'],
+            'birth_city' => $form_data['birth_city'],
+            'city' => $form_data['city'],
+            'address' => $form_data['address'],
+            'phone' => $form_data['phone'],
+            'genre' => $form_data['genre'],
+            'pec' => $form_data['pec'] ?? null,
+            'nationality_id'    => $form_data['nationality_id']
+        ]);
+
+        return redirect()->route('admin.nurses.index')->with([
+                'toast' => [
+                    'type' => 'success',
+                    'message' => 'Infermiere aggiornato con successo'
+                ]
+            ]);
     }
 
     /**
@@ -67,6 +166,30 @@ class NurseController extends Controller
      */
     public function destroy(Nurse $nurse)
     {
-        //
+        $nurse->user()->delete();
+
+        $nurse->delete();
+
+        return redirect()->route('admin.nurses.index')->with([
+            'toast' => [
+                    'type' => 'success',
+                    'message' => 'Infermiere cancellato correttamente'
+            ]
+        ]);
+    }
+
+    public function sendResetEmail($id)
+    {
+        $nurse = Nurse::findOrFail($id);
+        $user = $nurse->user;
+
+        $token = Password::createToken($user);
+    
+        Mail::to($user->email)->send(new PersonSetPasswordMail($user, $token));
+
+        return back()->with(['toast', [
+            'type' => 'success',
+            'message' => 'Email di impostazione password inviata con successo'
+        ]]);
     }
 }

@@ -60,7 +60,13 @@ const logout = () => {
                             >Dottori</Link
                         >
                     </li>
-                    <li class="list-item"><a href="#">Infermieri</a></li>
+                    <li class="list-item">
+                        <Link
+                            :class="isRouteActive(['nurses']) ? 'active' : ''"
+                            :href="route('admin.nurses.index')"
+                            >Infermieri</Link
+                        >
+                    </li>
                 </ul>
             </li>
             <li

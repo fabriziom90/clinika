@@ -45,8 +45,8 @@ export const sidebarMenus = {
             roles: ["superadmin"],
             icon: "fas fa-user-nurse",
             links: [
-                { name: "Lista Infermieri", route: "nurses.index", path: '/', icon: "fas fa-list" },
-                { name: "Aggiungi Infermiere", route: "nurses.create", path: '/create', icon: "fas fa-plus" },
+                { name: "Lista Infermieri", route: "admin.nurses.index", path: '/', icon: "fas fa-list" },
+                { name: "Aggiungi Infermiere", route: "admin.nurses.create", path: '/create', icon: "fas fa-plus" },
             ],
         },
     ],

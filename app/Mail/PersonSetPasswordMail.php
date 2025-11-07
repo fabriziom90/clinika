@@ -10,7 +10,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\User;
 
-class DoctorSetPasswordMail extends Mailable
+class PersonSetPasswordMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -36,7 +36,7 @@ class DoctorSetPasswordMail extends Mailable
     public function build()
     {
         return $this->subject('Imposta la tua password - Clinika')
-                    ->view('emails.doctors.set-password', ['user' => $this->user, 'url' => $this->url, 'logoCid' => $this->logoPath])->withSymfonyMessage(function ($message) {
+                    ->view('emails.persons.set-password', ['user' => $this->user, 'url' => $this->url, 'logoCid' => $this->logoPath])->withSymfonyMessage(function ($message) {
                         $logoCid = $message->embedFromPath($this->logoPath, 'logo_cid');
                         // Passiamo il CID nel contesto della view
                         $this->with(['logoCid' => $logoCid]);
@@ -59,7 +59,7 @@ class DoctorSetPasswordMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.doctors.set-password',
+            markdown: 'emails.persons.set-password',
         );
     }
 

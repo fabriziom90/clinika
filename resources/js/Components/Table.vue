@@ -375,6 +375,10 @@ select {
     width: 100%;
     border-collapse: collapse;
 
+    tbody tr {
+        height: 120px;
+    }
+
     tr:nth-child(2n + 1) {
         background-color: #c5323771;
     }
@@ -387,6 +391,7 @@ select {
 
     td {
         vertical-align: middle;
+        height: 100%;
     }
 
     th {
@@ -407,6 +412,7 @@ select {
         display: flex;
         gap: 8px;
         justify-content: center;
+        align-items: center;
 
         button {
             cursor: pointer;
