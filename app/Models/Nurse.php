@@ -31,4 +31,9 @@ class Nurse extends Model
         return $this->belongsTo(Nationality::class);
     }
 
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
 }
