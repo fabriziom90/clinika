@@ -77,5 +77,14 @@ export const sidebarMenus = {
             icon: "fas fa-calendar"
         }
     ],
+    clinic_rooms: [
+        {
+            id: 'clinicrooms-section',
+            title: 'Stanze',
+            roles: ["superadmin"],
+            path: '/',
+            icon: 'fas fa-hospital'
+        }
+    ],
     superadmin: [], 
 };

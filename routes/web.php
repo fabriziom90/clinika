@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\NurseController;
 use App\Http\Controllers\Admin\SpecialtyController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\AppointmentController;
+use App\Http\Controllers\Admin\ClinicRoomController;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,6 +43,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('nurses', NurseController::class);
         Route::resource('specialties', SpecialtyController::class);
         Route::resource('patients', PatientController::class);
+        Route::resource('clinic-rooms', ClinicRoomController::class);
         Route::post('/doctors/{id}/send-reset-email', [DoctorController::class, 'sendResetEmail'])->name('doctors.sendResetEmail');
         Route::post('/nurses/{id}/send-reset-email', [NurseController::class, 'sendResetEmail'])->name('nurses.sendResetEmail');
         Route::get('roles-permissions', [RoleController::class, 'index'])->name('roles-permissions.index');

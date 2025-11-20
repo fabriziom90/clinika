@@ -95,6 +95,15 @@ const logout = () => {
                 <ul class="submenu">
                     <li class="list-item">
                         <Link
+                            :class="
+                                isRouteActive(['clinic_rooms']) ? 'active' : ''
+                            "
+                            :href="route('admin.clinic-rooms.index')"
+                            >Stanze Poliambulatorio</Link
+                        >
+                    </li>
+                    <li class="list-item">
+                        <Link
                             :class="isRouteActive(['roles']) ? 'active' : ''"
                             :href="route('admin.roles-permissions.index')"
                             >Ruoli</Link

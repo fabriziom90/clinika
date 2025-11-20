@@ -39,7 +39,8 @@ class RoleSeeder extends Seeder
             'appointment' => 'Appuntamento',
             'user' => 'Utente di sistema',
             'role' => 'Ruolo',
-            'specialty' => 'Specializzazioni'
+            'specialty' => 'Specializzazioni',
+            'clinic-room' => 'Stanze Poliambulatorio'
         ];
 
         // === AZIONI CRUD ===
