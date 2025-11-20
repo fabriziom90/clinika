@@ -7,8 +7,12 @@ import { ref, computed } from "vue";
 import { useForm } from "@inertiajs/vue3";
 import { useToast } from "vue-toast-notification";
 import Modal from "@/Components/Modal.vue";
+import DetailModal from "./DetailModal.vue";
 
 import PersonForm from "@/Components/PersonForm.vue";
+
+// debounce variable to handle click or doubleClick
+let clickTimeout = null;
 
 const props = defineProps({
     appointments: Array,
@@ -23,6 +27,9 @@ const $toast = useToast();
 const showNewAppointmentModal = ref(false);
 const showDeleteModal = ref(false);
 const eventToDelete = ref(null);
+const showDetailModal = ref(false);
+const eventToShow = ref(false);
+
 const newAppointmentData = ref({
     date: null,
     startTime: null,
@@ -49,18 +56,13 @@ const formAppointment = useForm({
 const calendarEvents = computed(() => {
     return props.appointments.map((appointment) => ({
         id: appointment.id,
-        // start: appointment.start_time.slice(0, 16).replace("T", " "), //
-        // end: appointment.end_time.slice(0, 16).replace("T", " "),
         start: isoToLocalDate(appointment.start_time),
         end: isoToLocalDate(appointment.end_time),
         title: appointment.title,
-        // content: `Paziente: ${appointment.patient.name} ${appointment.patient.surname}\nMedico: ${appointment.doctor.user.name} ${appointment.doctor.user.surname}`,
-        // background: "#f87171", // opzionale, colore evento
     }));
 });
 
 const handleCellClick = (clickedTime) => {
-    console.log(new Date(clickedTime.cursor.date));
     if (!props.userIsSuperadmin) return;
 
     newAppointmentData.value.date = formatDateForInput(clickedTime.cursor.date);
@@ -104,6 +106,27 @@ const handleNewAppointment = () => {
     });
 };
 
+// define function to handle single click
+const handleEventClick = (event) => {
+    clearTimeout(clickTimeout);
+
+    // wait if there is a double click
+    clickTimeout = setTimeout(() => {
+        clickTimeout = null;
+
+        openDetailModal(event);
+    }, 180);
+};
+
+// define function to handle double click
+const handleEventDblClick = (event) => {
+    clearTimeout(clickTimeout);
+
+    clickTimeout = null;
+
+    openDeleteModal(event);
+};
+
 const handleDeleted = (event) => {
     showDeleteModal.value = false;
 };
@@ -122,6 +145,22 @@ const openDeleteModal = (eventClicked) => {
 const closeDeleteModal = () => {
     eventToDelete.value = null;
     showDeleteModal.value = false;
+};
+
+const openDetailModal = (eventClicked) => {
+    const event = props.appointments.find(
+        (e) => e.id === eventClicked.event.id
+    );
+
+    if (!event) return;
+
+    showDetailModal.value = true;
+    eventToShow.value = event;
+};
+
+const closeDetailModal = () => {
+    eventToShow.value = null;
+    showDetailModal.value = false;
 };
 
 const handleNewPatient = (newPatient) => {
@@ -178,7 +217,8 @@ function formatDateForInput(date) {
             :time-cell-height="120"
             :time-from="7 * 60"
             :time-to="22 * 60"
-            @event-dblclick="openDeleteModal"
+            @event-click="handleEventClick"
+            @event-dblclick="handleEventDblClick"
         />
 
         <div
@@ -363,6 +403,11 @@ function formatDateForInput(date) {
             @close="closeDeleteModal"
             @deleted="handleDeleted"
         />
+        <DetailModal
+            :show="showDetailModal"
+            @close="closeDetailModal"
+            :item="eventToShow"
+        />
     </AuthenticatedLayout>
 </template>
 
@@ -430,6 +475,25 @@ function formatDateForInput(date) {
     background-color: $mainRedHover;
     border-bottom-color: $mainRed;
     color: #fff;
+}
+
+.event-delete-button {
+    position: absolute;
+    top: -15px;
+    right: 0px;
+
+    .delete-event-btn {
+        border-radius: 50%;
+        background-color: red;
+        color: #fff;
+        border: 1px solid #fff;
+        width: 30px;
+        height: 30px;
+        transition: 0.3s;
+        &:hover {
+            background-color: darkred;
+        }
+    }
 }
 
 /* NUOVA VERSIONE: Stili modal */
