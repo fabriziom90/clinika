@@ -111,7 +111,29 @@ class AppointmentController extends Controller
      */
     public function update(UpdateAppointmentRequest $request, Appointment $appointment)
     {
-        //
+        $form_data = $request->validated();
+        
+        $startTime = \Carbon\Carbon::parse($form_data['start_time']);
+        $duration  = $form_data['duration'] ?? 30; // minuti
+        $endTime   = $startTime->copy()->addMinutes($duration);
+
+        $appointment->doctor_id  = $form_data['doctor_id'];
+        $appointment->nurse_id   = $form_data['nurse_id'];
+        $appointment->patient_id = $form_data['patient_id'];
+        $appointment->title      = $form_data['title'];
+        $appointment->start_time = $startTime;
+        $appointment->end_time   = $endTime;
+        $appointment->duration_minutes   = $duration;
+        $appointment->notes      = $form_data['notes'] ?? null;
+
+        $appointment->save();
+
+        return redirect()->back()->with([
+            'toast' => [
+                'type' => 'success',
+                'message' => 'Appuntamento modificato correttamente.',
+            ]
+        ]);
     }
 
     /**

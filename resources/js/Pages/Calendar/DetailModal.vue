@@ -66,9 +66,9 @@ const formatHour = (date) => {
                         <strong>Paziente</strong>:
                         {{ `${item.patient.name} ${item.patient.surname}` }}
                     </p>
-                    <p v-if="item.note">
+                    <p v-if="item.notes">
                         <strong>Note</strong>:
-                        {{ item.note }}
+                        {{ item.notes }}
                     </p>
                 </div>
                 <div class="modal-footer">

@@ -24,12 +24,22 @@ const props = defineProps({
 });
 
 const $toast = useToast();
+// variable to show new appointment modal
 const showNewAppointmentModal = ref(false);
+
+// variables for deletion
 const showDeleteModal = ref(false);
 const eventToDelete = ref(null);
+
+// variable for showing details
 const showDetailModal = ref(false);
 const eventToShow = ref(false);
 
+// variable for dragging
+const editingEventId = ref(null);
+const suppressClickAfterDrag = ref(false);
+
+// new appointment data
 const newAppointmentData = ref({
     date: null,
     startTime: null,
@@ -42,6 +52,7 @@ const newAppointmentData = ref({
     notes: "",
 });
 
+// form appointment
 const formAppointment = useForm({
     date: null,
     start_time: null,
@@ -53,6 +64,7 @@ const formAppointment = useForm({
     notes: "",
 });
 
+// computed property to show events in calendar
 const calendarEvents = computed(() => {
     return props.appointments.map((appointment) => ({
         id: appointment.id,
@@ -62,6 +74,7 @@ const calendarEvents = computed(() => {
     }));
 });
 
+// click on empty cell in calendar to get date and time and show modal for new appointment insertion
 const handleCellClick = (clickedTime) => {
     if (!props.userIsSuperadmin) return;
 
@@ -71,6 +84,7 @@ const handleCellClick = (clickedTime) => {
     showNewAppointmentModal.value = true;
 };
 
+// function that create new appointment
 const handleNewAppointment = () => {
     formAppointment.date = newAppointmentData.value.date;
     formAppointment.start_time = `${newAppointmentData.value.date} ${newAppointmentData.value.startTime}:00`;
@@ -81,33 +95,73 @@ const handleNewAppointment = () => {
     formAppointment.duration = newAppointmentData.value.duration;
     formAppointment.notes = newAppointmentData.value.notes;
 
-    formAppointment.post(route("admin.appointments.store"), {
-        onSuccess: () => {
-            showNewAppointmentModal.value = false;
-            // reset dei dati della modale
-            Object.assign(newAppointmentData.value, {
-                date: null,
-                startTime: null,
-                doctorId: "",
-                patientId: "",
-                nurseId: "",
-                newPatient: false,
-                title: "",
-                duration: 30,
-                notes: "",
-            });
-        },
-        onError: (err) => {
-            console.log(err);
-            const flat = Object.values(err).flat();
-            $toast.error(flat.join("<br>"));
-            onSaving.value = false;
-        },
-    });
+    if (editingEventId.value) {
+        // update esistente
+        formAppointment.patch(
+            route("admin.appointments.update", editingEventId.value),
+            {
+                onSuccess: () => {
+                    showNewAppointmentModal.value = false;
+                    // reset editing flag
+                    editingEventId.value = null;
+                    // reset modale dati (come già fai)
+                    Object.assign(newAppointmentData.value, {
+                        date: null,
+                        startTime: null,
+                        doctorId: "",
+                        patientId: "",
+                        nurseId: "",
+                        newPatient: false,
+                        title: "",
+                        duration: 30,
+                        notes: "",
+                    });
+                },
+                onError: (err) => {
+                    console.log(err);
+                    const flat = Object.values(err).flat();
+                    $toast.error(flat.join("<br>"));
+                    onSaving.value = false;
+                },
+            }
+        );
+    } else {
+        formAppointment.post(route("admin.appointments.store"), {
+            onSuccess: () => {
+                showNewAppointmentModal.value = false;
+
+                // reset dei dati della modale
+                Object.assign(newAppointmentData.value, {
+                    date: null,
+                    startTime: null,
+                    doctorId: "",
+                    patientId: "",
+                    nurseId: "",
+                    newPatient: false,
+                    title: "",
+                    duration: 30,
+                    notes: "",
+                });
+            },
+            onError: (err) => {
+                console.log(err);
+                const flat = Object.values(err).flat();
+                $toast.error(flat.join("<br>"));
+                onSaving.value = false;
+            },
+        });
+    }
 };
 
 // define function to handle single click
 const handleEventClick = (event) => {
+    // suppress opening other modals
+    if (suppressClickAfterDrag.value) {
+        // ignora click subito dopo drag
+        suppressClickAfterDrag.value = false;
+        return;
+    }
+
     clearTimeout(clickTimeout);
 
     // wait if there is a double click
@@ -127,10 +181,12 @@ const handleEventDblClick = (event) => {
     openDeleteModal(event);
 };
 
+// function that close delete modal
 const handleDeleted = (event) => {
     showDeleteModal.value = false;
 };
 
+// function that open delete modal
 const openDeleteModal = (eventClicked) => {
     const event = props.appointments.find(
         (e) => e.id === eventClicked.event.id
@@ -142,11 +198,13 @@ const openDeleteModal = (eventClicked) => {
     eventToDelete.value = event;
 };
 
+// function that close delete modal
 const closeDeleteModal = () => {
     eventToDelete.value = null;
     showDeleteModal.value = false;
 };
 
+// function that open detail modal
 const openDetailModal = (eventClicked) => {
     const event = props.appointments.find(
         (e) => e.id === eventClicked.event.id
@@ -158,11 +216,63 @@ const openDetailModal = (eventClicked) => {
     eventToShow.value = event;
 };
 
+// function that close detail modal
 const closeDetailModal = () => {
     eventToShow.value = null;
     showDetailModal.value = false;
 };
 
+// function that handles drag and drop
+const handleEventDrop = (payload) => {
+    //payload event
+    const ev = payload.event || payload;
+    const appointment = props.appointments.find((a) => a.id === ev.id);
+
+    if (!appointment) return;
+
+    editingEventId.value = appointment.id;
+
+    // newAppointmentData
+    const newStart = new Date(ev.start); // ev.start è Date o stringa parsata
+    newAppointmentData.value.date = formatDateForInput(newStart);
+    newAppointmentData.value.startTime = formatTime(newStart);
+    newAppointmentData.value.doctorId =
+        appointment.doctor_id ?? appointment.doctor?.id ?? "";
+    newAppointmentData.value.patientId =
+        appointment.patient_id ?? appointment.patient?.id ?? "";
+    newAppointmentData.value.nurseId =
+        appointment.nurse_id ?? appointment.nurse?.id ?? "";
+    newAppointmentData.value.title = appointment.title;
+    newAppointmentData.value.duration =
+        appointment.duration_minutes ??
+        appointment.duration ??
+        appointment.duration_minutes;
+    newAppointmentData.value.notes = appointment.notes ?? "";
+
+    // prepare formAppointment
+    formAppointment.date = `${newAppointmentData.value.date}`;
+    formAppointment.start_time = `${newAppointmentData.value.date} ${newAppointmentData.value.startTime}:00`;
+    formAppointment.doctor_id = newAppointmentData.value.doctorId;
+    formAppointment.patient_id = newAppointmentData.value.patientId;
+    formAppointment.nurse_id = newAppointmentData.value.nurseId;
+    formAppointment.title = newAppointmentData.value.title;
+    formAppointment.duration = newAppointmentData.value.duration;
+    formAppointment.notes = newAppointmentData.value.notes;
+
+    // open modal to create/edit appointment
+    showNewAppointmentModal.value = true;
+
+    // do not open other modals
+    suppressClickAfterDrag.value = true;
+    setTimeout(() => (suppressClickAfterDrag.value = false), 300);
+};
+
+const handleEventChange = (payload) => {
+    // handle resize (cambiamento durata) - comportamento identico:
+    handleEventDrop(payload);
+};
+
+// function that create new patient from modal
 const handleNewPatient = (newPatient) => {
     // Aggiunge il nuovo paziente alla lista
     props.patients.push(newPatient);
@@ -174,6 +284,7 @@ const handleNewPatient = (newPatient) => {
     newAppointmentData.value.newPatient = false;
 };
 
+//
 function isoToLocalDate(iso) {
     const d = new Date(iso);
 
@@ -219,6 +330,14 @@ function formatDateForInput(date) {
             :time-to="22 * 60"
             @event-click="handleEventClick"
             @event-dblclick="handleEventDblClick"
+            @event-drop="handleEventDrop"
+            @event-change="handleEventChange"
+            :editable-events="{
+                title: false,
+                drag: true,
+                resize: true,
+                delete: false,
+            }"
         />
 
         <div
