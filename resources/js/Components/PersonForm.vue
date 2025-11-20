@@ -1,7 +1,7 @@
 <script setup>
 import cities from "@/data/cities.json";
 import { calculatePersonalCode } from "@/utilities/calculatePersonalCode";
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, watch, onMounted, defineEmits } from "vue";
 import { useForm } from "@inertiajs/vue3";
 import { useToast } from "vue-toast-notification";
 
@@ -10,7 +10,10 @@ const props = defineProps({
     specialties: { type: Array, default: () => [] },
     formType: { type: String, default: "patient" },
     person: { type: Object, default: null },
+    inlineMode: { type: Boolean, default: false },
 });
+
+const emit = defineEmits(["savedInline"]);
 
 const onSaving = ref(false);
 const citiesList = ref(cities);
@@ -43,6 +46,7 @@ const form = useForm({
     vat: "",
     specialty_id: "",
     user_id: "",
+    inline: false,
 });
 
 onMounted(() => {
@@ -144,6 +148,26 @@ const handleSubmitForm = () => {
         : `admin.${props.formType}s.store`;
 
     const url = isEdit ? route(routeName, props.person.id) : route(routeName);
+
+    // inline form: from modal
+    if (props.inlineMode) {
+        (form.inline = true),
+            form.post(url, {
+                data: { inline: true },
+                onSuccess: (page) => {
+                    onSaving.value = false;
+                    const newPerson = page.props.newPerson;
+                    emit("savedInline", newPerson);
+                },
+                onError: (err) => {
+                    const flat = Object.values(err).flat();
+                    $toast.error(flat.join("\n"));
+                    onSaving.value = false;
+                },
+            });
+
+        return; // blocca redirect modalità normale
+    }
 
     form[isEdit ? "put" : "post"](url, {
         onSuccess: () => {
@@ -413,10 +437,10 @@ const handleSubmitForm = () => {
             <div class="col-12 col-md-4">
                 <button type="submit" class="main-button">
                     <span v-if="onSaving">
-                        "Salvataggio in corso...
-                        <i class="fa-solid fa-spinner fa-spin ms-2"></i> :
+                        Salvataggio in corso...
+                        <i class="fa-solid fa-spinner fa-spin ms-2"></i>
                     </span>
-                    <span v-else> Salva </span>
+                    <span v-else>Salva </span>
                 </button>
             </div>
         </div>

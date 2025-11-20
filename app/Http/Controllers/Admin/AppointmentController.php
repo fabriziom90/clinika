@@ -1,0 +1,131 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Models\Appointment;
+use App\Models\Doctor;
+use App\Models\Patient;
+use App\Models\Nurse;
+use App\Models\Nationality;
+use App\Http\Requests\StoreAppointmentRequest;
+use App\Http\Requests\UpdateAppointmentRequest;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+
+class AppointmentController extends Controller
+{   
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        $user = Auth::user();
+
+        if ($user->doctor) {
+        $appointments = Appointment::with(['doctor.user', 'nurse.user', 'patient'])
+            ->where('doctor_id', $user->doctor->id)
+            ->get();
+        } elseif ($user->nurse) {
+            $appointments = Appointment::with(['doctor.user', 'nurse.user', 'patient'])
+                ->where('nurse_id', $user->nurse->id)
+                ->get();
+        } else {
+            // Admin o altri ruoli autorizzati
+            $appointments = Appointment::with(['doctor.user', 'nurse.user', 'patient'])->get();
+        }
+        
+        $nationalities = Nationality::all();
+        $doctors = Doctor::with('user')->get();
+        $nurses = Nurse::with('user')->get();
+        $patients = Patient::all();
+
+        return inertia('Calendar/IndexCalendar', [
+            'appointments' => $appointments,
+            'userIsSuperadmin' => $user->hasRole('superadmin'),
+            'doctors' => $doctors,
+            'nurses'  => $nurses,
+            'patients'  => $patients,
+            'nationalities'  => $nationalities 
+        ]);
+
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(StoreAppointmentRequest $request)
+    {
+        $form_data = $request->validated();
+        
+        $startTime = \Carbon\Carbon::parse($form_data['start_time']);
+        $duration  = $form_data['duration'] ?? 30; // minuti
+        $endTime   = $startTime->copy()->addMinutes($duration);
+
+        $appointment = new Appointment();
+        $appointment->doctor_id  = $form_data['doctor_id'];
+        $appointment->nurse_id   = $form_data['nurse_id'];
+        $appointment->patient_id = $form_data['patient_id'];
+        $appointment->title      = $form_data['title'];
+        $appointment->start_time = $startTime;
+        $appointment->end_time   = $endTime;
+        $appointment->duration_minutes   = $duration;
+        $appointment->notes      = $form_data['notes'] ?? null;
+
+        $appointment->save();
+
+        return redirect()->back()->with([
+            'toast' => [
+                'type' => 'success',
+                'message' => 'Appuntamento creato correttamente.',
+            ]
+        ]);
+    }
+    
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Appointment $appointment)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Appointment $appointment)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UpdateAppointmentRequest $request, Appointment $appointment)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Appointment $appointment)
+    {
+        $appointment->delete();
+
+        return redirect()->route('admin.appointments.index')->with([
+                'toast' => [
+                    'type' => 'success',
+                    'message' => 'Appuntamento cancellato correttamente'
+                ]
+            ]);
+    }
+}

@@ -43,7 +43,9 @@ const logout = () => {
                     :fontSize="'20px'"
                 />
             </li>
-            <li class="list-item"><a href="#">Agenda</a></li>
+            <li class="list-item">
+                <Link :href="route('admin.appointments.index')">Agenda</Link>
+            </li>
             <li class="list-item submenu-open" v-if="hasRole('superadmin')">
                 <a
                     href="#"
@@ -174,6 +176,7 @@ ul {
         &.submenu-open:hover > .submenu {
             display: block;
             position: absolute;
+            z-index: 100;
             background-color: #fff;
             border: 1px solid $mainGrey;
             padding: 0px;

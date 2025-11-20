@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\DoctorController;
 use App\Http\Controllers\Admin\NurseController;
 use App\Http\Controllers\Admin\SpecialtyController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\AppointmentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,6 +46,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/nurses/{id}/send-reset-email', [NurseController::class, 'sendResetEmail'])->name('nurses.sendResetEmail');
         Route::get('roles-permissions', [RoleController::class, 'index'])->name('roles-permissions.index');
         Route::post('roles-permissions/toggle', [RoleController::class, 'togglePermission'])->name('roles-permissions.toggle');
+        Route::resource('appointments', AppointmentController::class);
     });
 });
 

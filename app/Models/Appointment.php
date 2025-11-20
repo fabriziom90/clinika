@@ -12,12 +12,17 @@ class Appointment extends Model
     protected $fillable = [
         'doctor_id',
         'nurse_id',
+        'patient_id',
         'title',
         'start_time',
-        'end_time',
         'duration',
         'notes',
     ];
+
+    // protected $casts = [
+    //     'start_time' => 'datetime:Y-m-d\TH:i:sP',
+    //     'end_time' => 'datetime:Y-m-d\TH:i:sP',
+    // ];
 
     public function doctor()
     {
@@ -27,5 +32,10 @@ class Appointment extends Model
     public function nurse()
     {
         return $this->belongsTo(Nurse::class);
+    }
+
+    public function patient()
+    {
+        return $this->belongsTo(Patient::class);
     }
 }

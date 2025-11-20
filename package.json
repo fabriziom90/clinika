@@ -25,9 +25,11 @@
         "@fullcalendar/timegrid": "^6.1.19",
         "@fullcalendar/vue3": "^6.1.19",
         "bootstrap": "^5.3.8",
+        "dayjs": "^1.11.19",
         "pdfmake": "^0.2.20",
         "pinia": "^3.0.3",
         "sass": "^1.93.2",
+        "vue-cal": "^5.0.1-rc.33",
         "vue-router": "^4.6.3",
         "vue-toast-notification": "^3.1.3"
     }

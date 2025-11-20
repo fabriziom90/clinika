@@ -11,30 +11,26 @@ return new class extends Migration
      */
     public function up(): void
     {
-         Schema::create('appointments', function (Blueprint $table) {
+        Schema::create('appointments', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('doctor_id')->nullable();
+            $table->unsignedBigInteger('nurse_id')->nullable();
+            $table->unsignedBigInteger('patient_id');
 
-            $table->unsignedBigInteger('doctor_id');
-            $table->unsignedBigInteger('nurse_id');
-
-            $table->date('date');
-            $table->dateTime('start_time');
-            $table->dateTime('end_time'); 
-            $table->integer('duration_minutes')->default(30); 
-
-            $table->string('type')->nullable(); 
+            $table->string('title');
+            $table->dateTime('start_time');     
+            $table->dateTime('end_time');       
+            $table->integer('duration_minutes')->default(30)->nullable(); 
             $table->text('notes')->nullable();
 
             $table->timestamps();
 
-            $table->foreign('doctor_id')
-                ->references('id')->on('doctors')
-                ->cascadeOnDelete();
-
-            $table->foreign('nurse_id')
-                ->references('id')->on('nurses')
-                ->cascadeOnDelete();
+            // Foreign keys
+            $table->foreign('doctor_id')->references('id')->on('doctors')->nullOnDelete();
+            $table->foreign('nurse_id')->references('id')->on('nurses')->nullOnDelete();
+            $table->foreign('patient_id')->references('id')->on('patients')->cascadeOnDelete();
         });
+
     }
 
     /**

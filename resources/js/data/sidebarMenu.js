@@ -68,5 +68,14 @@ export const sidebarMenus = {
             icon: "fas fa-user-shield"
         }
     ],
+    calendar: [
+        {
+            id: 'calendar-section',
+            title: "Gestione Agenda",
+            roles: ["superadmin", "doctors", "nurses"],
+            path: '/',
+            icon: "fas fa-calendar"
+        }
+    ],
     superadmin: [], 
 };

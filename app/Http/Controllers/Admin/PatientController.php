@@ -4,11 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Patient;
+use App\Models\Doctor;
+use App\Models\Nurse;
 use App\Models\Nationality;
+use App\Models\Appointment;
 use App\Http\Requests\StorePatientRequest;
 use App\Http\Requests\UpdatePatientRequest;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Facades\Auth;
 
 class PatientController extends Controller
 {   
@@ -58,11 +62,44 @@ class PatientController extends Controller
 
         $newPatient->save();
 
-        return redirect()->route('admin.patients.index')->with([
-            'toast' => [
-                'type' => 'success',
-                'message' => 'Paziente aggiunto correttamente.',
-            ]]);
+        if ($request->boolean('inline')) {
+            $doctors = Doctor::with('user')->get();
+            $nurses = Nurse::with('nurse')->get();
+            $nationalities = Nationality::all();
+            
+            $user = Auth::user();
+
+            if ($user->doctor) {
+            $appointments = Appointment::with(['doctor.user', 'nurse.user', 'patient'])
+                ->where('doctor_id', $user->doctor->id)
+                ->get();
+            } elseif ($user->nurse) {
+                $appointments = Appointment::with(['doctor.user', 'nurse.user', 'patient'])
+                    ->where('nurse_id', $user->nurse->id)
+                    ->get();
+            } else {
+                // Admin o altri ruoli autorizzati
+                $appointments = Appointment::with(['doctor.user', 'nurse.user', 'patient'])->get();
+            }
+
+            return Inertia::render('Calendar/IndexCalendar', [
+                'newPerson' => $newPatient,
+                'doctors' => $doctors,
+                'patients' => Patient::all(),
+                'nurses' => $nurses,
+                'nationalities' => $nationalities,
+                'appointments'  => $appointments,
+                'userIsSuperadmin' => auth()->user()->hasRole('superadmin'),
+            ]);
+        }
+        else{
+
+            return redirect()->route('admin.patients.index')->with([
+                'toast' => [
+                    'type' => 'success',
+                    'message' => 'Paziente aggiunto correttamente.',
+                ]]);
+        }
     }
 
     /**
