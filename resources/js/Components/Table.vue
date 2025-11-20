@@ -153,7 +153,12 @@ const saveEdit = (id) => {
         onSuccess: () => {
             form.editing = false;
             preventPageReset.value = true;
-            emit("updated", page.props.specialties || page.props.items);
+            emit(
+                "updated",
+                page.props.specialties ||
+                    page.props.clinicRooms ||
+                    page.props.items
+            );
         },
         onError: (err) => {
             // eventuale gestione errori locali

@@ -12,7 +12,7 @@ class ClinicRoomController extends Controller
 {
     public function __construct()
     {
-        $this->authorizeResource(\App\Models\ClinicRoom::class, 'clinic-room');
+        $this->authorizeResource(\App\Models\ClinicRoom::class, 'clinic_room');
     }
 
     /**
@@ -21,7 +21,10 @@ class ClinicRoomController extends Controller
     public function index()
     {
         $clinicRooms = ClinicRoom::all();
-        return Inertia::render('ClinicRooms/IndexClinicRoom', [ 'clinicRooms' => $clinicRooms]);
+        return Inertia::render('ClinicRooms/IndexClinicRoom', [ 'clinicRooms' => $clinicRooms, 'columns' => [
+                'id'    => 'ID',
+                'name'  => 'Nome',
+            ]]);
     }
 
     /**
@@ -37,7 +40,18 @@ class ClinicRoomController extends Controller
      */
     public function store(StoreClinicRoomRequest $request)
     {
-        //
+        $form_data = $request->validated();
+
+        $newClinicRoom = new ClinicRoom();
+        $newClinicRoom->name = $form_data['name'];
+        $newClinicRoom->save();
+
+        return redirect()->route('admin.clinic-rooms.index')->with([
+            'toast' => [
+                'type' => 'success',
+                'message' => "Stanza creata con successo."
+            ]
+        ]);
     }
 
     /**
@@ -61,7 +75,17 @@ class ClinicRoomController extends Controller
      */
     public function update(UpdateClinicRoomRequest $request, ClinicRoom $clinicRoom)
     {
-        //
+        $form_data = $request->validated();
+
+        $clinicRoom->name = $form_data['name'];
+        $clinicRoom->save();
+
+        return redirect()->route('admin.clinic-rooms.index')->with([
+            'toast' => [
+                'type' => 'success',
+                'message' => "Stanza modificata con successo."
+            ]
+        ]);
     }
 
     /**
@@ -69,6 +93,13 @@ class ClinicRoomController extends Controller
      */
     public function destroy(ClinicRoom $clinicRoom)
     {
-        //
+        $clinicRoom->delete();
+
+        return redirect()->route('admin.clinic-rooms.index')->with([
+            'toast' => [
+                'type' => 'success',
+                'message' => "Stanza cancellata con successo."
+            ]
+        ]);
     }
 }
