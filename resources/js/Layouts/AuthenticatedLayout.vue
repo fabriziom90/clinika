@@ -13,6 +13,8 @@ const props = defineProps({
         "roles" |
         "specialties" |
         "clinicrooms" |
+        "products" |
+        "drugs" |
         "superadmin",
 });
 </script>

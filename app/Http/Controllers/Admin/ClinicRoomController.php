@@ -21,7 +21,7 @@ class ClinicRoomController extends Controller
     public function index()
     {
         $clinicRooms = ClinicRoom::all();
-        return Inertia::render('ClinicRooms/IndexClinicRoom', [ 'clinicRooms' => $clinicRooms, 'columns' => [
+        return Inertia::render('ClinicRooms/IndexClinicRooms', [ 'clinicRooms' => $clinicRooms, 'columns' => [
                 'id'    => 'ID',
                 'name'  => 'Nome',
             ]]);

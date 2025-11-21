@@ -7,13 +7,7 @@ use App\Models\ClinicRoom;
 
 class ClinicRoomPolicy
 {
-    /**
-     * Create a new policy instance.
-     */
-    public function __construct()
-    {
-        //
-    }
+    
 
     public function viewAny(User $user): bool
     {

@@ -1,25 +1,27 @@
 <script setup>
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import Table from "@/Components/Table.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import Modal from "@/Components/Modal.vue";
+import Table from "@/Components/Table.vue";
 import { ref } from "vue";
 
 const props = defineProps({
-    clinicRooms: Array,
+    drugs: Array,
     columns: Object,
 });
 
 const showAddForm = ref(false);
-const localClinicRoom = ref([...props.clinicRooms]);
+const localProduct = ref([...props.drugs]);
 const form = useForm({
     name: "",
+    unit_price: "",
 });
 
 const handleSubmitForm = () => {
-    form.post(route("admin.clinic-rooms.store"), {
+    form.post(route("admin.drugs.store"), {
         onSuccess: (page) => {
             // aggiorna la tabella con i nuovi dati passati dal controller
-            localClinicRoom.value = page.props.clinicRooms;
+            localProduct.value = page.props.drugs;
 
             form.reset();
             showAddForm.value = false;
@@ -34,17 +36,17 @@ const handleSubmitForm = () => {
 };
 
 const handleInlineUpdate = (updatedData) => {
-    localClinicRoom.value = updatedData;
+    localProduct.value = updatedData;
 };
 </script>
 <template lang="">
-    <Head title="Stanze Poliambulatorio" />
-    <AuthenticatedLayout section="clinicrooms">
+    <Head title="Medicinali" />
+    <AuthenticatedLayout section="drugs">
         <div>
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2>Elenco stanze</h2>
+                <h2>Elenco medicinali</h2>
                 <button class="main-button" @click="showAddForm = !showAddForm">
-                    Aggiungi stanza
+                    Aggiungi medicinale
                 </button>
             </div>
         </div>
@@ -53,13 +55,24 @@ const handleInlineUpdate = (updatedData) => {
                 @submit.prevent="handleSubmitForm"
                 class="d-flex align-items-end"
             >
-                <div class="me-3 w-100">
-                    <label class="form-label">Nome stanza</label>
+                <div class="me-3 w-50">
+                    <label class="form-label">Nome medicinale</label>
                     <input
                         type="text"
                         class="form-control"
-                        placeholder="Inserisci nome stanza"
+                        placeholder="Inserisci il nome del medicinale"
                         v-model="form.name"
+                    />
+                </div>
+                <div class="me-3 w-50">
+                    <label class="form-label">Prezzo unitario</label>
+                    <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        class="form-control"
+                        placeholder="Inserisci il prezzo unitario del medicinale"
+                        v-model="form.unit_price"
                     />
                 </div>
                 <div>
@@ -68,10 +81,10 @@ const handleInlineUpdate = (updatedData) => {
             </form>
         </div>
         <Table
-            :items="clinicRooms"
+            :items="drugs"
             :columns="columns"
-            baseRoute="admin.clinic-rooms"
-            :editableColumns="['name']"
+            baseRoute="admin.drugs"
+            :editableColumns="['name', 'unit_price']"
             @updated="handleInlineUpdate"
         />
     </AuthenticatedLayout>

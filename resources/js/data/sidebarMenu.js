@@ -95,5 +95,14 @@ export const sidebarMenus = {
             icon: 'fas fa-syringe'
         } 
     ],
+    drugs: [
+       {
+            id: 'drugs-section',
+            title: 'Gestione Medicinali',
+            roles: ["superadmin"],
+            path: '/',
+            icon: 'fas fa-pills'
+        } 
+    ],
     superadmin: [], 
 };
