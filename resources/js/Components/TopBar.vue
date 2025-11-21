@@ -95,6 +95,13 @@ const logout = () => {
                 <ul class="submenu">
                     <li class="list-item">
                         <Link
+                            :class="isRouteActive(['products']) ? 'active' : ''"
+                            :href="route('admin.products.index')"
+                            >Prodotti</Link
+                        >
+                    </li>
+                    <li class="list-item">
+                        <Link
                             :class="
                                 isRouteActive(['clinic_rooms']) ? 'active' : ''
                             "

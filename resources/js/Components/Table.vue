@@ -157,6 +157,7 @@ const saveEdit = (id) => {
                 "updated",
                 page.props.specialties ||
                     page.props.clinicRooms ||
+                    page.props.products ||
                     page.props.items
             );
         },
@@ -249,6 +250,12 @@ const sendResetEmail = (item) => {
                                 key.toLowerCase().includes("created_at")
                                     ? formatDate(item[key])
                                     : item[key]
+                            }}
+                            {{
+                                key === "unit_price" &&
+                                item["unit_price"] != null
+                                    ? "€"
+                                    : ""
                             }}
                         </template>
                     </td>

@@ -86,5 +86,14 @@ export const sidebarMenus = {
             icon: 'fas fa-hospital'
         }
     ],
+    products: [
+       {
+            id: 'products-section',
+            title: 'Gestione Prodotti medici',
+            roles: ["superadmin"],
+            path: '/',
+            icon: 'fas fa-syringe'
+        } 
+    ],
     superadmin: [], 
 };
