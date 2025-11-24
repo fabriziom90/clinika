@@ -1,10 +1,11 @@
 <script setup>
 import ApplicationLogo from "./ApplicationLogo.vue";
 import { Link, usePage } from "@inertiajs/vue3";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
+const openWarehouse = ref(false);
 
 const hasRole = (role) => user.value?.roles?.includes(role);
 
@@ -93,28 +94,68 @@ const logout = () => {
                     >Amministrazione</a
                 >
                 <ul class="submenu">
-                    <li class="list-item">
-                        <Link
-                            :class="isRouteActive(['drugs']) ? 'active' : ''"
-                            :href="route('admin.drugs.index')"
-                            >Medicinali</Link
-                        >
-                    </li>
-                    <li class="list-item">
-                        <Link
-                            :class="isRouteActive(['products']) ? 'active' : ''"
-                            :href="route('admin.products.index')"
-                            >Prodotti</Link
-                        >
-                    </li>
-                    <li class="list-item">
-                        <Link
+                    <li
+                        id="warehouse"
+                        class="list-item has-submenu"
+                        v-if="hasRole('superadmin')"
+                    >
+                        <a
+                            href="#"
+                            class="submenu-toggle"
                             :class="
-                                isRouteActive(['clinic_rooms']) ? 'active' : ''
+                                isRouteActive([
+                                    'drugs',
+                                    'products',
+                                    'clinic_rooms',
+                                ])
+                                    ? 'active'
+                                    : ''
                             "
-                            :href="route('admin.clinic-rooms.index')"
-                            >Stanze Poliambulatorio</Link
+                            @click.prevent="openWarehouse = !openWarehouse"
                         >
+                            Magazzino
+                            <i
+                                class="fas"
+                                :class="
+                                    openWarehouse
+                                        ? 'fa-chevron-up'
+                                        : 'fa-chevron-down'
+                                "
+                            ></i>
+                        </a>
+
+                        <ul
+                            class="submenu right-submenu"
+                            v-show="openWarehouse"
+                        >
+                            <li>
+                                <Link
+                                    :href="route('admin.drugs.index')"
+                                    :class="{
+                                        active: isRouteActive(['drugs']),
+                                    }"
+                                    >Medicinali</Link
+                                >
+                            </li>
+                            <li>
+                                <Link
+                                    :href="route('admin.products.index')"
+                                    :class="{
+                                        active: isRouteActive(['products']),
+                                    }"
+                                    >Prodotti</Link
+                                >
+                            </li>
+                            <li>
+                                <Link
+                                    :href="route('admin.clinic-rooms.index')"
+                                    :class="{
+                                        active: isRouteActive(['clinic_rooms']),
+                                    }"
+                                    >Stanze Poliambulatorio</Link
+                                >
+                            </li>
+                        </ul>
                     </li>
                     <li class="list-item">
                         <Link
@@ -177,6 +218,29 @@ ul {
 
         .submenu {
             display: none;
+
+            .right-submenu {
+                display: block;
+                position: absolute;
+                background-color: #fff;
+                left: 100%;
+                margin-left: 0px;
+                border: 1px solid $mainRed;
+                top: 0px;
+
+                &::before {
+                    content: "";
+                    position: absolute;
+                    top: 40px; // posizione sopra il bordo
+                    left: -6px; // regola per centrarlo rispetto al link
+                    width: 10px;
+                    height: 10px;
+                    background-color: #fff;
+                    border-left: 1px solid $mainRed;
+                    border-top: 1px solid $mainRed;
+                    transform: rotate(-45deg);
+                }
+            }
 
             &::before {
                 content: "";

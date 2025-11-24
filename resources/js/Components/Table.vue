@@ -261,6 +261,13 @@ const sendResetEmail = (item) => {
                     </td>
                     <td class="actions">
                         <template
+                            v-if="props.baseRoute === 'admin.clinic-rooms'"
+                        >
+                            <Link class="show-button" :href="showUrl(item.id)">
+                                <i class="fas fa-eye"></i>
+                            </Link>
+                        </template>
+                        <template
                             v-if="
                                 props.editableColumns.length &&
                                 editingItem !== item.id
