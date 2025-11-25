@@ -42,7 +42,8 @@ class RoleSeeder extends Seeder
             'specialty' => 'Specializzazioni',
             'clinic-room' => 'Stanze Poliambulatorio',
             'product'   => 'Prodotti sanitari',
-            'drug'    => 'Medicinali'
+            'drug'    => 'Medicinali',
+            'inventory-product' => "Prodotti stanza"
         ];
 
         // === AZIONI CRUD ===

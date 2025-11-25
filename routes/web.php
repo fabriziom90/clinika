@@ -14,6 +14,8 @@ use App\Http\Controllers\Admin\AppointmentController;
 use App\Http\Controllers\Admin\ClinicRoomController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\DrugController;
+use App\Http\Controllers\Admin\InventoryProductController;
+use App\Http\Controllers\Admin\InventoryDrugController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,6 +50,8 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('clinic-rooms', ClinicRoomController::class);
         Route::resource('products', ProductController::class);
         Route::resource('drugs', DrugController::class);
+        Route::resource('inventory-products', InventoryProductController::class);
+        Route::resource('inventory-drugs', InventoryDrugController::class);
         Route::post('/doctors/{id}/send-reset-email', [DoctorController::class, 'sendResetEmail'])->name('doctors.sendResetEmail');
         Route::post('/nurses/{id}/send-reset-email', [NurseController::class, 'sendResetEmail'])->name('nurses.sendResetEmail');
         Route::get('roles-permissions', [RoleController::class, 'index'])->name('roles-permissions.index');

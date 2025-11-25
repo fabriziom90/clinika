@@ -104,5 +104,6 @@ export const sidebarMenus = {
             icon: 'fas fa-pills'
         } 
     ],
+    
     superadmin: [], 
 };

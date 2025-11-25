@@ -1,10 +1,15 @@
 <?php
 
 namespace App\Models;
+use Illuminate\Database\Eloquent\Model;
 
-use Illuminate\Database\Eloquent\Relations\Pivot;
-
-class Drug extends Pivot
+class Drug extends Model
 {
     protected $fillable = ['name', 'unit_price'];
+
+
+    public function inventoryDrugs()
+    {
+        return $this->hasMany(InventoryDrug::class);
+    }
 }

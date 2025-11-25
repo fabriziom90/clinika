@@ -157,6 +157,7 @@ const saveEdit = (id) => {
                 "updated",
                 page.props.specialties ||
                     page.props.clinicRooms ||
+                    page.props.inventoryProducts ||
                     page.props.products ||
                     page.props.items
             );
@@ -190,6 +191,63 @@ const sendResetEmail = (item) => {
         }
     );
 };
+
+const displayValue = (item, key) => {
+    // prezzo totale
+    if (key === "price") {
+        const base = item.product || item.drug;
+        if (base?.unit_price != null && item.units != null) {
+            return `${base.unit_price * item.units}€`;
+        }
+        return "";
+    }
+
+    // per il nome personalizzato "item_name"
+    if (key === "item_name") {
+        if (item.product && item.product.name != null) {
+            return item.product.name;
+        }
+        if (item.drug && item.drug.name != null) {
+            return item.drug.name;
+        }
+        return "";
+    }
+
+    // altri campi
+    const keys = key.split(".");
+    let value = item;
+    for (let k of keys) {
+        if (value == null) return "";
+        value = value[k];
+    }
+
+    if (keys[keys.length - 1].toLowerCase().includes("date") && value) {
+        return formatDate(value);
+    }
+
+    return value ?? "";
+};
+
+function normalizeValueForInput(value, key) {
+    if (!value) return "";
+
+    // Se è una data nel formato DD/MM/YYYY → converte in YYYY-MM-DD
+    if (key.toLowerCase().includes("date")) {
+        // se è già ISO lo ritorna
+        if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+            return value;
+        }
+
+        // se è nel formato DD/MM/YYYY lo converte
+        const parts = value.split("/");
+        if (parts.length === 3) {
+            const [day, month, year] = parts;
+            return `${year}-${month}-${day}`;
+        }
+    }
+
+    return value;
+}
 </script>
 
 <template>
@@ -241,22 +299,29 @@ const sendResetEmail = (item) => {
                             "
                         >
                             <input
+                                v-if="key.toLowerCase().includes('date')"
+                                type="date"
+                                class="form-control"
+                                :value="
+                                    normalizeValueForInput(
+                                        editForms[item.id][key],
+                                        key
+                                    )
+                                "
+                                @input="
+                                    editForms[item.id][key] =
+                                        $event.target.value
+                                "
+                            />
+
+                            <input
+                                v-else
                                 v-model="editForms[item.id][key]"
                                 class="form-control"
                             />
                         </template>
                         <template v-else>
-                            {{
-                                key.toLowerCase().includes("created_at")
-                                    ? formatDate(item[key])
-                                    : item[key]
-                            }}
-                            {{
-                                key === "unit_price" &&
-                                item["unit_price"] != null
-                                    ? "€"
-                                    : ""
-                            }}
+                            {{ displayValue(item, key) }}
                         </template>
                     </td>
                     <td class="actions">

@@ -10,4 +10,14 @@ class ClinicRoom extends Model
     use HasFactory;
 
     protected $fillable = ['name'];
+
+    public function inventoryProducts()
+    {
+        return $this->hasMany(InventoryProduct::class);
+    }
+
+    public function inventoryDrugs()
+    {
+        return $this->hasMany(InventoryDrug::class);
+    }
 }

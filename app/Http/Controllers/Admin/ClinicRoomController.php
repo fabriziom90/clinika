@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\ClinicRoom;
+use App\Models\InventoryProduct;
+use App\Models\InventoryDrug;
+use App\Models\Product;
+use App\Models\Drug;
 use App\Http\Requests\StoreClinicRoomRequest;
 use App\Http\Requests\UpdateClinicRoomRequest;
 use App\Http\Controllers\Controller;
@@ -58,8 +62,27 @@ class ClinicRoomController extends Controller
      * Display the specified resource.
      */
     public function show(ClinicRoom $clinicRoom)
-    {
-        //
+    {   
+        $clinicRoomProducts = InventoryProduct::where('room_id', $clinicRoom->id)->with('product')->get();
+        $clinicRoomDrugs = InventoryDrug::where('room_id', $clinicRoom->id)->with('drug')->get();
+        $products = Product::all();
+        $drugs = Drug::all();
+        
+
+        return Inertia::render('ClinicRooms/ShowClinicRoom', [
+            'clinicRoom' => $clinicRoom,
+            'clinicRoomProducts' => $clinicRoomProducts,
+            'clinicRoomDrugs'   => $clinicRoomDrugs,
+            'products'  => $products,
+            'drugs'     => $drugs,
+            'columns'   => [
+                'id'    => 'ID',
+                'item_name' => 'Nome',
+                'expiry_date' => 'Data Scadenza',
+                'units' => 'Quantità',
+                'price' => 'Prezzo'
+            ]
+        ]);
     }
 
     /**
