@@ -105,7 +105,7 @@ const isRouteActive = (routeName) => currentRouteName.value === routeName;
 
         color: #fff;
         transition: 0.3s;
-        padding: 10px 0px;
+        padding: 5px 0px;
 
         &:hover {
             background-color: #fff;
@@ -114,7 +114,7 @@ const isRouteActive = (routeName) => currentRouteName.value === routeName;
     }
 
     #top-sidebar {
-        height: calc(100% - 120px);
+        height: calc(100% - 130px);
     }
 
     h3 {

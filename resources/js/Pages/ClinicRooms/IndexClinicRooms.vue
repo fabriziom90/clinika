@@ -58,9 +58,13 @@ const handleInlineUpdate = (updatedData) => {
                     <input
                         type="text"
                         class="form-control"
+                        :class="{ 'is-invalid': form.errors.name }"
                         placeholder="Inserisci il nome della stanza"
                         v-model="form.name"
                     />
+                    <span v-if="form.errors.name" class="text-danger">{{
+                        form.errors.name
+                    }}</span>
                 </div>
                 <div>
                     <button type="submit" class="btn-negative">Salva</button>

@@ -45,7 +45,7 @@ const logout = () => {
                 />
             </li>
             <li class="list-item">
-                <Link :href="route('admin.appointments.index')">Agenda</Link>
+                <Link :href="route('admin.appointments.index')" :class="isRouteActive(['appointments']) ? 'active' : ''">Agenda</Link>
             </li>
             <li class="list-item submenu-open" v-if="hasRole('superadmin')">
                 <a

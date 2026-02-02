@@ -5,20 +5,22 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDoctorRequest;
 use App\Http\Requests\UpdateDoctorRequest;
-use Illuminate\Http\Request;
-use App\Models\Doctor;
-use App\Models\Specialty;
-use App\Models\Nationality;
-use App\Models\User;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Mail;
 use App\Mail\PersonSetPasswordMail;
+use App\Models\Doctor;
+use App\Models\Nationality;
+use App\Models\Nurse;
+use App\Models\Patient;
+use App\Models\Specialty;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class DoctorController extends Controller
-{   
+{
     public function __construct()
     {
         $this->authorizeResource(\App\Models\Doctor::class, 'doctor');
@@ -30,7 +32,7 @@ class DoctorController extends Controller
     public function index()
     {
         $doctors = Doctor::with('user')->get();
-        
+
         $doctors = $doctors->map(function ($doctor) {
             return [
                 'id' => $doctor->id,
@@ -41,17 +43,17 @@ class DoctorController extends Controller
                 'created_at' => $doctor->created_at->format('d/m/Y'),
             ];
         });
-        
+
         return Inertia::render('Doctors/IndexDoctors', [
-            'doctors' => $doctors, 
+            'doctors' => $doctors,
             'columns' => [
-                'id'    => 'ID',
-                'name'  => 'Nome',
-                'surname'   => 'Cognome',
-                'email'     => 'Email',
-                'phone'     => 'Telefono',
-                'created_at'    => 'Inserito il'
-            ]
+                'id' => 'ID',
+                'name' => 'Nome',
+                'surname' => 'Cognome',
+                'email' => 'Email',
+                'phone' => 'Telefono',
+                'created_at' => 'Inserito il',
+            ],
         ]);
     }
 
@@ -62,6 +64,7 @@ class DoctorController extends Controller
     {
         $nationalities = Nationality::all();
         $specialties = Specialty::all();
+
         return Inertia::render('Doctors/CreateDoctor', ['nationalities' => $nationalities, 'specialties' => $specialties]);
     }
 
@@ -71,18 +74,18 @@ class DoctorController extends Controller
     public function store(StoreDoctorRequest $request)
     {
         $form_data = $request->validated();
-        
+
         $password = Str::random(12);
         $user = [
             'name' => $form_data['name'],
             'surname' => $form_data['surname'],
-            'email'   => $form_data['email'],
-            'password' => Hash::make($password)
+            'email' => $form_data['email'],
+            'password' => Hash::make($password),
         ];
-        
+
         $newUser = User::create($user);
         $newUser->assignRole('doctor');
-        
+
         $doctor = Doctor::create([
             'user_id' => $newUser->id,
             'personal_code' => $form_data['personal_code'],
@@ -95,18 +98,18 @@ class DoctorController extends Controller
             'genre' => $form_data['genre'],
             'pec' => $form_data['pec'] ?? null,
             'specialty_id' => $form_data['specialty_id'],
-            'nationality_id'    => $form_data['nationality_id']
+            'nationality_id' => $form_data['nationality_id'],
         ]);
 
         $token = Password::createToken($newUser);
         Mail::to($newUser->email)->send(new PersonSetPasswordMail($newUser, $token));
 
         return redirect()->route('admin.doctors.index')->with([
-                'toast' => [
-                    'type' => 'success',
-                    'message' => "Dottore creato con successo."
-                ]
-            ]);
+            'toast' => [
+                'type' => 'success',
+                'message' => 'Dottore creato con successo.',
+            ],
+        ]);
     }
 
     /**
@@ -114,15 +117,23 @@ class DoctorController extends Controller
      */
     public function show(Doctor $doctor)
     {
-        $doctor = Doctor::with(['user', 'nationality', 'specialty'])->findOrFail($doctor->id);
-        return Inertia::render('Doctors/ShowDoctor', ['doctor' => $doctor]);
+        $user = Auth::user();
+
+        $doctor = Doctor::with(['user', 'nationality', 'specialty', 'appointments', 'appointments.patient'])->findOrFail($doctor->id);
+        $doctors = Doctor::all();
+        $patients = Patient::all();
+        $nurses = Nurse::all();
+        $nationalities = Nationality::all();
+        $user = Auth::user();
+
+        return Inertia::render('Doctors/ShowDoctor', ['doctor' => $doctor, 'doctors' => $doctors, 'patients' => $patients, 'nurses' => $nurses, 'nationalities' => $nationalities, 'userIsSuperadmin' => $user->hasRole('superadmin')]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
     public function edit(Doctor $doctor)
-    {   
+    {
         $doctor->load('user');
         $nationalities = Nationality::all();
         $specialties = Specialty::all();
@@ -136,11 +147,11 @@ class DoctorController extends Controller
     public function update(UpdateDoctorRequest $request, Doctor $doctor)
     {
         $form_data = $request->validated();
-        
+
         $doctor->user->update([
             'name' => $form_data['name'],
             'surname' => $form_data['surname'],
-            'email'     => $form_data['email']
+            'email' => $form_data['email'],
         ]);
 
         $doctor->update([
@@ -155,15 +166,15 @@ class DoctorController extends Controller
             'genre' => $form_data['genre'],
             'pec' => $form_data['pec'] ?? null,
             'specialty_id' => $form_data['specialty_id'],
-            'nationality_id'    => $form_data['nationality_id']
+            'nationality_id' => $form_data['nationality_id'],
         ]);
 
         return redirect()->route('admin.doctors.index')->with([
-                'toast' => [
-                    'type' => 'success',
-                    'message' => 'Dottore aggiornato con successo'
-                ]
-            ]);
+            'toast' => [
+                'type' => 'success',
+                'message' => 'Dottore aggiornato con successo',
+            ],
+        ]);
     }
 
     /**
@@ -177,9 +188,9 @@ class DoctorController extends Controller
 
         return redirect()->route('admin.doctors.index')->with([
             'toast' => [
-                    'type' => 'success',
-                    'message' => 'Dottore cancellato correttamente'
-            ]
+                'type' => 'success',
+                'message' => 'Dottore cancellato correttamente',
+            ],
         ]);
     }
 
@@ -189,12 +200,12 @@ class DoctorController extends Controller
         $user = $doctor->user;
 
         $token = Password::createToken($user);
-    
+
         Mail::to($user->email)->send(new PersonSetPasswordMail($user, $token));
 
         return back()->with(['toast', [
             'type' => 'success',
-            'message' => 'Email di impostazione password inviata con successo'
+            'message' => 'Email di impostazione password inviata con successo',
         ]]);
     }
 }

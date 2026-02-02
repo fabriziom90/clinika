@@ -221,9 +221,11 @@ const displayValue = (item, key) => {
         value = value[k];
     }
 
-    if (keys[keys.length - 1].toLowerCase().includes("date") && value) {
+    if ((keys[keys.length - 1].toLowerCase().includes("date") || keys[keys.length - 1].toLowerCase().includes("created_at")) && value) {
         return formatDate(value);
     }
+
+    console.log(key);
 
     return value ?? "";
 };

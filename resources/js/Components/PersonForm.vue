@@ -196,6 +196,9 @@ const handleSubmitForm = () => {
                     v-model="form.name"
                     required
                 />
+                <span v-if="form.errors.name" class="text-danger">{{
+                    form.errors.name
+                }}</span>
             </div>
             <div class="col-12 col-md-4">
                 <label for="" class="form-label">Cognome</label>
@@ -209,6 +212,9 @@ const handleSubmitForm = () => {
                     v-model="form.surname"
                     required
                 />
+                <span v-if="form.errors.surname" class="text-danger">{{
+                    form.errors.surname
+                }}</span>
             </div>
             <div class="col-12 col-md-4">
                 <label for="" class="form-label">Email</label>
@@ -222,6 +228,9 @@ const handleSubmitForm = () => {
                     v-model="form.email"
                     required
                 />
+                <span v-if="form.errors.email" class="text-danger">{{
+                    form.errors.email
+                }}</span>
             </div>
             <div class="col-12 col-md-4">
                 <div class="label form-label">Telefono</div>
@@ -235,6 +244,9 @@ const handleSubmitForm = () => {
                     v-model="form.phone"
                     required
                 />
+                <span v-if="form.errors.phone" class="text-danger">{{
+                    form.errors.phone
+                }}</span>
             </div>
             <div class="col-12 col-md-4">
                 <label for="" class="form-label">Sesso</label>
@@ -250,6 +262,9 @@ const handleSubmitForm = () => {
                     <option value="m">Uomo</option>
                     <option value="d">Donna</option>
                 </select>
+                <span v-if="form.errors.genre" class="text-danger">{{
+                    form.errors.genre
+                }}</span>
             </div>
         </div>
         <hr />
@@ -269,6 +284,9 @@ const handleSubmitForm = () => {
                     v-model="form.birthday"
                     required
                 />
+                <span v-if="form.errors.birthday" class="text-danger">{{
+                    form.errors.birthday
+                }}</span>
             </div>
             <div class="col-12 col-md-4 position-relative">
                 <label for="" class="form-label">Città di nascita</label>
@@ -299,6 +317,9 @@ const handleSubmitForm = () => {
                         {{ c.name }} ({{ c.province.name }})
                     </li>
                 </ul>
+                <span v-if="form.errors.birth_city" class="text-danger">{{
+                    form.errors.birth_city
+                }}</span>
             </div>
             <div class="col-12 col-md-4">
                 <label for="" class="form-label">Nazionalità</label>
@@ -319,6 +340,9 @@ const handleSubmitForm = () => {
                         {{ nationality.name }}
                     </option>
                 </select>
+                <span v-if="form.errors.nationality_id" class="text-danger">{{
+                    form.errors.nationality_id
+                }}</span>
             </div>
         </div>
         <hr />
@@ -358,6 +382,9 @@ const handleSubmitForm = () => {
                         {{ c.name }} ({{ c.province.name }})
                     </li>
                 </ul>
+                <span v-if="form.errors.city" class="text-danger">{{
+                    form.errors.city
+                }}</span>
             </div>
             <div class="col-12 col-md-4">
                 <label for="" class="form-label">Indirizzo</label>
@@ -371,6 +398,9 @@ const handleSubmitForm = () => {
                     v-model="form.address"
                     required
                 />
+                <span v-if="form.errors.address" class="text-danger">{{
+                    form.errors.address
+                }}</span>
             </div>
             <div class="col-12 col-md-4">
                 <label for="" class="form-label">Codice fiscale</label>
@@ -384,6 +414,9 @@ const handleSubmitForm = () => {
                     v-model="form.personal_code"
                     required
                 />
+                <span v-if="form.errors.personal_code" class="text-danger">{{
+                    form.errors.personal_code
+                }}</span>
             </div>
         </div>
         <hr />
@@ -404,6 +437,9 @@ const handleSubmitForm = () => {
                     id="vat"
                     placeholder="Inserisci Partita IVA"
                 />
+                <span v-if="form.errors.vat" class="text-danger">{{
+                    form.errors.vat
+                }}</span>
             </div>
             <div class="col-md-4">
                 <label class="form-label">PEC</label>
@@ -416,6 +452,9 @@ const handleSubmitForm = () => {
                     id="pec"
                     placeholder="Inserisci PEC"
                 />
+                <span v-if="form.errors.pec" class="text-danger">{{
+                    form.errors.pec
+                }}</span>
             </div>
 
             <!-- Solo per medici -->
@@ -431,6 +470,9 @@ const handleSubmitForm = () => {
                         {{ s.name }}
                     </option>
                 </select>
+                <span v-if="form.errors.specialty_id" class="text-danger">{{
+                    form.errors.specialty_id
+                }}</span>
             </div>
         </div>
         <div class="row mt-4">

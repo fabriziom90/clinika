@@ -3,30 +3,22 @@ import { Head, Link } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { formatDate } from "@/utilities/formatDateFunction";
 import Calendar from "@/Components/Calendar.vue";
+
+import { ref } from "vue";
+
 const props = defineProps({
     doctor: Object,
+    doctors: Array,
+    nurses: Array,
+    nationalities: Array,
+    patients: Array,
+    userIsSuperadmin: Boolean
 });
 
-const appointments = [
-    {
-        title: "Visita Mario Rossi",
-        start: "2025-02-10 10:00",
-        end: "2025-02-10 10:30",
-        color: "#4CAF50",
-    },
-    {
-        title: "Controllo diabetico",
-        start: "2025-02-12",
-    },
-];
+const detailsOpen = ref(false);
 
-const handleEventClick = (event) => {
-    console.log("Hai cliccato l’appuntamento:", event);
-};
+const showDetail = () => detailsOpen.value = !detailsOpen.value;
 
-const handleDateClick = (date) => {
-    console.log("Hai cliccato la data:", date);
-};
 </script>
 <template lang="">
     <Head title="Dettaglio dottore"></Head>
@@ -49,101 +41,108 @@ const handleDateClick = (date) => {
                         </div>
                     </div>
                 </div>
-
-                <div class="col-12 col-md-4 border-right-red">
-                    <div class="row gy-3">
+                <div class="col-12">
+                    <div class="row">
                         <div class="col-12">
-                            <h3>Anagrafica dottore</h3>
+                            <h3>{{ doctor.user.name }} {{ doctor.user.surname }} <i class="fas" :class="detailsOpen == true ? 'fa-caret-up' : 'fa-caret-down'" @click="showDetail"></i></h3>
                         </div>
-                        <div class="col-12 col-md-6">
-                            <label for="" class="form-label">Nome</label>
-                            <p>{{ doctor.user.name }}</p>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label for="" class="form-label">Cognome</label>
-                            <p>{{ doctor.user.surname }}</p>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label for="" class="form-label"
-                                >Data di nascita</label
-                            >
-                            <p>{{ formatDate(doctor.birthday) }}</p>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label for="" class="form-label"
-                                >Città di nascita</label
-                            >
-                            <p>{{ doctor.birth_city }}</p>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label for="" class="form-label">Nazionalità</label>
-                            <p>
-                                {{
-                                    doctor.nationality === null
-                                        ? "Nazionalità non valorizzata"
-                                        : doctor.nationality.name
-                                }}
-                            </p>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label for="" class="form-label">Sesso</label>
-                            <p>
-                                {{ doctor.genre === "m" ? "Uomo" : "Donna" }}
-                            </p>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label for="" class="form-label"
-                                >Codice fiscale</label
-                            >
-                            <p>{{ doctor.personal_code }}</p>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label for="" class="form-label"
-                                >Specializzazione</label
-                            >
-                            <p>{{ doctor.specialty.name }}</p>
-                        </div>
-                    </div>
-                    <div class="row gy-3">
-                        <div class="col-12">
-                            <h3>Residenza</h3>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label for="" class="form-label"
-                                >Città di residenza</label
-                            >
-                            <p>{{ doctor.city }}</p>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label for="" class="form-label">Indirizzo</label>
-                            <p>{{ doctor.address }}</p>
-                        </div>
-                    </div>
-                    <div class="row gy-3">
-                        <div class="col-12">
-                            <h3>Informazioni contatto</h3>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label for="" class="form-label">Email</label>
-                            <p>{{ doctor.user.email }}</p>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label for="" class="form-label">Telefono</label>
-                            <p>{{ doctor.phone }}</p>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label for="" class="form-label">Pec</label>
-                            <p>{{ doctor.pec }}</p>
+                        <div class="col-12" v-if="detailsOpen">
+                            <div class="bg-main">
+                                <div class="row gy-3">
+                                    <div class="col-12">
+                                        <h3>Anagrafica dottore</h3>
+                                    </div>
+                                    
+                                    <div class="col-12 col-md-2">
+                                        <label for="" class="form-label"
+                                            >Data di nascita</label
+                                        >
+                                        <p>{{ formatDate(doctor.birthday) }}</p>
+                                    </div>
+                                    <div class="col-12 col-md-2">
+                                        <label for="" class="form-label"
+                                            >Città di nascita</label
+                                        >
+                                        <p>{{ doctor.birth_city }}</p>
+                                    </div>
+                                    <div class="col-12 col-md-2">
+                                        <label for="" class="form-label">Nazionalità</label>
+                                        <p>
+                                            {{
+                                                doctor.nationality === null
+                                                    ? "Nazionalità non valorizzata"
+                                                    : doctor.nationality.name
+                                            }}
+                                        </p>
+                                    </div>
+                                    <div class="col-12 col-md-2">
+                                        <label for="" class="form-label">Sesso</label>
+                                        <p>
+                                            {{ doctor.genre === "m" ? "Uomo" : "Donna" }}
+                                        </p>
+                                    </div>
+                                    <div class="col-12 col-md-2">
+                                        <label for="" class="form-label"
+                                            >Codice fiscale</label
+                                        >
+                                        <p>{{ doctor.personal_code }}</p>
+                                    </div>
+                                    <div class="col-12 col-md-2">
+                                        <label for="" class="form-label"
+                                            >Specializzazione</label
+                                        >
+                                        <p>{{ doctor.specialty.name }}</p>
+                                    </div>
+                                </div>
+                                <div class="row gy-3">
+                                    <div class="col-12">
+                                        <h3>Residenza</h3>
+                                    </div>
+                                    <div class="col-12 col-md-2">
+                                        <label for="" class="form-label"
+                                            >Città di residenza</label
+                                        >
+                                        <p>{{ doctor.city }}</p>
+                                    </div>
+                                    <div class="col-12 col-md-2">
+                                        <label for="" class="form-label">Indirizzo</label>
+                                        <p>{{ doctor.address }}</p>
+                                    </div>
+                                </div>
+                                <div class="row gy-3">
+                                    <div class="col-12">
+                                        <h3>Informazioni contatto</h3>
+                                    </div>
+                                    <div class="col-12 col-md-2">
+                                        <label for="" class="form-label">Email</label>
+                                        <p>{{ doctor.user.email }}</p>
+                                    </div>
+                                    <div class="col-12 col-md-2">
+                                        <label for="" class="form-label">Telefono</label>
+                                        <p>{{ doctor.phone }}</p>
+                                    </div>
+                                    <div class="col-12 col-md-2">
+                                        <label for="" class="form-label">Pec</label>
+                                        <p>{{ doctor.pec }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-8">
+                
+                <div class="col-12">
                     <Calendar
-                        :events="appointments"
-                        @event-click="handleEventClick"
-                        @date-click="handleDateClick"
+                        :appointments="doctor.appointments"
+                        :userIsSuperadmin="userIsSuperadmin"
+                        :doctors="doctors"
+                        :nurses="nurses"
+                        :patients="patients"
+                        :doctor="doctor"
                     />
                 </div>
+                
             </div>
         </div>
     </AuthenticatedLayout>
@@ -165,4 +164,6 @@ label {
 .border-right-red {
     border-right: 3px solid $mainRed;
 }
+
+
 </style>

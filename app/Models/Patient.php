@@ -2,12 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Patient extends Model
 {
-     protected $fillable = [
+    protected $fillable = [
         'name',
         'surname',
         'personal_code',
@@ -18,14 +17,28 @@ class Patient extends Model
         'phone',
         'email',
         'nationality_id',
-        'genre'
+        'genre',
     ];
 
-    public function users(){
+    protected $casts = [
+        'name' => 'encrypted',
+        'surname' => 'encrypted',
+        'personal_code' => 'encrypted',
+        'birth_city' => 'encrypted',
+        'city' => 'encrypted',
+        'address' => 'encrypted',
+        'phone' => 'encrypted',
+        'email' => 'encrypted',
+
+    ];
+
+    public function users()
+    {
         return $this->belongsTo(User::class);
     }
 
-    public function nationality(){
+    public function nationality()
+    {
         return $this->belongsTo(Nationality::class);
     }
 
@@ -33,5 +46,4 @@ class Patient extends Model
     {
         return $this->hasMany(Appointment::class);
     }
-
 }

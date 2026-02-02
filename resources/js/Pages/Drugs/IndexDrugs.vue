@@ -60,9 +60,15 @@ const handleInlineUpdate = (updatedData) => {
                     <input
                         type="text"
                         class="form-control"
+                        :class="{
+                            'is-invalid': form.errors.name,
+                        }"
                         placeholder="Inserisci il nome del medicinale"
                         v-model="form.name"
                     />
+                    <span v-if="form.errors.name" class="text-danger">{{
+                        form.errors.name
+                    }}</span>
                 </div>
                 <div class="me-3 w-50">
                     <label class="form-label">Prezzo unitario</label>
@@ -71,9 +77,15 @@ const handleInlineUpdate = (updatedData) => {
                         step="0.01"
                         min="0"
                         class="form-control"
+                        :class="{
+                            'is-invalid': form.errors.unit_price,
+                        }"
                         placeholder="Inserisci il prezzo unitario del medicinale"
                         v-model="form.unit_price"
                     />
+                    <span v-if="form.errors.unit_price" class="text-danger">{{
+                        form.errors.unit_price
+                    }}</span>
                 </div>
                 <div>
                     <button type="submit" class="btn-negative">Salva</button>
