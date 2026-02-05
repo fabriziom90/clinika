@@ -56,7 +56,11 @@ export const sidebarMenus = {
             title: "Gestione Specializzazioni",
             roles: ["superadmin"],
             path: '/',
-            icon: "fas fa-book-medical"
+            icon: "fas fa-book-medical",
+            links: [
+                { name: "Lista specializzazioni", route: "admin.specialties.index", path: '/', icon: "fas fa-list"},
+                { name: "Aggiungi specializzazione", route: "admin.specialties.create", path: '/create', icon: "fas fa-plus" },
+            ]
         }
     ],
     roles: [

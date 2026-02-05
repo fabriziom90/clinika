@@ -1,21 +1,21 @@
 <?php
 
+use App\Http\Controllers\Admin\AppointmentController;
+use App\Http\Controllers\Admin\ClinicRoomController;
+use App\Http\Controllers\Admin\DoctorController;
+use App\Http\Controllers\Admin\DrugController;
+use App\Http\Controllers\Admin\InventoryDrugController;
+use App\Http\Controllers\Admin\InventoryProductController;
+use App\Http\Controllers\Admin\NurseController;
+use App\Http\Controllers\Admin\PatientController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\ServiceController;
+use App\Http\Controllers\Admin\SpecialtyController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-
-use App\Http\Controllers\Admin\PatientController;
-use App\Http\Controllers\Admin\DoctorController;
-use App\Http\Controllers\Admin\NurseController;
-use App\Http\Controllers\Admin\SpecialtyController;
-use App\Http\Controllers\Admin\RoleController;
-use App\Http\Controllers\Admin\AppointmentController;
-use App\Http\Controllers\Admin\ClinicRoomController;
-use App\Http\Controllers\Admin\ProductController;
-use App\Http\Controllers\Admin\DrugController;
-use App\Http\Controllers\Admin\InventoryProductController;
-use App\Http\Controllers\Admin\InventoryDrugController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,6 +46,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('doctors', DoctorController::class);
         Route::resource('nurses', NurseController::class);
         Route::resource('specialties', SpecialtyController::class);
+        Route::resource('services', ServiceController::class);
         Route::resource('patients', PatientController::class);
         Route::resource('clinic-rooms', ClinicRoomController::class);
         Route::resource('products', ProductController::class);
@@ -59,7 +60,6 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('appointments', AppointmentController::class);
     });
 });
-
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -457,55 +457,6 @@ select {
     }
 }
 
-.custom-table {
-    width: 100%;
-    border-collapse: collapse;
-
-    tbody tr {
-        height: 120px;
-    }
-
-    tr:nth-child(2n + 1) {
-        background-color: #c5323771;
-    }
-
-    th,
-    td {
-        padding: 10px;
-        border: 1px solid $mainGrey;
-    }
-
-    td {
-        vertical-align: middle;
-        height: 100%;
-    }
-
-    th {
-        background: $mainRed;
-        color: #fff;
-        cursor: pointer;
-        vertical-align: top;
-    }
-
-    .column-filter {
-        display: block;
-        width: 100%;
-        margin-top: 5px;
-        font-size: 0.8em;
-    }
-
-    .actions {
-        display: flex;
-        gap: 8px;
-        justify-content: center;
-        align-items: center;
-
-        button {
-            cursor: pointer;
-        }
-    }
-}
-
 .pagination {
     display: flex;
     justify-content: flex-end;

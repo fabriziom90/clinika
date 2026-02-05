@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RoleSeeder extends Seeder
 {
@@ -28,8 +27,8 @@ class RoleSeeder extends Seeder
         // $superadmin->givePermissionTo(Permission::all());
         // $doctor->givePermissionTo(['manage patients', 'manage appointments']);
         // $nurse->givePermissionTo(['manage patients']);
-        
-         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // === ENTITÀ DELL'APPLICAZIONE ===
         $entities = [
@@ -40,16 +39,17 @@ class RoleSeeder extends Seeder
             'user' => 'Utente di sistema',
             'role' => 'Ruolo',
             'specialty' => 'Specializzazioni',
+            'service' => 'Prestazione sanitaria',
             'clinic-room' => 'Stanze Poliambulatorio',
-            'product'   => 'Prodotti sanitari',
-            'drug'    => 'Medicinali',
-            'inventory-product' => "Prodotti stanza"
+            'product' => 'Prodotti sanitari',
+            'drug' => 'Medicinali',
+            'inventory-product' => 'Prodotti stanza',
         ];
 
         // === AZIONI CRUD ===
         $actions = [
             'create' => 'Crea',
-            'view'   => 'Visualizza',
+            'view' => 'Visualizza',
             'update' => 'Modifica',
             'delete' => 'Elimina',
         ];
@@ -108,8 +108,8 @@ class RoleSeeder extends Seeder
             'patient.view',
             'appointment.view',
             'appointment.create',
-            'appointment.update'
+            'appointment.update',
         ]);
-    
+
     }
 }
