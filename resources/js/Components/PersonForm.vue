@@ -8,6 +8,7 @@ import { useToast } from "vue-toast-notification";
 const props = defineProps({
     nationalities: Array,
     specialties: { type: Array, default: () => [] },
+    services: Array,
     formType: { type: String, default: "patient" },
     person: { type: Object, default: null },
     inlineMode: { type: Boolean, default: false },
@@ -17,6 +18,7 @@ const emit = defineEmits(["savedInline"]);
 
 const onSaving = ref(false);
 const citiesList = ref(cities);
+
 const birthSearch = ref("");
 const residenceSearch = ref("");
 const showBirthSuggestions = ref(false);
@@ -45,6 +47,12 @@ const form = useForm({
     pec: "",
     vat: "",
     specialty_id: "",
+    services: [{
+        service_id: "",
+        price: "",
+        duration: "",
+        active: 1
+    }],
     user_id: "",
     inline: false,
 });
@@ -52,6 +60,16 @@ const form = useForm({
 onMounted(() => {
     if (!props.person) return;
     const person = props.person;
+
+    if (person.services && person.services.length) {
+        form.services = person.services.map(s => ({
+            service_id: s.id,
+            name: s.name,
+            price: s.pivot?.price ?? 0,
+            duration: s.pivot?.duration_minutes ?? 0,
+            active: s.pivot?.active ?? 1
+        }));
+    }
 
     form.defaults({ ...person });
 
@@ -73,6 +91,7 @@ onMounted(() => {
     form.pec = person.pec ?? "";
     form.vat = person.vat ?? "";
     form.specialty_id = person.specialty_id ?? "";
+    // form.services = person.services ?? [];
     form.user_id = person.user_id ?? "";
 });
 
@@ -93,12 +112,35 @@ const filteredResidenceCities = computed(() => {
         .slice(0, 10);
 });
 
+const filteredServices = computed(() => {
+    const specialty = props.specialties.find(s => s.id === form.specialty_id);
+    return specialty ? specialty.services : [];
+})
+
 const hideSuggestions = (type) => {
     setTimeout(() => {
         if (type === "birth") showBirthSuggestions.value = false;
         else if (type === "residence") showResidenceSuggestions.value = false;
     }, 200);
 };
+
+// Add service row 
+const addRow = () => {
+    form.services.push({
+        name: "",
+        duration: "",
+        price: "",
+        active: 1,
+    });
+};
+
+// remove service row
+const removeRow = (index) => {
+    if (form.services.length > 1) {
+        form.services.splice(index, 1);
+    }
+};
+
 
 // update field when suggestion clicked
 const selectBirthCity = (cityName) => {
@@ -138,6 +180,31 @@ watch(
     },
     { deep: true }
 );
+
+watch(() => form.specialty_id, (newVal, oldVal) => {
+     if (!props.person) {
+        form.services = [{
+            service_id: "",
+            price: "",
+            duration: "",
+            active: 1
+        }]
+    }
+})
+
+const onServiceChange = (index) => {
+    const row = form.services[index]
+    if (!row.service_id) return
+
+    const selected = filteredServices.value.find(
+        s => s.id === row.service_id
+    )
+    
+    if (selected) {
+        row.duration = selected.default_duration
+        row.price = selected.default_price
+    }
+}
 
 const handleSubmitForm = () => {
     onSaving.value = true;
@@ -473,6 +540,61 @@ const handleSubmitForm = () => {
                 <span v-if="form.errors.specialty_id" class="text-danger">{{
                     form.errors.specialty_id
                 }}</span>
+            </div>
+            <div class="col-12" v-if="formType === 'doctor'">
+                <hr>
+                <h3>Prestazioni medico</h3>
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <label for="" class="form-label"><strong>Prestazione</strong></label>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="" class="form-label"><strong>Prezzo</strong></label>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="" class="form-label"><strong>Durata (minuti)</strong></label>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="" class="form-label"><strong>Attivo</strong></label>
+                    </div>
+                </div>
+                <div v-for="service, index in form.services" :key="index" class="row gy-3 mb-3">
+                    <div class="row gy-2">
+                        <div class="col-md-4">
+                            <select name="" id="" class="form-select" v-model="service.service_id" @change="onServiceChange(index)">
+                                <option value="">Seleziona una specializzazione prima</option>
+                                <option :value="service.id" v-for="service in filteredServices" :key="service.id">{{ service.name }}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <input class="form-control" type="number" placeholder="Prezzo" v-model="service.price" />
+                        </div>
+                        <div class="col-md-2">
+                            <input class="form-control" type="number" placeholder="Durata" v-model="service.duration" />
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" v-model="service.active">
+                                <option :value="1">Attiva</option>
+                                <option :value="0">Disattiva</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">    
+                            <button
+                                v-if="form.services.length > 1"
+                                class="main-button"
+                                @click="removeRow(index)"
+                                type="button"
+                            >
+                                Rimuovi
+                            </button>
+                        </div>
+                    </div>
+
+                    
+                </div>
+                <button class="secondary-button mb-3" type="button" @click="addRow">
+                    + Aggiungi prestazione
+                </button>
             </div>
         </div>
         <div class="row mt-4">

@@ -23,7 +23,9 @@ const handleInlineUpdate = (updatedData) => {
         <div>
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2>Elenco specializzazioni</h2>
-                <Link :href="route('admin.specialties.create')" class="main-button">Aggiungi specializzazione</Link>
+                <div>
+                    <Link :href="route('admin.specialties.create')" class="main-button">Aggiungi specializzazione</Link>
+                </div>
             </div>
 
             

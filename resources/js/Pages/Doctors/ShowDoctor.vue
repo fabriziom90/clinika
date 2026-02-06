@@ -47,7 +47,7 @@ const showDetail = () => detailsOpen.value = !detailsOpen.value;
                             <h3>{{ doctor.user.name }} {{ doctor.user.surname }} <i class="fas" :class="detailsOpen == true ? 'fa-caret-up' : 'fa-caret-down'" @click="showDetail"></i></h3>
                         </div>
                         <div class="col-12" v-if="detailsOpen">
-                            <div class="bg-main">
+                            <div class="bg-main-red text-white">
                                 <div class="row gy-3">
                                     <div class="col-12">
                                         <h3>Anagrafica dottore</h3>
@@ -94,6 +94,7 @@ const showDetail = () => detailsOpen.value = !detailsOpen.value;
                                         <p>{{ doctor.specialty.name }}</p>
                                     </div>
                                 </div>
+                                <hr>
                                 <div class="row gy-3">
                                     <div class="col-12">
                                         <h3>Residenza</h3>
@@ -109,6 +110,7 @@ const showDetail = () => detailsOpen.value = !detailsOpen.value;
                                         <p>{{ doctor.address }}</p>
                                     </div>
                                 </div>
+                                <hr>
                                 <div class="row gy-3">
                                     <div class="col-12">
                                         <h3>Informazioni contatto</h3>
@@ -132,7 +134,7 @@ const showDetail = () => detailsOpen.value = !detailsOpen.value;
                     </div>
                 </div>
                 
-                <div class="col-12">
+                <div class="col-12 col-md-7">
                     <Calendar
                         :appointments="doctor.appointments"
                         :userIsSuperadmin="userIsSuperadmin"
@@ -142,7 +144,38 @@ const showDetail = () => detailsOpen.value = !detailsOpen.value;
                         :doctor="doctor"
                     />
                 </div>
-                
+                <div class="col-12 col-md-5">
+                    <div class="bg-main-red">
+                        <div class="row">
+                            <div class="col-12">
+                                <h3>Prestazioni</h3>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12 col-md-6">
+                                <label for="" class="form-label">Prestazione</label>
+                            </div>
+                            <div class="col-12 col-md-2">
+                                <label for="" class="form-label">Prezzo</label>
+                            </div>
+                            <div class="col-12 col-md-2">
+                                <label for="" class="form-label">Durata</label>
+                            </div>
+                            <div class="col-12 col-md-2">
+                                <label for="" class="form-label">Attivo</label>
+                            </div>
+                        </div>
+                        <div class="row text-white" v-for="service in doctor.services" :key="service.id">
+                            <div class="col-12 col-md-6">{{ service.name }}<br>{{ service.code}}</div>
+                            <div class="col-12 col-md-2">{{ service.pivot.price }}€</div>
+                            <div class="col-12 col-md-2">{{ service.pivot.duration_minutes}}</div>
+                            <div class="col-12 col-md-2">
+                                <span class="circle" :class="service.pivot.active ? 'is-active' : 'not-active'"><i class="fas" :class="service.pivot.active ? 'fa-check' : 'fa-times'"></i></span>
+                            </div>
+                            <hr>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </AuthenticatedLayout>
@@ -156,6 +189,13 @@ label {
     color: $mainRed;
 }
 
+.bg-main-red{
+    padding: 20px;
+    h3, label, hr{
+        color: #fff;
+    }
+}
+
 label {
     border-bottom: 1px solid $mainRed;
     font-weight: bold;
@@ -165,5 +205,17 @@ label {
     border-right: 3px solid $mainRed;
 }
 
+.circle{
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 50%;
+    
+    &.is-active{
+        color: green;
+    }
 
+    &.not-active{
+        color: $mainRed;
+    }
+}
 </style>

@@ -7,6 +7,7 @@ import { useToast } from "vue-toast-notification";
 const props = defineProps({
     nationalities: Array,
     specialties: Array,
+    services: Array,
     doctor: Object,
 });
 </script>
@@ -19,6 +20,7 @@ const props = defineProps({
         <PersonForm
             :nationalities="nationalities"
             :specialties="specialties"
+            :services="services"
             formType="doctor"
             :person="doctor"
         ></PersonForm>

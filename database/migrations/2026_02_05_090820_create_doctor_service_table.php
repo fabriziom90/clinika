@@ -13,7 +13,15 @@ return new class extends Migration
     {
         Schema::create('doctor_service', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('doctor_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('service_id')->constrained()->cascadeOnDelete();
+            $table->float('price');
+            $table->unsignedInteger('duration_minutes');
+            $table->boolean('active');
+
             $table->timestamps();
+
+            $table->unique(['doctor_id', 'service_id']);
         });
     }
 

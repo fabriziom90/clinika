@@ -21,23 +21,31 @@ class Doctor extends Model
         'phone',
         'pec',
         'genre',
-        'nationality_id'
+        'nationality_id',
     ];
 
-    public function user(){
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
 
-    public function nationality(){
+    public function nationality()
+    {
         return $this->belongsTo(Nationality::class);
     }
 
-    public function specialty(){
+    public function specialty()
+    {
         return $this->belongsTo(Specialty::class);
     }
 
     public function appointments()
     {
         return $this->hasMany(Appointment::class);
+    }
+
+    public function services()
+    {
+        return $this->belongsToMany(Service::class)->withPivot(['price', 'duration_minutes', 'active'])->withTimestamps();
     }
 }

@@ -63,7 +63,7 @@ class DoctorController extends Controller
     public function create()
     {
         $nationalities = Nationality::all();
-        $specialties = Specialty::all();
+        $specialties = Specialty::with(['services'])->get();
 
         return Inertia::render('Doctors/CreateDoctor', ['nationalities' => $nationalities, 'specialties' => $specialties]);
     }
@@ -75,6 +75,7 @@ class DoctorController extends Controller
     {
         $form_data = $request->validated();
 
+        $servicesSync = [];
         $password = Str::random(12);
         $user = [
             'name' => $form_data['name'],
@@ -101,6 +102,18 @@ class DoctorController extends Controller
             'nationality_id' => $form_data['nationality_id'],
         ]);
 
+        foreach ($form_data['services'] as $service) {
+            if (! empty($service['service_id'])) {
+                $servicesSync[$service['service_id']] = [
+                    'price' => $service['price'],
+                    'duration_minutes' => $service['duration'],
+                    'active' => $service['active'] ?? 1,
+                ];
+            }
+        }
+
+        $doctor->services()->sync($servicesSync);
+
         $token = Password::createToken($newUser);
         Mail::to($newUser->email)->send(new PersonSetPasswordMail($newUser, $token));
 
@@ -119,7 +132,7 @@ class DoctorController extends Controller
     {
         $user = Auth::user();
 
-        $doctor = Doctor::with(['user', 'nationality', 'specialty', 'appointments', 'appointments.patient'])->findOrFail($doctor->id);
+        $doctor = Doctor::with(['user', 'nationality', 'specialty', 'appointments', 'appointments.patient', 'services'])->findOrFail($doctor->id);
         $doctors = Doctor::all();
         $patients = Patient::all();
         $nurses = Nurse::all();
@@ -134,9 +147,22 @@ class DoctorController extends Controller
      */
     public function edit(Doctor $doctor)
     {
-        $doctor->load('user');
+        $doctor->load(['user', 'services' => function ($service) {
+            $service->select('services.id', 'name')->withPivot('price', 'duration_minutes', 'price');
+        }]);
+
+        $doctor->services = $doctor->services->map(function ($service) {
+            return [
+                'service_id' => $service->id,
+                'name' => $service->name,
+                'price' => $service->pivot->price,
+                'duration_minutes' => $service->pivot->duration_minutes,
+                'active' => $service->pivot->active,
+            ];
+        });
+
         $nationalities = Nationality::all();
-        $specialties = Specialty::all();
+        $specialties = Specialty::with(['services'])->get();
 
         return Inertia::render('Doctors/EditDoctor', ['doctor' => $doctor, 'nationalities' => $nationalities, 'specialties' => $specialties]);
     }
@@ -147,6 +173,8 @@ class DoctorController extends Controller
     public function update(UpdateDoctorRequest $request, Doctor $doctor)
     {
         $form_data = $request->validated();
+
+        $servicesSync = [];
 
         $doctor->user->update([
             'name' => $form_data['name'],
@@ -168,6 +196,18 @@ class DoctorController extends Controller
             'specialty_id' => $form_data['specialty_id'],
             'nationality_id' => $form_data['nationality_id'],
         ]);
+
+        foreach ($form_data['services'] as $service) {
+            if (! empty($service['service_id'])) {
+                $servicesSync[$service['service_id']] = [
+                    'price' => $service['price'],
+                    'duration_minutes' => $service['duration'],
+                    'active' => $service['active'] ?? 1,
+                ];
+            }
+        }
+
+        $doctor->services()->sync($servicesSync);
 
         return redirect()->route('admin.doctors.index')->with([
             'toast' => [
