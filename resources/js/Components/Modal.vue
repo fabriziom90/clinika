@@ -39,7 +39,7 @@ const displayName = (item) => {
     }
 
     // case product or drugs
-    if(item.product.name || item.drug.name){
+    if(item.product?.name || item.drug?.name){
         return item.product ? item.product.name : item.drug.name;
     }
 

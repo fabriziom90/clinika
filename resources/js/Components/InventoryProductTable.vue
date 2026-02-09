@@ -240,7 +240,6 @@ const confirmDelete = () => {
             <!-- QUANTITÀ EDIT INLINE -->
             <td>
               <div class="d-flex align-items-center justify-content-between">
-                {{ console.log(checkExpirationDate(ip.expiry_date)) }}
                 <span
                   v-if="!editProductQuantity || actualProduct !== ip.id"
                   :class="ip.units <= 1 ? 'text-danger fw-bold' : ''"
