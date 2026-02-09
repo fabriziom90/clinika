@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Appointment;
-use App\Models\Doctor;
-use App\Models\Patient;
-use App\Models\Nurse;
-use App\Models\Nationality;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentRequest;
-use App\Http\Controllers\Controller;
+use App\Models\Appointment;
+use App\Models\Doctor;
+use App\Models\Nationality;
+use App\Models\Nurse;
+use App\Models\Patient;
 use Illuminate\Support\Facades\Auth;
 
 class AppointmentController extends Controller
-{   
+{
     /**
      * Display a listing of the resource.
      */
@@ -22,20 +22,21 @@ class AppointmentController extends Controller
         $user = Auth::user();
 
         if ($user->doctor) {
-        $appointments = Appointment::with(['doctor.user', 'nurse.user', 'patient'])
-            ->where('doctor_id', $user->doctor->id)
-            ->get();
+            $appointments = Appointment::with(['doctor.user', 'nurse.user', 'patient', 'service'])
+                ->where('doctor_id', $user->doctor->id)
+                ->get();
         } elseif ($user->nurse) {
-            $appointments = Appointment::with(['doctor.user', 'nurse.user', 'patient'])
+            $appointments = Appointment::with(['doctor.user', 'nurse.user', 'patient', 'service'])
                 ->where('nurse_id', $user->nurse->id)
                 ->get();
         } else {
             // Admin o altri ruoli autorizzati
-            $appointments = Appointment::with(['doctor.user', 'nurse.user', 'patient'])->get();
+            $appointments = Appointment::with(['doctor.user', 'nurse.user', 'patient', 'service'])->get();
+
         }
-        
+
         $nationalities = Nationality::all();
-        $doctors = Doctor::with('user')->get();
+        $doctors = Doctor::with(['user', 'services'])->get();
         $nurses = Nurse::with('user')->get();
         $patients = Patient::all();
 
@@ -43,9 +44,9 @@ class AppointmentController extends Controller
             'appointments' => $appointments,
             'userIsSuperadmin' => $user->hasRole('superadmin'),
             'doctors' => $doctors,
-            'nurses'  => $nurses,
-            'patients'  => $patients,
-            'nationalities'  => $nationalities 
+            'nurses' => $nurses,
+            'patients' => $patients,
+            'nationalities' => $nationalities,
         ]);
 
     }
@@ -64,20 +65,20 @@ class AppointmentController extends Controller
     public function store(StoreAppointmentRequest $request)
     {
         $form_data = $request->validated();
-        
-        $startTime = \Carbon\Carbon::parse($form_data['start_time']);
-        $duration  = $form_data['duration'] ?? 30; // minuti
-        $endTime   = $startTime->copy()->addMinutes($duration);
 
-        $appointment = new Appointment();
-        $appointment->doctor_id  = $form_data['doctor_id'];
-        $appointment->nurse_id   = $form_data['nurse_id'];
+        $startTime = \Carbon\Carbon::parse($form_data['start_time']);
+        $duration = $form_data['duration'] ?? 30; // minuti
+        $endTime = $startTime->copy()->addMinutes($duration);
+
+        $appointment = new Appointment;
+        $appointment->doctor_id = $form_data['doctor_id'];
+        $appointment->nurse_id = $form_data['nurse_id'];
         $appointment->patient_id = $form_data['patient_id'];
-        $appointment->title      = $form_data['title'];
+        $appointment->service_id = $form_data['service_id'];
         $appointment->start_time = $startTime;
-        $appointment->end_time   = $endTime;
-        $appointment->duration_minutes   = $duration;
-        $appointment->notes      = $form_data['notes'] ?? null;
+        $appointment->end_time = $endTime;
+        $appointment->duration_minutes = $duration;
+        $appointment->notes = $form_data['notes'] ?? null;
 
         $appointment->save();
 
@@ -85,10 +86,9 @@ class AppointmentController extends Controller
             'toast' => [
                 'type' => 'success',
                 'message' => 'Appuntamento creato correttamente.',
-            ]
+            ],
         ]);
     }
-    
 
     /**
      * Display the specified resource.
@@ -112,19 +112,19 @@ class AppointmentController extends Controller
     public function update(UpdateAppointmentRequest $request, Appointment $appointment)
     {
         $form_data = $request->validated();
-        
-        $startTime = \Carbon\Carbon::parse($form_data['start_time']);
-        $duration  = $form_data['duration'] ?? 30; // minuti
-        $endTime   = $startTime->copy()->addMinutes($duration);
 
-        $appointment->doctor_id  = $form_data['doctor_id'];
-        $appointment->nurse_id   = $form_data['nurse_id'];
+        $startTime = \Carbon\Carbon::parse($form_data['start_time']);
+        $duration = $form_data['duration'] ?? 30; // minuti
+        $endTime = $startTime->copy()->addMinutes($duration);
+
+        $appointment->doctor_id = $form_data['doctor_id'];
+        $appointment->nurse_id = $form_data['nurse_id'];
         $appointment->patient_id = $form_data['patient_id'];
-        $appointment->title      = $form_data['title'];
+        $appointment->service_id = $form_data['service_id'];
         $appointment->start_time = $startTime;
-        $appointment->end_time   = $endTime;
-        $appointment->duration_minutes   = $duration;
-        $appointment->notes      = $form_data['notes'] ?? null;
+        $appointment->end_time = $endTime;
+        $appointment->duration_minutes = $duration;
+        $appointment->notes = $form_data['notes'] ?? null;
 
         $appointment->save();
 
@@ -132,7 +132,7 @@ class AppointmentController extends Controller
             'toast' => [
                 'type' => 'success',
                 'message' => 'Appuntamento modificato correttamente.',
-            ]
+            ],
         ]);
     }
 
@@ -144,10 +144,10 @@ class AppointmentController extends Controller
         $appointment->delete();
 
         return redirect()->route('admin.appointments.index')->with([
-                'toast' => [
-                    'type' => 'success',
-                    'message' => 'Appuntamento cancellato correttamente'
-                ]
-            ]);
+            'toast' => [
+                'type' => 'success',
+                'message' => 'Appuntamento cancellato correttamente',
+            ],
+        ]);
     }
 }

@@ -20,4 +20,9 @@ class Service extends Model
     {
         $this->belongsToMany(Doctor::class)->withPivot(['price', 'duration_minutes', 'active']);
     }
+
+    public function appointment()
+    {
+        $this->belongsTo(Appointment::class);
+    }
 }

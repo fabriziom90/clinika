@@ -38,7 +38,7 @@ const formatHour = (date) => {
                 </div>
                 <div class="modal-body">
                     <h3>
-                        {{ item.title }}
+                        {{ item.service?.name }} - {{ item.service?.code}}
                     </h3>
                     <div class="infos">
                         <strong>Giorno ed ora</strong>:

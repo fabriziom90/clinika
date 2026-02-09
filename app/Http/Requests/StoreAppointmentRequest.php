@@ -22,35 +22,43 @@ class StoreAppointmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'doctor_id'   => ['nullable', 'exists:doctors,id'],
-            'nurse_id'    => ['nullable', 'exists:nurses,id'],
-            'patient_id'  => ['required', 'exists:patients,id'],
-            'title'       => ['required', 'string', 'max:255'],
-            'start_time'  => ['required', 'date'],
-            'duration'    => ['required', 'integer', 'min:1'],
-            'notes'       => ['nullable', 'string'],
+            'date' => ['required', 'date'],
+            'start_time' => ['required', 'date'],
+            'doctor_id' => ['required', 'exists:doctors,id'],
+            'service_id' => ['required', 'exists:services,id'],
+            'patient_id' => ['required', 'exists:patients,id'],
+            'nurse_id' => ['nullable', 'exists:nurses,id'],
+            'duration' => ['required', 'integer', 'min:1'],
+            'notes' => ['nullable', 'string', 'max:2000'],
         ];
     }
 
     public function messages()
     {
         return [
-            'doctor_id.exists'  => 'Il medico selezionato non esiste.',
-            'nurse_id.exists'   => 'L’infermiere selezionato non esiste.',
-            'patient_id.required'  => 'Il paziente è obbligatorio',
-            'patient_id.exists'  => 'Il paziente selezionato non esiste.',
-            'title.required'    => 'Il titolo dell’appuntamento è obbligatorio.',
-            'title.string'      => 'Il titolo deve essere un testo valido.',
-            'title.max'         => 'Il titolo non può superare i 255 caratteri.',
+            'date.required' => 'La data dell’appuntamento è obbligatoria.',
+            'date.date' => 'La data dell’appuntamento non è valida.',
 
-            'start_time.required' => 'La data e ora di inizio sono obbligatorie.',
-            'start_time.date'     => 'La data di inizio non è valida.',
+            'start_time.required' => 'L’orario di inizio è obbligatorio.',
+            'start_time.date' => 'L’orario di inizio non è valido.',
 
-            'duration.required'   => 'La durata è obbligatoria.',
-            'duration.integer'    => 'La durata deve essere un numero intero.',
-            'duration.min'        => 'La durata deve essere almeno di 1 minuto.',
+            'doctor_id.required' => 'Seleziona un medico.',
+            'doctor_id.exists' => 'Il medico selezionato non è valido.',
 
-            'notes.string'        => 'Le note devono essere un testo valido.',
+            'service_id.required' => 'Seleziona una prestazione.',
+            'service_id.exists' => 'La prestazione selezionata non è valida.',
+
+            'patient_id.required' => 'Seleziona un paziente.',
+            'patient_id.exists' => 'Il paziente selezionato non è valido.',
+
+            'nurse_id.exists' => 'L’infermiere selezionato non è valido.',
+
+            'duration.required' => 'La durata è obbligatoria.',
+            'duration.integer' => 'La durata deve essere un numero.',
+            'duration.min' => 'La durata deve essere di almeno 1 minuto.',
+
+            'notes.string' => 'Le note devono essere un testo.',
+            'notes.max' => 'Le note non possono superare i 2000 caratteri.',
         ];
     }
 }
