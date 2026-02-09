@@ -225,8 +225,6 @@ const displayValue = (item, key) => {
         return formatDate(value);
     }
 
-    console.log(key);
-
     return value ?? "";
 };
 

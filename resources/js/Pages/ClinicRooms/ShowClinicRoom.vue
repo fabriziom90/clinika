@@ -1,9 +1,11 @@
 <script setup>
 import { Head, useForm, Link } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import Table from "@/Components/Table.vue";
+import InventoryDrugTable from "@/Components/InventoryDrugTable.vue";
+import InventoryProductTable from "@/Components/InventoryProductTable.vue";
 import { ref } from "vue";
 import { useToast } from "vue-toast-notification";
+import ExportToPdfButton from "@/Components/ExportToPdfButton.vue";
 
 const props = defineProps({
     clinicRoom: Object,
@@ -11,8 +13,9 @@ const props = defineProps({
     clinicRoomDrugs: Array,
     products: Array,
     drugs: Array,
-    columns: Array,
 });
+
+const pdfColumns = ["Nome", "Quantità", "Scadenza"];
 
 const $toast = useToast();
 
@@ -39,9 +42,10 @@ const handleSubmitProductForm = () => {
         onSuccess: (page) => {
             // aggiorna la tabella con i nuovi dati passati dal controller
             localInventoryProducts.value = page.props.inventoryProducts;
-
-            form.reset();
-            showAddProductForm.value = false;
+            
+            formProduct.product_id = "";
+            formProduct.expiry_date = "";
+            formProduct.units = "";
         },
         onError: (errors) => {
             $toast.error("Errore durante il salvataggio", {
@@ -58,8 +62,9 @@ const handleSubmitDrugForm = () => {
             // aggiorna la tabella con i nuovi dati passati dal controller
             localInventoryDrugs.value = page.props.inventoryDrugs;
 
-            form.reset();
-            showAddDrugForm.value = false;
+            formDrug.drug_id = "";
+            formDrug.expiry_date = "";
+            formDrug.units = "";
         },
         onError: (errors) => {
             $toast.error("Errore durante il salvataggio", {
@@ -70,8 +75,9 @@ const handleSubmitDrugForm = () => {
     });
 };
 
-const handleInlineUpdate = (updatedData) => {
-    localInventoryProducts.value = updatedData;
+const openModal = (currentType) => {
+  isModalOpen.value = true;
+  type.value = currentType;
 };
 </script>
 
@@ -190,26 +196,15 @@ const handleInlineUpdate = (updatedData) => {
             </form>
         </div>
         <div class="row">
-            <div class="col-12 col-md-6">
-                <h3>Prodotti</h3>
-                <Table
-                    :items="clinicRoomProducts"
-                    :columns="columns"
-                    baseRoute="admin.inventory-products"
-                    :editableColumns="['expiry_date', 'units']"
-                    @updated="handleInlineUpdate"
-                />
-            </div>
-            <div class="col-12 col-md-6">
-                <h3>Medicinali</h3>
-                <Table
-                    :items="clinicRoomDrugs"
-                    :columns="columns"
-                    baseRoute="admin.inventory-drugs"
-                    :editableColumns="['expiry_date', 'units']"
-                    @updated="handleInlineUpdate"
-                />
-            </div>
+            <InventoryProductTable
+                :items="clinicRoomProducts"
+                
+            />
+        
+            <InventoryDrugTable
+                :items="clinicRoomDrugs"
+                
+            />
         </div>
     </AuthenticatedLayout>
 </template>

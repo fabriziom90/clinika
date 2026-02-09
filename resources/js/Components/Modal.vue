@@ -28,14 +28,19 @@ const confirmDelete = () => {
 const displayName = (item) => {
     if (!item) return "";
 
-    // caso pazienti, medici, infermieri
+    // case patient, nurses, doctors
     if (item.name && item.surname) {
         return `${item.name} ${item.surname}`;
     }
 
-    // caso entità con solo 'name'
+    // caso only name
     if (item.name) {
         return item.name;
+    }
+
+    // case product or drugs
+    if(item.product.name || item.drug.name){
+        return item.product ? item.product.name : item.drug.name;
     }
 
     // fallback: mostra eventuale titolo, email, ecc.

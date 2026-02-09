@@ -52,6 +52,10 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('products', ProductController::class);
         Route::resource('drugs', DrugController::class);
         Route::resource('inventory-products', InventoryProductController::class);
+        Route::put('inventory-products/{inventoryProduct}/update-quantity', [InventoryProductController::class, 'updateQuantity'])->name('inventory-products.update-quantity');
+        Route::put('inventory-products/{inventoryProduct}/update-expiration', [InventoryProductController::class, 'updateExpiryDate'])->name('inventory-products.update-expiration');
+        Route::put('inventory-drugs/{inventoryDrug}/update-quantity', [InventoryDrugController::class, 'updateQuantity'])->name('inventory-drugs.update-quantity');
+        Route::put('inventory-drugs/{inventoryDrug}/update-expiration', [InventoryDrugController::class, 'updateExpiryDate'])->name('inventory-drugs.update-expiration');
         Route::resource('inventory-drugs', InventoryDrugController::class);
         Route::post('/doctors/{id}/send-reset-email', [DoctorController::class, 'sendResetEmail'])->name('doctors.sendResetEmail');
         Route::post('/nurses/{id}/send-reset-email', [NurseController::class, 'sendResetEmail'])->name('nurses.sendResetEmail');

@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\ClinicRoom;
-use App\Models\InventoryProduct;
-use App\Models\InventoryDrug;
-use App\Models\Product;
-use App\Models\Drug;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreClinicRoomRequest;
 use App\Http\Requests\UpdateClinicRoomRequest;
-use App\Http\Controllers\Controller;
+use App\Models\ClinicRoom;
+use App\Models\Drug;
+use App\Models\InventoryDrug;
+use App\Models\InventoryProduct;
+use App\Models\Product;
 use Inertia\Inertia;
 
 class ClinicRoomController extends Controller
@@ -25,10 +25,11 @@ class ClinicRoomController extends Controller
     public function index()
     {
         $clinicRooms = ClinicRoom::all();
-        return Inertia::render('ClinicRooms/IndexClinicRooms', [ 'clinicRooms' => $clinicRooms, 'columns' => [
-                'id'    => 'ID',
-                'name'  => 'Nome',
-            ]]);
+
+        return Inertia::render('ClinicRooms/IndexClinicRooms', ['clinicRooms' => $clinicRooms, 'columns' => [
+            'id' => 'ID',
+            'name' => 'Nome',
+        ]]);
     }
 
     /**
@@ -46,15 +47,15 @@ class ClinicRoomController extends Controller
     {
         $form_data = $request->validated();
 
-        $newClinicRoom = new ClinicRoom();
+        $newClinicRoom = new ClinicRoom;
         $newClinicRoom->name = $form_data['name'];
         $newClinicRoom->save();
 
         return redirect()->route('admin.clinic-rooms.index')->with([
             'toast' => [
                 'type' => 'success',
-                'message' => "Stanza creata con successo."
-            ]
+                'message' => 'Stanza creata con successo.',
+            ],
         ]);
     }
 
@@ -62,26 +63,27 @@ class ClinicRoomController extends Controller
      * Display the specified resource.
      */
     public function show(ClinicRoom $clinicRoom)
-    {   
+    {
+
         $clinicRoomProducts = InventoryProduct::where('room_id', $clinicRoom->id)->with('product')->get();
+        // dd($clinicRoomProducts);
         $clinicRoomDrugs = InventoryDrug::where('room_id', $clinicRoom->id)->with('drug')->get();
         $products = Product::all();
         $drugs = Drug::all();
-        
 
         return Inertia::render('ClinicRooms/ShowClinicRoom', [
             'clinicRoom' => $clinicRoom,
             'clinicRoomProducts' => $clinicRoomProducts,
-            'clinicRoomDrugs'   => $clinicRoomDrugs,
-            'products'  => $products,
-            'drugs'     => $drugs,
-            'columns'   => [
-                'id'    => 'ID',
+            'clinicRoomDrugs' => $clinicRoomDrugs,
+            'products' => $products,
+            'drugs' => $drugs,
+            'columns' => [
+                'id' => 'ID',
                 'item_name' => 'Nome',
                 'expiry_date' => 'Data Scadenza',
                 'units' => 'Quantità',
-                'price' => 'Prezzo'
-            ]
+                'price' => 'Prezzo',
+            ],
         ]);
     }
 
@@ -106,8 +108,8 @@ class ClinicRoomController extends Controller
         return redirect()->route('admin.clinic-rooms.index')->with([
             'toast' => [
                 'type' => 'success',
-                'message' => "Stanza modificata con successo."
-            ]
+                'message' => 'Stanza modificata con successo.',
+            ],
         ]);
     }
 
@@ -121,8 +123,8 @@ class ClinicRoomController extends Controller
         return redirect()->route('admin.clinic-rooms.index')->with([
             'toast' => [
                 'type' => 'success',
-                'message' => "Stanza cancellata con successo."
-            ]
+                'message' => 'Stanza cancellata con successo.',
+            ],
         ]);
     }
 }

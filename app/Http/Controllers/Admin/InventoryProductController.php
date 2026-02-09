@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\InventoryProduct;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreInventoryProductRequest;
 use App\Http\Requests\UpdateInventoryProductRequest;
-use App\Http\Controllers\Controller;
+use App\Models\InventoryProduct;
+use Illuminate\Http\Request;
 
 class InventoryProductController extends Controller
 {
@@ -31,19 +32,19 @@ class InventoryProductController extends Controller
     public function store(StoreInventoryProductRequest $request)
     {
         $form_data = $request->validated();
-        
+
         $checkProduct = InventoryProduct::where('product_id', $form_data['product_id'])->get();
-        
-        if(count($checkProduct) > 0){
+
+        if (count($checkProduct) > 0) {
             return redirect()->route('admin.clinic-rooms.show', ['clinic_room' => $form_data['room_id']])->with([
                 'toast' => [
                     'type' => 'error',
-                    'message' => 'E\' già presente questo prodotto nella stanza.'
-                ]
+                    'message' => 'E\' già presente questo prodotto nella stanza.',
+                ],
             ]);
         }
-        
-        $newInventoryProduct = new InventoryProduct();
+
+        $newInventoryProduct = new InventoryProduct;
         $newInventoryProduct->room_id = $form_data['room_id'];
         $newInventoryProduct->product_id = $form_data['product_id'];
         $newInventoryProduct->expiry_date = $form_data['expiry_date'];
@@ -54,8 +55,8 @@ class InventoryProductController extends Controller
         return redirect()->route('admin.clinic-rooms.show', ['clinic_room' => $form_data['room_id']])->with([
             'toast' => [
                 'type' => 'success',
-                'message' => 'Prodotto salvato con successo all\'interno della stanza.'
-            ]
+                'message' => 'Prodotto salvato con successo all\'interno della stanza.',
+            ],
         ]);
     }
 
@@ -79,7 +80,7 @@ class InventoryProductController extends Controller
      * Update the specified resource in storage.
      */
     public function update(UpdateInventoryProductRequest $request, InventoryProduct $inventoryProduct)
-    {   
+    {
         $form_data = $request->validated();
 
         $inventoryProduct->expiry_date = $form_data['expiry_date'];
@@ -90,8 +91,58 @@ class InventoryProductController extends Controller
         return redirect()->route('admin.clinic-rooms.show', ['clinic_room' => $inventoryProduct->room_id])->with([
             'toast' => [
                 'type' => 'success',
-                'message' => "Prodotto modificato correttamente."
+                'message' => 'Prodotto modificato correttamente.',
+            ],
+        ]);
+    }
+
+    public function updateQuantity(Request $request, InventoryProduct $inventoryProduct)
+    {
+
+        $form_data = $request->validate(
+            [
+                'quantity' => ['required'],
+            ],
+            [
+                'quantity.required' => 'La data di scadenza è obbligatoria.',
+                'quantity.date' => 'La data di scadenza deve essere una data valida.',
             ]
+        );
+
+        $inventoryProduct->units = $form_data['quantity'];
+
+        $inventoryProduct->update();
+
+        return redirect()->route('admin.clinic-rooms.show', ['clinic_room' => $inventoryProduct->room_id])->with([
+            'toast' => [
+                'type' => 'success',
+                'message' => 'Prodotto modificato correttamente.',
+            ],
+        ]);
+    }
+
+    public function updateExpiryDate(Request $request, InventoryProduct $inventoryProduct)
+    {
+
+        $form_data = $request->validate(
+            [
+                'expirationDate' => ['required', 'date'],
+            ],
+            [
+                'expirationDate.required' => 'La data di scadenza è obbligatoria.',
+                'expirationDate.date' => 'La data di scadenza deve essere una data valida.',
+            ]
+        );
+
+        $inventoryProduct->expiry_date = $form_data['expirationDate'];
+
+        $inventoryProduct->update();
+
+        return redirect()->route('admin.clinic-rooms.show', ['clinic_room' => $inventoryProduct->room_id])->with([
+            'toast' => [
+                'type' => 'success',
+                'message' => 'Scadenza aggiornata correttamente.',
+            ],
         ]);
     }
 
@@ -100,13 +151,15 @@ class InventoryProductController extends Controller
      */
     public function destroy(InventoryProduct $inventoryProduct)
     {
+        $clinicRoom = $inventoryProduct->room;
+
         $inventoryProduct->delete();
 
-        return redirect()->route('admin.clinic-rooms.show', ['clinic_room' => $inventoryProduct->room_id])->with([
+        return redirect()->route('admin.clinic-rooms.show', ['clinic_room' => $clinicRoom])->with([
             'toast' => [
                 'type' => 'success',
-                'message' => "Prodotto cancellato correttamente."
-            ]
+                'message' => 'Prodotto cancellato correttamente.',
+            ],
         ]);
     }
 }

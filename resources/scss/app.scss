@@ -65,6 +65,12 @@ hr {
     @include button-link($mainBlue, $mainBlueHover, #fff);
 }
 
+.not-button{
+    color: red;
+    background-color: transparent;
+    border: none;
+}
+
 input.form-check-inline{
     height: 30px;
     width: 30px;
