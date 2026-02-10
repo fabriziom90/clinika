@@ -54,6 +54,8 @@ const filteredLogs = computed(() => props.logs.data);
             <span
               class="badge"
               :class="{
+                'bg-primary': log.event === 'viewed' || log.event === 'viewed all patients',
+                
                 'bg-success': log.event === 'login',
                 'bg-secondary': log.event === 'logout',
                 'bg-danger': log.event === 'login_failed',

@@ -3,19 +3,19 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Patient;
-use App\Models\Doctor;
-use App\Models\Nurse;
-use App\Models\Nationality;
-use App\Models\Appointment;
 use App\Http\Requests\StorePatientRequest;
 use App\Http\Requests\UpdatePatientRequest;
-use Inertia\Inertia;
-use Inertia\Response;
+use App\Models\Appointment;
+use App\Models\Doctor;
+use App\Models\Nationality;
+use App\Models\Nurse;
+use App\Models\Patient;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
+use OwenIt\Auditing\Models\Audit;
 
 class PatientController extends Controller
-{   
+{
     public function __construct()
     {
         $this->authorizeResource(\App\Models\Patient::class, 'patient');
@@ -25,19 +25,41 @@ class PatientController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {   
-        $patients = Patient::all();
-        return Inertia::render('Patients/IndexPatients', 
+    {
+        $user = Auth::user();
+
+        if ($user->doctor) {
+            $patients = Patient::whereHas('appointments', function ($query) use ($user) {
+                $query->where('doctor_id', $user->doctor->id);
+            })->get();
+
+        } else {
+            $patients = Patient::all();
+        }
+
+        Audit::forceCreate([
+            'user_id' => auth()->id(),
+            'user_type' => get_class(auth()->user()),
+            'event' => 'viewed all patients',
+            'auditable_type' => 'App\Models\Patient',
+            'auditable_id' => null,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'old_values' => [],
+            'new_values' => [],
+        ]);
+
+        return Inertia::render('Patients/IndexPatients',
             [
-                'patients' => $patients, 
+                'patients' => $patients,
                 'columns' => [
-                    'id'    => 'ID',
-                    'name'  => 'Nome',
-                    'surname'   => 'Cognome',
-                    'email'     => 'Email',
-                    'phone'     => 'Telefono',
-                    'created_at'    => 'Inserito il'
-                ] 
+                    'id' => 'ID',
+                    'name' => 'Nome',
+                    'surname' => 'Cognome',
+                    'email' => 'Email',
+                    'phone' => 'Telefono',
+                    'created_at' => 'Inserito il',
+                ],
             ]);
     }
 
@@ -45,8 +67,9 @@ class PatientController extends Controller
      * Show the form for creating a new resource.
      */
     public function create()
-    {   
+    {
         $nationalities = Nationality::all();
+
         return Inertia::render('Patients/CreatePatient', ['nationalities' => $nationalities]);
     }
 
@@ -57,7 +80,7 @@ class PatientController extends Controller
     {
         $form_data = $request->validated();
 
-        $newPatient = new Patient();
+        $newPatient = new Patient;
         $newPatient->fill($form_data);
 
         $newPatient->save();
@@ -66,13 +89,13 @@ class PatientController extends Controller
             $doctors = Doctor::with('user')->get();
             $nurses = Nurse::with('nurse')->get();
             $nationalities = Nationality::all();
-            
+
             $user = Auth::user();
 
             if ($user->doctor) {
-            $appointments = Appointment::with(['doctor.user', 'nurse.user', 'patient'])
-                ->where('doctor_id', $user->doctor->id)
-                ->get();
+                $appointments = Appointment::with(['doctor.user', 'nurse.user', 'patient'])
+                    ->where('doctor_id', $user->doctor->id)
+                    ->get();
             } elseif ($user->nurse) {
                 $appointments = Appointment::with(['doctor.user', 'nurse.user', 'patient'])
                     ->where('nurse_id', $user->nurse->id)
@@ -88,11 +111,10 @@ class PatientController extends Controller
                 'patients' => Patient::all(),
                 'nurses' => $nurses,
                 'nationalities' => $nationalities,
-                'appointments'  => $appointments,
+                'appointments' => $appointments,
                 'userIsSuperadmin' => auth()->user()->hasRole('superadmin'),
             ]);
-        }
-        else{
+        } else {
 
             return redirect()->route('admin.patients.index')->with([
                 'toast' => [
@@ -106,9 +128,21 @@ class PatientController extends Controller
      * Display the specified resource.
      */
     public function show(Patient $patient)
-    {   
+    {
         $patient = Patient::with('nationality')->findOrFail($patient->id);
-        
+
+        Audit::forceCreate([
+            'user_id' => auth()->id(),
+            'user_type' => get_class(auth()->user()),
+            'event' => 'viewed', // evento nuovo
+            'auditable_type' => get_class($patient),
+            'auditable_id' => $patient->id,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'old_values' => [],  // non serve
+            'new_values' => [],  // non serve
+        ]);
+
         return Inertia::render('Patients/ShowPatient', ['patient' => $patient]);
     }
 
@@ -118,6 +152,7 @@ class PatientController extends Controller
     public function edit(Patient $patient)
     {
         $nationalities = Nationality::all();
+
         return Inertia::render('Patients/EditPatient', ['nationalities' => $nationalities, 'patient' => $patient]);
     }
 
@@ -130,11 +165,11 @@ class PatientController extends Controller
         $patient->update($form_data);
 
         return redirect()->route('admin.patients.index')->with([
-                'toast' => [
-                    'type' => 'success',
-                    'message' => 'Paziente modificato correttamente.',
-                ]
-            ]);
+            'toast' => [
+                'type' => 'success',
+                'message' => 'Paziente modificato correttamente.',
+            ],
+        ]);
     }
 
     /**
@@ -145,10 +180,10 @@ class PatientController extends Controller
         $patient->delete();
 
         return redirect()->route('admin.patients.index')->with([
-                'toast' => [
-                    'type' => 'success',
-                    'message' => 'Paziente cancellato correttamente'
-                ]
-            ]);
+            'toast' => [
+                'type' => 'success',
+                'message' => 'Paziente cancellato correttamente',
+            ],
+        ]);
     }
 }

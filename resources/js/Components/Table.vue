@@ -100,10 +100,12 @@ const sortedItems = computed(() => {
 
 // pagination
 const totalPages = computed(() =>
-    Math.ceil(sortedItems.value.length / perPage.value)
+    Object.keys(sortedItems.value).length === 0 ? 1 : Math.ceil(sortedItems.value.length / perPage.value)
 );
 
 const paginatedItems = computed(() => {
+    
+    if(Object.keys(sortedItems.value).length === 0) return 0;
     const start = (currentPage.value - 1) * perPage.value;
     const end = start + perPage.value;
     return sortedItems.value.slice(start, end);
