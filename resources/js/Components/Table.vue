@@ -4,6 +4,7 @@ import { ref, computed, watch } from "vue";
 import { Link, useForm, usePage } from "@inertiajs/vue3";
 import { router } from "@inertiajs/vue3";
 import { formatDate } from "@/utilities/formatDateFunction";
+import { useConfigStore } from "@/stores/main";
 
 const props = defineProps({
     items: {
@@ -25,6 +26,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["updated"]);
+
+const { user, hasRole } = useConfigStore();
 
 // state
 const perPage = ref(10);
@@ -370,14 +373,14 @@ function normalizeValueForInput(value, key) {
                             <i class="fas fa-eye"></i>
                         </Link>
                         <Link
-                            v-if="!props.editableColumns.length"
+                            v-if="!props.editableColumns.length && hasRole('superadmin')"
                             class="edit-button"
                             :href="editUrl(item.id)"
                         >
                             <i class="fas fa-edit"></i>
                         </Link>
 
-                        <button
+                        <button v-if="hasRole('superadmin')"
                             class="delete-button"
                             @click="
                                 () => {

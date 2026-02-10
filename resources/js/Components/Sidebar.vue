@@ -1,7 +1,9 @@
 <script setup>
 import { computed } from "vue";
 import { Link, usePage } from "@inertiajs/vue3";
-import { sidebarMenus } from "@/data/sidebarMenu.js"; // ← attenzione: ora è .js
+import { sidebarMenus } from "@/data/sidebarMenu.js";
+import { useConfigStore } from "@/stores/main";
+
 // props
 const props = defineProps({
     currentSection: {
@@ -13,6 +15,8 @@ const props = defineProps({
         required: true,
     },
 });
+
+const { user, hasRole } = useConfigStore();
 
 const page = usePage();
 const currentRouteName = computed(() => page.props.currentRouteName);
@@ -65,6 +69,7 @@ const isRouteActive = (routeName) => currentRouteName.value === routeName;
                 <hr />
                 <ul>
                     <li
+                        
                         :class="isRouteActive(link.route) ? 'active' : ''"
                         v-for="link in section.links"
                         :key="link.route"

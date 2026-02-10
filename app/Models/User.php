@@ -61,4 +61,14 @@ class User extends Authenticatable implements AuditableContract
 
         return $data;
     }
+
+    public function doctor()
+    {
+        return $this->hasOne(Doctor::class);
+    }
+
+    public function nurse()
+    {
+        return $this->hasOne(Nurse::class);
+    }
 }

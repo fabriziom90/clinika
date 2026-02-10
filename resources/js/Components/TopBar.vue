@@ -2,12 +2,11 @@
 import ApplicationLogo from "./ApplicationLogo.vue";
 import { Link, usePage } from "@inertiajs/vue3";
 import { computed, ref } from "vue";
+import { useConfigStore } from "@/stores/main";
 
-const page = usePage();
-const user = computed(() => page.props.auth.user);
+const { user, hasRole } = useConfigStore()
+
 const openWarehouse = ref(false);
-
-const hasRole = (role) => user.value?.roles?.includes(role);
 
 const isRouteActive = (routes) => {
     let flag = false;

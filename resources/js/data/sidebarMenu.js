@@ -20,7 +20,7 @@ export const sidebarMenus = {
                     name: "Nuovo Paziente",
                     route: "admin.patients.create",
                     path: '/create',
-                    roles: ["superadmin", "doctor"],
+                    roles: ["superadmin"],
                     icon: "fas fa-plus"
                 },
             ],
