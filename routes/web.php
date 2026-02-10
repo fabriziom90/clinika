@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AppointmentController;
+use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\ClinicRoomController;
 use App\Http\Controllers\Admin\DoctorController;
 use App\Http\Controllers\Admin\DrugController;
@@ -52,6 +53,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('products', ProductController::class);
         Route::resource('drugs', DrugController::class);
         Route::resource('inventory-products', InventoryProductController::class);
+        Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
         Route::put('inventory-products/{inventoryProduct}/update-quantity', [InventoryProductController::class, 'updateQuantity'])->name('inventory-products.update-quantity');
         Route::put('inventory-products/{inventoryProduct}/update-expiration', [InventoryProductController::class, 'updateExpiryDate'])->name('inventory-products.update-expiration');
         Route::put('inventory-drugs/{inventoryDrug}/update-quantity', [InventoryDrugController::class, 'updateQuantity'])->name('inventory-drugs.update-quantity');

@@ -173,6 +173,15 @@ const logout = () => {
                             >Specializzazioni</Link
                         >
                     </li>
+                    <li class="list-item">
+                        <Link
+                            :class="
+                                isRouteActive(['audit-logs']) ? 'active' : ''
+                            "
+                            :href="route('admin.audit-logs.index')"
+                            >Logs</Link
+                        >
+                    </li>
                 </ul>
             </li>
         </ul>

@@ -5,15 +5,15 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
-use Spatie\Permission\Traits\HasRoles;
 use Laravel\Sanctum\HasApiTokens;
+use OwenIt\Auditing\Auditable;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+use Spatie\Permission\Traits\HasRoles;
 
-
-class User extends Authenticatable
+class User extends Authenticatable implements AuditableContract
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use Auditable, HasApiTokens, HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -25,8 +25,10 @@ class User extends Authenticatable
         'surname',
         'username',
         'password',
-        'email'
+        'email',
     ];
+
+    protected $dontKeep = ['password', 'email', 'remember_token'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -47,4 +49,16 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function transformAudit(array $data): array
+    {
+        // Rimuove eventuali campi sensibili
+        $sensitive = ['password', 'email', 'remember_token'];
+
+        foreach ($sensitive as $field) {
+            unset($data['old_values'][$field], $data['new_values'][$field]);
+        }
+
+        return $data;
+    }
 }

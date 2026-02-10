@@ -3,9 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Auditable;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
-class Patient extends Model
+class Patient extends Model implements AuditableContract
 {
+    use Auditable;
+
     protected $fillable = [
         'name',
         'surname',
@@ -45,5 +49,44 @@ class Patient extends Model
     public function appointments()
     {
         return $this->hasMany(Appointment::class);
+    }
+
+    public function getNameForAuditAttribute()
+    {
+        return $this->name; // già decrypt grazie al cast
+    }
+
+    public function getSurnameForAuditAttribute()
+    {
+        return $this->surname; // già decrypt
+    }
+
+    public function transformAudit(array $data): array
+    {
+        $sensitive = [
+            'personal_code', 'birthday', 'birth_city',
+            'city', 'address', 'phone', 'email', 'genre',
+            'password', 'remember_token',
+        ];
+
+        foreach ($sensitive as $field) {
+            unset($data['old_values'][$field], $data['new_values'][$field]);
+        }
+
+        // se vuoi, puoi mostrare name e surname decifrati tramite i getter
+        if (isset($data['old_values']['name'])) {
+            $data['old_values']['name'] = $this->getNameForAuditAttribute();
+        }
+        if (isset($data['new_values']['name'])) {
+            $data['new_values']['name'] = $this->getNameForAuditAttribute();
+        }
+        if (isset($data['old_values']['surname'])) {
+            $data['old_values']['surname'] = $this->getSurnameForAuditAttribute();
+        }
+        if (isset($data['new_values']['surname'])) {
+            $data['new_values']['surname'] = $this->getSurnameForAuditAttribute();
+        }
+
+        return $data;
     }
 }

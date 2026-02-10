@@ -108,6 +108,15 @@ export const sidebarMenus = {
             icon: 'fas fa-pills'
         } 
     ],
-    
+    logs: [
+        {
+            id: 'logs-section',
+            title: 'Logs di sistema',
+            roles: ["superadmin"],
+            path: "/",
+            icon: 'fa-clipboard-list'
+        }
+    ],
     superadmin: [], 
+
 };

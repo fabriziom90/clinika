@@ -18,6 +18,13 @@ class AuthServiceProvider extends ServiceProvider
         \App\Models\Nurse::class => \App\Policies\NursePolicy::class,
         \App\Models\Role::class => \App\Policies\RolePolicy::class,
         \App\Models\Specialty::class => \App\Policies\SpecialtyPolicy::class,
+        \App\Models\Drug::class => \App\Policies\DrugPolicy::class,
+        \App\Models\Product::class => \App\Policies\ProductPolicy::class,
+        \App\Models\ClinicRoom::class => \App\Policies\ClinicRoomPolicy::class,
+        \App\Models\Specialty::class => \App\Policies\SpecialtyPolicy::class,
+        \App\Models\InventoryProduct::class => \App\Policies\InventoryProductPolicy::class,
+        \App\Models\InventoryDrug::class => \App\Policies\InventoryDrugPolicy::class,
+        \OwenIt\Auditing\Models\Audit::class => \App\Policies\AuditPolicy::class,
     ];
 
     /**

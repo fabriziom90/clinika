@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Auditable;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
-class Nurse extends Model
+class Nurse extends Model implements AuditableContract
 {
-    use HasFactory;
+    use Auditable;
 
-     protected $fillable = [
+    protected $dontKeep = ['personal_code', 'vat', 'birthday', 'birth_city', 'city', 'address', 'phone', 'genre', 'pec'];
+
+    protected $fillable = [
         'user_id',
         'personal_code',
         'vat',
@@ -20,14 +23,16 @@ class Nurse extends Model
         'phone',
         'pec',
         'genre',
-        'nationality_id'
+        'nationality_id',
     ];
 
-    public function user(){
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
 
-    public function nationality(){
+    public function nationality()
+    {
         return $this->belongsTo(Nationality::class);
     }
 
@@ -36,4 +41,15 @@ class Nurse extends Model
         return $this->hasMany(Appointment::class);
     }
 
+    public function transformAudit(array $data): array
+    {
+        // Rimuove eventuali campi sensibili
+        $sensitive = ['personal_code', 'vat', 'birthday', 'birth_city', 'city', 'address', 'phone', 'genre', 'pec'];
+
+        foreach ($sensitive as $field) {
+            unset($data['old_values'][$field], $data['new_values'][$field]);
+        }
+
+        return $data;
+    }
 }

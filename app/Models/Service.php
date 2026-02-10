@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Auditable;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
-class Service extends Model
+class Service extends Model implements AuditableContract
 {
-    use HasFactory;
+    use Auditable;
 
     protected $fillable = ['name', 'note', 'default_duration', 'default_price', 'active', 'code'];
 
