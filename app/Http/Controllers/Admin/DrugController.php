@@ -2,27 +2,33 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Drug;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDrugRequest;
 use App\Http\Requests\UpdateDrugRequest;
-use App\Http\Controllers\Controller;
+use App\Models\Drug;
 use Inertia\Inertia;
 
 class DrugController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(\App\Models\Drug::class, 'drug');
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         $drugs = Drug::all();
+
         return Inertia::render('Drugs/IndexDrugs', [
             'drugs' => $drugs,
             'columns' => [
                 'id' => 'ID',
                 'name' => 'Nome',
-                'unit_price' => 'Prezzo unitario'
-            ]
+                'unit_price' => 'Prezzo unitario',
+            ],
         ]);
     }
 
@@ -41,7 +47,7 @@ class DrugController extends Controller
     {
         $form_data = $request->validated();
 
-        $newDrug = new Drug();
+        $newDrug = new Drug;
         $newDrug->name = $form_data['name'];
         $newDrug->unit_price = $form_data['unit_price'];
 
@@ -50,8 +56,8 @@ class DrugController extends Controller
         return redirect()->route('admin.drugs.index')->with([
             'toast' => [
                 'type' => 'success',
-                'message' => 'Medicinale creato con successo'
-            ]
+                'message' => 'Medicinale creato con successo',
+            ],
         ]);
     }
 
@@ -78,7 +84,6 @@ class DrugController extends Controller
     {
         $form_data = $request->validated();
 
-        
         $drug->name = $form_data['name'];
         $drug->unit_price = $form_data['unit_price'];
 
@@ -87,8 +92,8 @@ class DrugController extends Controller
         return redirect()->route('admin.drugs.index')->with([
             'toast' => [
                 'type' => 'success',
-                'message' => 'Medicinale modificato con successo'
-            ]
+                'message' => 'Medicinale modificato con successo',
+            ],
         ]);
     }
 
@@ -96,14 +101,14 @@ class DrugController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy(Drug $drug)
-    {   
+    {
         $drug->delete();
 
         return redirect()->route('admin.drugs.index')->with([
             'toast' => [
                 'type' => 'success',
-                'message' => 'Medicinale cancellato con successo'
-            ]
+                'message' => 'Medicinale cancellato con successo',
+            ],
         ]);
     }
 }

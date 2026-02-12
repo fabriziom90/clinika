@@ -21,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Patient::observe(PatientObserver::class);
         Inertia::share([
             // Condivide la chiave 'toast' (se presente nella sessione)
             'toast' => fn () => session('toast'),

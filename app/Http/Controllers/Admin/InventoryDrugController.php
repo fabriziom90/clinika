@@ -10,6 +10,11 @@ use Illuminate\Http\Request;
 
 class InventoryDrugController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(\App\Models\InventoryDrug::class, 'inventoryDrug');
+    }
+
     /**
      * Display a listing of the resource.
      */

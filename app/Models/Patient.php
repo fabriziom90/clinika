@@ -36,6 +36,13 @@ class Patient extends Model implements AuditableContract
 
     ];
 
+    protected static function booted()
+    {
+        static::created(function ($patient) {
+            $patient->medicalRecord()->create();
+        });
+    }
+
     public function users()
     {
         return $this->belongsTo(User::class);
@@ -49,6 +56,11 @@ class Patient extends Model implements AuditableContract
     public function appointments()
     {
         return $this->hasMany(Appointment::class);
+    }
+
+    public function medicalRecord()
+    {
+        return $this->hasOne(MedicalRecord::class);
     }
 
     public function getNameForAuditAttribute()

@@ -85,9 +85,10 @@ class PatientController extends Controller
 
         $newPatient->save();
 
+        // if request comes from create appointment modal
         if ($request->boolean('inline')) {
             $doctors = Doctor::with('user')->get();
-            $nurses = Nurse::with('nurse')->get();
+            $nurses = Nurse::with('user')->get();
             $nationalities = Nationality::all();
 
             $user = Auth::user();
@@ -104,6 +105,8 @@ class PatientController extends Controller
                 // Admin o altri ruoli autorizzati
                 $appointments = Appointment::with(['doctor.user', 'nurse.user', 'patient'])->get();
             }
+
+            app(\App\Observers\PatientObserver::class)->created($patient);
 
             return Inertia::render('Calendar/IndexCalendar', [
                 'newPerson' => $newPatient,
@@ -129,19 +132,12 @@ class PatientController extends Controller
      */
     public function show(Patient $patient)
     {
-        $patient = Patient::with('nationality')->findOrFail($patient->id);
+        $patient = Patient::with(['nationality', 'medicalRecord.medicalEntries' => fn ($q) => $q->orderByDesc('created_at')->with(['doctor.user', 'appointment', 'attachments', 'prescriptions', 'vitalParameters'])])->findOrFail($patient->id);
 
-        Audit::forceCreate([
-            'user_id' => auth()->id(),
-            'user_type' => get_class(auth()->user()),
-            'event' => 'viewed', // evento nuovo
-            'auditable_type' => get_class($patient),
-            'auditable_id' => $patient->id,
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-            'old_values' => [],  // non serve
-            'new_values' => [],  // non serve
-        ]);
+        // check GDPR permissions
+        $this->authorize('view', $patient->medicalRecord);
+
+        app(\App\Observers\PatientObserver::class)->viewed($patient);
 
         return Inertia::render('Patients/ShowPatient', ['patient' => $patient]);
     }
@@ -164,6 +160,8 @@ class PatientController extends Controller
         $form_data = $request->validated();
         $patient->update($form_data);
 
+        app(\App\Observers\PatientObserver::class)->updated($patient);
+
         return redirect()->route('admin.patients.index')->with([
             'toast' => [
                 'type' => 'success',
@@ -178,6 +176,8 @@ class PatientController extends Controller
     public function destroy(Patient $patient)
     {
         $patient->delete();
+
+        app(\App\Observers\PatientObserver::class)->deleted($patient);
 
         return redirect()->route('admin.patients.index')->with([
             'toast' => [

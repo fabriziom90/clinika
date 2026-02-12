@@ -14,6 +14,11 @@ use Illuminate\Support\Facades\Auth;
 
 class AppointmentController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(\App\Models\Appointment::class, 'appointment');
+    }
+
     /**
      * Display a listing of the resource.
      */

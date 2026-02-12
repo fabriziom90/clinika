@@ -44,6 +44,11 @@ class RoleSeeder extends Seeder
             'product' => 'Prodotti sanitari',
             'drug' => 'Medicinali',
             'inventory-product' => 'Prodotti stanza',
+            'medical-record' => 'Cartella clinica',
+            'medical-entry' => 'Voce cartella clinica',
+            'medical-attachment' => 'Allegato clinico',
+            'prescription' => 'Prescrizione',
+            'vital-parameter' => 'Parametri vitali',
         ];
 
         // === AZIONI CRUD ===
@@ -101,6 +106,19 @@ class RoleSeeder extends Seeder
             'appointment.view',
             'appointment.create',
             'appointment.update',
+            'medical-record.view',
+            'medical-entry.view',
+            'medical-entry.create',
+            'medical-entry.update',
+
+            'medical-attachment.create',
+            'medical-attachment.view',
+
+            'prescription.create',
+            'prescription.view',
+
+            'vital-parameter.create',
+            'vital-parameter.view',
         ]);
 
         // Infermiere → solo lettura su pazienti e appuntamenti
@@ -109,6 +127,11 @@ class RoleSeeder extends Seeder
             'appointment.view',
             'appointment.create',
             'appointment.update',
+            'medical-record.view',
+            'medical-entry.view',
+            'medical-attachment.view',
+            'prescription.view',
+            'vital-parameter.view',
         ]);
 
     }

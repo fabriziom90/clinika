@@ -9,6 +9,11 @@ use App\Models\Service;
 
 class ServiceController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(\App\Models\Service::class, 'service');
+    }
+
     /**
      * Display a listing of the resource.
      */
