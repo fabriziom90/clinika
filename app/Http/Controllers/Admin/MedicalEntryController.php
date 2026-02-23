@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreMedicalEntryRequest;
+use App\Http\Requests\UpdateMedicalEntryRequest;
+use App\Models\Appointment;
 use App\Models\MedicalEntry;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use OwenIt\Auditing\Models\Audit;
 
 class MedicalEntryController extends Controller
 {
@@ -14,14 +18,14 @@ class MedicalEntryController extends Controller
      */
     public function index()
     {
-        $medicalRecord = \App\Models\MedicalRecord::with('medicalEntries.doctor.user', 'medicalEntries.appointment')->findOrFail($medicalRecordId);
+        // $medicalRecord = \App\Models\MedicalRecord::with('medicalEntries.doctor.user', 'medicalEntries.appointment')->findOrFail($medicalRecordId);
 
-        $this->authorize('view', $medicalRecord->medicalEntries()->firstOrFail()); // policy
+        // $this->authorize('view', $medicalRecord->medicalEntries()->firstOrFail()); // policy
 
-        return Inertia::render('MedicalEntries/Timeline', [
-            'medicalRecord' => $medicalRecord,
-            'entries' => $medicalRecord->medicalEntries,
-        ]);
+        // return Inertia::render('MedicalEntries/Timeline', [
+        //     'medicalRecord' => $medicalRecord,
+        //     'entries' => $medicalRecord->medicalEntries,
+        // ]);
     }
 
     /**
@@ -37,12 +41,72 @@ class MedicalEntryController extends Controller
      */
     public function store(StoreMedicalEntryRequest $request)
     {
+
+        $patient_id = $request->all()['patient_id'];
         $data = $request->validated();
-        $data['doctor_id'] = Auth::user()->doctor->id; // medico loggato
+        $user = Auth::user();
 
+        // Associa medico loggato
+        $data['doctor_id'] = $user->doctor->id;
+
+        // Creazione entry principale
         $entry = MedicalEntry::create($data);
+        
+       
+        // CREAZIONE PARAMETRI VITALI (solo se presenti)
+        if (! empty($data['vital_parameters'])) {
+            $vitals = $data['vital_parameters'];
+            // Filtra solo valori non null
+            $hasValues = collect($vitals)->filter(fn ($v) => $v !== null && $v !== '')->isNotEmpty();
 
-        return redirect()->back()->with('success', 'Entry aggiunta con successo');
+            if ($hasValues) {
+                $entry->vitalParameters()->create($vitals);
+            }
+        }
+
+        // CREAZIONE PRESCRIZIONI (solo se presenti)
+        if (! empty($data['prescriptions'])) {
+            foreach ($data['prescriptions'] as $prescriptionData) {
+                // Assicuriamoci di non creare prescrizioni vuote
+                if (! empty($prescriptionData['drug_name'] ?? null)) {
+                    $entry->prescriptions()->create($prescriptionData);
+                }
+            }
+        }
+
+        $entry->load([
+            'vitalParameters',
+            'prescriptions',
+            'attachments',
+            'doctor.user',
+        ]);
+
+        $appointment = $entry->appointment()->with([
+            'medicalEntry.vitalParameters',
+            'medicalEntry.prescriptions',
+            'medicalEntry.attachments',
+            'doctor.user',
+        ])->first();
+
+        // LOG AUDIT
+        Audit::forceCreate([
+            'user_id' => $user->id,
+            'user_type' => get_class($user),
+            'event' => 'create',
+            'auditable_type' => get_class($entry),
+            'auditable_id' => $entry->id,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'old_values' => [],
+            'new_values' => $entry->toArray(),
+        ]);
+        
+        return redirect()->route('admin.patients.show', $patient_id)->with('toast', [
+            'type' => 'success',
+            'message' => 'Visita aggiunta con successo',
+        ])->with([
+            'appointmentEntry' => $appointment,
+        ]);
     }
 
     /**
@@ -66,13 +130,13 @@ class MedicalEntryController extends Controller
      */
     public function update(UpdateMedicalEntryRequest $request, string $id)
     {
-        $data = $request->validated();
-        $data['doctor_id'] = Auth::user()->doctor->id;
-        $data['previous_entry_id'] = $medicalEntry->id;
+        // $data = $request->validated();
+        // $data['doctor_id'] = Auth::user()->doctor->id;
+        // $data['previous_entry_id'] = $medicalEntry->id;
 
-        $newEntry = MedicalEntry::create($data);
+        // $newEntry = MedicalEntry::create($data);
 
-        return redirect()->back()->with('success', 'Entry aggiornata creando nuova versione');
+        // return redirect()->back()->with('success', 'Entry aggiornata creando nuova versione');
     }
 
     /**
@@ -80,10 +144,10 @@ class MedicalEntryController extends Controller
      */
     public function destroy(string $id)
     {
-        $this->authorize('delete', $medicalEntry);
+        // $this->authorize('delete', $medicalEntry);
 
-        $medicalEntry->delete();
+        // $medicalEntry->delete();
 
-        return redirect()->back()->with('success', 'Entry eliminata');
+        // return redirect()->back()->with('success', 'Entry eliminata');
     }
 }

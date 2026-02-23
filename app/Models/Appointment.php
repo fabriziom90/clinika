@@ -44,4 +44,9 @@ class Appointment extends Model implements AuditableContract
     {
         return $this->belongsTo(Service::class);
     }
+
+    public function medicalEntry()
+    {
+        return $this->hasOne(MedicalEntry::class);
+    }
 }

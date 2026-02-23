@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Patient;
+use App\Observers\PatientObserver;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
@@ -32,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
                     'toast' => session('toast'),
                 ];
             },
+            'appointmentEntry' => fn () => session('appointmentEntry'),
             'currentRouteName' => fn () => Route::currentRouteName(),
 
         ]);

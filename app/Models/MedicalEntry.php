@@ -46,6 +46,11 @@ class MedicalEntry extends Model
 
     public function vitalParameters()
     {
-        return $this->hasMany(VitalParameter::class);
+        return $this->hasOne(VitalParameter::class);
+    }
+
+    public function prescriptions()
+    {
+        return $this->hasMany(Prescription::class);
     }
 }

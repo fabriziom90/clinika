@@ -106,7 +106,7 @@ class PatientController extends Controller
                 $appointments = Appointment::with(['doctor.user', 'nurse.user', 'patient'])->get();
             }
 
-            app(\App\Observers\PatientObserver::class)->created($patient);
+            app(\App\Observers\PatientObserver::class)->created($newPatient);
 
             return Inertia::render('Calendar/IndexCalendar', [
                 'newPerson' => $newPatient,
@@ -132,8 +132,35 @@ class PatientController extends Controller
      */
     public function show(Patient $patient)
     {
-        $patient = Patient::with(['nationality', 'medicalRecord.medicalEntries' => fn ($q) => $q->orderByDesc('created_at')->with(['doctor.user', 'appointment', 'attachments', 'prescriptions', 'vitalParameters'])])->findOrFail($patient->id);
+        $user = auth()->user();
 
+        $patient = Patient::with([
+            'nationality',
+            'appointments' => function ($q) use ($user) {
+                $q->where('doctor_id', $user->doctor->id ?? null)
+                ->orderByDesc('start_time')
+                ->with([
+                    'medicalEntry.doctor.user',
+                    'medicalEntry.appointment',
+                    'medicalEntry.attachments',
+                    'medicalEntry.prescriptions',
+                    'medicalEntry.vitalParameters',
+                ]);
+            },
+            'medicalRecord.medicalEntries' => function ($q) use ($user) {
+                $q->where('doctor_id', $user->doctor->id ?? null)
+                ->orderByDesc('created_at')
+                ->with([
+                    'doctor.user',
+                    'appointment',
+                    'attachments',
+                    'prescriptions',
+                    'vitalParameters'
+                ]);
+            },
+
+        ])->findOrFail($patient->id);
+        
         // check GDPR permissions
         $this->authorize('view', $patient->medicalRecord);
 
