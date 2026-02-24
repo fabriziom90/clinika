@@ -13,10 +13,8 @@ class MedicalEntry extends Model
         'medical_record_id',
         'appointment_id',
         'doctor_id',
-        'type',
-        'title',
-        'content',
-        'previous_entry_id',
+        'cancelled_by',
+        'cancelled_at'
     ];
 
     public function medicalRecord()
@@ -34,23 +32,40 @@ class MedicalEntry extends Model
         return $this->belongsTo(Appointment::class);
     }
 
-    public function previousEntry()
+     public function versions()
     {
-        return $this->belongsTo(MedicalEntry::class, 'previous_entry_id');
+        return $this->hasMany(MedicalEntryVersion::class)->orderByDesc('version');
     }
 
-    public function attachments()
+    public function latestVersion()
     {
-        return $this->hasMany(MedicalAttachment::class);
+        return $this->hasOne(MedicalEntryVersion::class)->latestOfMany();
     }
 
-    public function vitalParameters()
+    public function latestActiveVersion()
     {
-        return $this->hasOne(VitalParameter::class);
+        return $this->hasOne(MedicalEntryVersion::class)
+            ->whereNull('voided_at')
+            ->orderByDesc('version');
     }
 
-    public function prescriptions()
+    public function cancelledBy()
     {
-        return $this->hasMany(Prescription::class);
+        return $this->belongsTo(Doctor::class, 'cancelled_by');
+    }
+
+    public function latestAttachments()
+    {
+        return $this->latestVersion ? $this->latestVersion->attachments : collect();
+    }
+
+    public function latestPrescriptions()
+    {
+        return $this->latestVersion ? $this->latestVersion->prescriptions : collect();
+    }
+
+    public function latestVitalParameters()
+    {
+        return $this->latestVersion ? $this->latestVersion->vitalParameters : null;
     }
 }

@@ -1,16 +1,15 @@
 <script setup>
-import { ref, defineEmits, watch } from "vue";
+import { ref, defineEmits, onMounted, computed } from "vue";
 import { router } from "@inertiajs/vue3";
 
 const props = defineProps({
-    show: Boolean,
     entry: Object,
     patient: Object,
     appointment: Object
 });
 
 const emit = defineEmits(['saved', 'close'])
-
+const isEdit = computed(() => !!props.entry?.id)
 /* =========================
    STATO ENTRY PRINCIPALE
 ========================= */
@@ -18,6 +17,9 @@ const type = ref("visit");
 const title = ref("");
 const content = ref("");
 const saving = ref(false);
+const voidVersion = ref(false);
+const voidReason = ref("");
+
 
 /* =========================
    PARAMETRI VITALI (hasOne)
@@ -46,12 +48,39 @@ const prescriptions = ref([
 /* =========================
    RESET MODALE
 ========================= */
-watch(() => props.show, (val) => {
-    if (val) {
-        type.value = props.entry?.type || "visit";
-        title.value = props.entry?.title || "";
-        content.value = props.entry?.content || "";
-    }
+onMounted(() => {
+    if (!props.entry) return;
+    const latest = props.entry.medical_entry.latest_version;
+
+    type.value = latest?.type || "visit";
+    title.value = latest?.title || "";
+    content.value = latest?.content || "";
+
+    vitalParameters.value = {
+        pressure: latest?.vital_parameters?.pressure ?? null,
+        heart_rate: latest?.vital_parameters?.heart_rate ?? null,
+        temperature: latest?.vital_parameters?.temperature ?? null,
+        weight: latest?.vital_parameters?.weight ?? null,
+        height: latest?.vital_parameters?.height ?? null,
+    };
+
+    prescriptions.value = latest?.prescriptions?.length
+        ? latest.prescriptions.map(p => ({
+            drug_name: p.drug_name,
+            dosage: p.dosage,
+            frequency: p.frequency,
+            duration: p.duration,
+            notes: p.notes,
+        }))
+        : [{
+            drug_name: "",
+            dosage: "",
+            frequency: "",
+            duration: "",
+            notes: "",
+        }];
+
+
 });
 
 /* =========================
@@ -77,7 +106,7 @@ const removePrescription = (index) => {
 const saveEntry = () => {
     saving.value = true;
 
-    router.post(route("admin.medical-entries.store"), {
+    const payload = {
         patient_id: props.patient.id,
         medical_record_id: props.patient.medical_record.id,
         appointment_id: props.appointment.id,
@@ -86,16 +115,40 @@ const saveEntry = () => {
         content: content.value,
         vital_parameters: vitalParameters.value,
         prescriptions: prescriptions.value.filter(p => p.drug_name.trim() !== ""),
-    }, {
-        preserveScroll: true,
-        onSuccess: (page) => {
-            // window.location.reload();
+        is_voided: voidVersion.value ? true : undefined,
+        void_reason: voidVersion.value ? voidReason.value : undefined,
+    };
 
-            emit('saved', page.props.appointmentEntry)
-            emit("close");
-        },
-        onFinish: () => saving.value = false,
-    });
+    if (isEdit.value) {
+
+        router.put(
+            route("admin.medical-entries.update", props.entry.medical_entry.id),
+            payload,
+            {
+                preserveScroll: true,
+                onSuccess: (page) => {
+                    emit('saved', page.props.appointmentEntry);
+                    emit("close");
+                },
+                onFinish: () => saving.value = false,
+            }
+        );
+
+    } else {
+
+        router.post(
+            route("admin.medical-entries.store"),
+            payload,
+            {
+                preserveScroll: true,
+                onSuccess: (page) => {
+                    emit('saved', page.props.appointmentEntry);
+                    emit("close");
+                },
+                onFinish: () => saving.value = false,
+            }
+        );
+    }
 };
 </script>
 
@@ -213,7 +266,14 @@ const saveEntry = () => {
                     <button class="btn btn-sm btn-outline-primary" @click="addPrescription">
                         + Aggiungi Farmaco
                     </button>
-
+                    <div v-if="isEdit" class="mt-4 p-3 border rounded bg-warning bg-opacity-10">
+                        <label class="form-check-label mb-1">
+                            <input type="checkbox" class="form-check-input me-2" v-model="voidVersion">
+                            Annulla questa versione
+                        </label>
+                        <textarea v-if="voidVersion" v-model="voidReason" placeholder="Motivo annullamento..." rows="2"
+                            class="form-control mt-2"></textarea>
+                    </div>
                 </div>
 
                 <!-- FOOTER -->

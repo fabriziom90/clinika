@@ -10,7 +10,7 @@ class Prescription extends Model
     use HasFactory;
 
     protected $fillable = [
-        'medical_entry_id',
+        'medical_entry_version_id',
         'drug_name',
         'dosage',
         'frequency',
@@ -18,8 +18,8 @@ class Prescription extends Model
         'notes',
     ];
 
-    public function medicalEntry()
+    public function version()
     {
-        return $this->belongsTo(MedicalEntry::class);
+        return $this->belongsTo(MedicalEntryVersion::class, 'medical_entry_version_id');
     }
 }

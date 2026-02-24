@@ -142,9 +142,12 @@ class PatientController extends Controller
                 ->with([
                     'medicalEntry.doctor.user',
                     'medicalEntry.appointment',
-                    'medicalEntry.attachments',
-                    'medicalEntry.prescriptions',
-                    'medicalEntry.vitalParameters',
+                    'medicalEntry.latestActiveVersion.attachments',
+                    'medicalEntry.latestActiveVersion.prescriptions',
+                    'medicalEntry.latestActiveVersion.vitalParameters',
+                    'medicalEntry.versions.attachments',
+                    'medicalEntry.versions.prescriptions',
+                    'medicalEntry.versions.vitalParameters'
                 ]);
             },
             'medicalRecord.medicalEntries' => function ($q) use ($user) {
@@ -153,9 +156,9 @@ class PatientController extends Controller
                 ->with([
                     'doctor.user',
                     'appointment',
-                    'attachments',
-                    'prescriptions',
-                    'vitalParameters'
+                    'latestVersion.attachments',
+                    'latestVersion.prescriptions',
+                    'latestVersion.vitalParameters'
                 ]);
             },
 

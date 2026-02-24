@@ -58,7 +58,7 @@ class MedicalEntryPolicy
      * Chi può modificare entry (versioning: meglio creare nuova entry)
      */
     public function update(User $user, MedicalEntry $entry): bool
-    {
+    {   
         return $user->doctor && $entry->doctor_id === $user->doctor->id;
     }
 

@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class MedicalEntryVersion extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'medical_entry_id',
+        'version',
+        'type',
+        'title',
+        'content',
+        'created_by',
+        'is_voided',
+        'void_reason',
+        'voided_by',
+        'voided_at'
+    ];
+
+    // RELAZIONE CON L'ENTRY PRINCIPALE
+    public function entry()
+    {
+        return $this->belongsTo(MedicalEntry::class, 'medical_entry_id');
+    }
+    // PRESCRIPTIONS LEGATE A QUESTA VERSIONE
+    public function prescriptions()
+    {
+        return $this->hasMany(Prescription::class, 'medical_entry_version_id');
+    }
+
+    // PARAMETRI VITALI LEGATI A QUESTA VERSIONE
+    public function vitalParameters()
+    {
+        return $this->hasOne(VitalParameter::class, 'medical_entry_version_id');
+    }
+
+    // ALLEGATI LEGATI A QUESTA VERSIONE
+    public function attachments()
+    {
+        return $this->hasMany(MedicalAttachment::class, 'medical_entry_version_id');
+    }
+}

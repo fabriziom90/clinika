@@ -23,28 +23,20 @@ const appointments = ref([...props.patient.appointments]);
 <template>
   <div>
     <div class="d-flex justify-content-between">
-        <h2>Cartella Clinica</h2>
-        
+      <h2>Cartella Clinica</h2>
+
     </div>
 
     <div v-if="appointments.length === 0">
       Nessuna visita disponibile.
-    {{ patient }}
     </div>
-    <div v-else >
-      <MedicalEntryCard
-        v-for="appointment in appointments"
-        :key="appointment.id"
-        :appointment="appointment"
-        :patient="patient"
-        
-        :user="user"
-        
-      />
+    <div v-else>
+      <MedicalEntryCard v-for="appointment in appointments" :key="appointment.id" :appointment="appointment"
+        :patient="patient" :user="user" />
     </div>
 
     <!-- Modal per creare/modificare entry -->
-    
+
   </div>
 </template>
 

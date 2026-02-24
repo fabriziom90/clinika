@@ -10,11 +10,11 @@ class MedicalAttachment extends Model
     use HasFactory;
 
     protected $fillable = [
-        'medical_entry_id', 'path', 'original_name', 'mime', 'size',
+        'medical_entry_version_id', 'path', 'original_name', 'mime', 'size',
     ];
 
-    public function medicalEntry()
+    public function version()
     {
-        return $this->belongsTo(MedicalEntry::class);
+        return $this->belongsTo(MedicalEntryVersion::class, 'medical_entry_version_id');
     }
 }

@@ -11,7 +11,7 @@ class UpdateMedicalEntryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -44,6 +44,9 @@ class UpdateMedicalEntryRequest extends FormRequest
             'prescriptions.*.frequency' => 'nullable|string|max:255',
             'prescriptions.*.duration' => 'nullable|string|max:255',
             'prescriptions.*.notes' => 'nullable|string|max:500',
+
+            'is_voided' => 'nullable|boolean',
+            'void_reason' => 'nullable|string',
         ];
     }
 
