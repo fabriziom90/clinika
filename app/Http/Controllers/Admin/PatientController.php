@@ -156,9 +156,9 @@ class PatientController extends Controller
                 ->with([
                     'doctor.user',
                     'appointment',
-                    'latestVersion.attachments',
-                    'latestVersion.prescriptions',
-                    'latestVersion.vitalParameters'
+                    'latestActiveVersion.attachments',
+                    'latestActiveVersion.prescriptions',
+                    'latestActiveVersion.vitalParameters'
                 ]);
             },
 
@@ -168,7 +168,7 @@ class PatientController extends Controller
         $this->authorize('view', $patient->medicalRecord);
 
         app(\App\Observers\PatientObserver::class)->viewed($patient);
-
+        
         return Inertia::render('Patients/ShowPatient', ['patient' => $patient]);
     }
 

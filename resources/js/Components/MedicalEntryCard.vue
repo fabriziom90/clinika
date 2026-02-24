@@ -78,6 +78,14 @@ const formatType = (type) => {
     return found ? found.label : type;
 }
 
+const downloadPdf = () => {
+    const id = medicalAppointment.value.medical_entry.id
+
+    window.open(
+        route('admin.medical-entries.pdf', id),
+        '_blank'
+    )
+}
 
 </script>
 <template>
@@ -96,8 +104,9 @@ const formatType = (type) => {
                         Modifica
                     </button>
 
-                    <button class="btn-negative" v-if="hasMedicalEntry" @click="showHistory = true">Storico</button>
-
+                    <button class="btn-negative me-2" v-if="hasMedicalEntry"
+                        @click="showHistory = true">Storico</button>
+                    <button class="btn-negative" v-if="hasMedicalEntry" @click="downloadPdf">PDF</button>
                     <button class="btn-negative"
                         v-if="canCreateAppointment && medicalAppointment.medical_entry === null"
                         @click="showModal = true">Aggiungi visita</button>
@@ -106,6 +115,7 @@ const formatType = (type) => {
             <div>
                 <p><em>{{ appointment.note }}</em></p>
             </div>
+
             <div v-if="medicalAppointment.medical_entry !== null">
                 <!-- HEADER VISITA -->
 

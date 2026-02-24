@@ -50,7 +50,7 @@ const prescriptions = ref([
 ========================= */
 onMounted(() => {
     if (!props.entry) return;
-    const latest = props.entry.medical_entry.latest_version;
+    const latest = props.entry.medical_entry.latest_active_version;
 
     type.value = latest?.type || "visit";
     title.value = latest?.title || "";

@@ -10,6 +10,7 @@ use App\Models\MedicalEntry;
 use Illuminate\Support\Facades\Auth;
 
 use OwenIt\Auditing\Models\Audit;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class MedicalEntryController extends Controller
 {
@@ -232,23 +233,46 @@ class MedicalEntryController extends Controller
             'message' => 'Visita aggiornata creando nuova versione',
         ])->with([
             'appointmentEntry' => $entry->appointment()->with([
-                'medicalEntry.latestVersion.vitalParameters',
-                'medicalEntry.latestVersion.prescriptions',
-                'medicalEntry.latestVersion.attachments',
+                'medicalEntry.latestActiveVersion.vitalParameters',
+                'medicalEntry.latestActiveVersion.prescriptions',
+                'medicalEntry.latestActiveVersion.attachments',
                 'doctor.user',
             ])->first(),
         ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function generatePdf(MedicalEntry $medicalEntry)
     {
-        // $this->authorize('delete', $medicalEntry);
+        $this->authorize('view', $medicalEntry);
 
-        // $medicalEntry->delete();
+        $medicalEntry->load([
+            'appointment',
+            'doctor.user',
+            'latestActiveVersion.vitalParameters',
+            'latestActiveVersion.prescriptions',
+            'latestActiveVersion.attachments'
+        ]);
 
-        // return redirect()->back()->with('success', 'Entry eliminata');
+        $version = $medicalEntry->latestActiveVersion;
+
+        $user = auth()->user();
+        Audit::forceCreate([
+            'user_id' => $user->id,
+            'user_type' => get_class($user),
+            'event' => 'generate_pdf',
+            'auditable_type' => get_class($medicalEntry),
+            'auditable_id' => $medicalEntry->id,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'old_values' => $medicalEntry->toArray(),
+            'new_values' => [],
+        ]);
+
+        $pdf = Pdf::loadView('pdf.medical_entry', [
+            'entry' => $medicalEntry,
+            'version' => $version,
+        ]);
+
+        return $pdf->download('referto-'.$medicalEntry->id.'.pdf');
     }
 }

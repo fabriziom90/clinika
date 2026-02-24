@@ -57,7 +57,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('medical-records/{id}/entries', [MedicalEntryController::class, 'index'])->name('medical-entries.index');
         Route::post('medical-entries', [MedicalEntryController::class, 'store'])->name('medical-entries.store');
         Route::put('medical-entries/{medical_entry}', [MedicalEntryController::class, 'update'])->name('medical-entries.update');
-        Route::delete('medical-entries/{medical_entry}', [MedicalEntryController::class, 'destroy'])->name('medical-entries.destroy');
+        Route::get('/medical-entries/{medicalEntry}/pdf', [MedicalEntryController::class, 'generatePdf'])->name('medical-entries.pdf');
         Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
         Route::put('inventory-products/{inventoryProduct}/update-quantity', [InventoryProductController::class, 'updateQuantity'])->name('inventory-products.update-quantity');
         Route::put('inventory-products/{inventoryProduct}/update-expiration', [InventoryProductController::class, 'updateExpiryDate'])->name('inventory-products.update-expiration');
