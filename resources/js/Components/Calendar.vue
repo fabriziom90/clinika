@@ -6,7 +6,7 @@ import { useForm } from "@inertiajs/vue3";
 import { useToast } from "vue-toast-notification";
 import Modal from "@/Components/Modal.vue";
 import DetailModal from "@/Pages/Calendar/DetailModal.vue";
-
+import { useConfigStore } from "@/stores/main";
 import PersonForm from "@/Components/PersonForm.vue";
 
 // debounce variable to handle click or doubleClick
@@ -21,6 +21,8 @@ const props = defineProps({
     nationalities: Array,
     userIsSuperadmin: Boolean,
 });
+
+const configStore = useConfigStore();
 
 const $toast = useToast();
 // variable to show new appointment modal
@@ -68,48 +70,48 @@ const formAppointment = useForm({
 
 // computed property to show events in calendar
 const calendarEvents = computed(() => {
-    
+
     return props.appointments.map((appointment) => ({
         id: appointment.id,
         start: isoToLocalDate(appointment.start_time),
         end: isoToLocalDate(appointment.end_time),
-        title: appointment.service?.name,
+        title: configStore.user.roles[0] === 'superadmin' ? `${appointment.doctor.user.name} ${appointment.doctor.user.surname}` : appointment.service?.name,
     }));
 });
 
 // computed property to get doctor's services 
 const availableServices = computed(() => {
-    if(props.doctor){
+    if (props.doctor) {
         return props.doctor.services ?? [];
     }
 
-    if(!newAppointmentData.value.doctorId) return [];
+    if (!newAppointmentData.value.doctorId) return [];
 
     const doc = props.doctors.find(
         doctor => doctor.id === newAppointmentData.value.doctorId
     );
 
-    return doc?.services ?? [] 
+    return doc?.services ?? []
 });
 
 //watch to prepopulate duration
 watch(
     () => newAppointmentData.value.serviceId,
     (serviceId) => {
-        if(!serviceId) return ;
+        if (!serviceId) return;
         const service = availableServices.value.find(s => s.id === serviceId)
 
-        if(!service) return ;
+        if (!service) return;
         newAppointmentData.value.duration = service.pivot.duration_minutes;
 
-    } 
+    }
 )
 
 // click on empty cell in calendar to get date and time and show modal for new appointment insertion
 const handleCellClick = (clickedTime) => {
     if (!props.userIsSuperadmin) return;
 
-    if(isInteractingWithEvent.value) return;
+    if (isInteractingWithEvent.value) return;
 
     newAppointmentData.value.date = formatDateForInput(clickedTime.cursor.date);
     newAppointmentData.value.startTime = formatTime(clickedTime.cursor.date);
@@ -244,7 +246,7 @@ const openDetailModal = (eventClicked) => {
     );
     console.log(event);
     if (!event) return;
-    
+
     showDetailModal.value = true;
     eventToShow.value = event;
 };
@@ -305,9 +307,9 @@ const openEditFromCalendar = (payload) => {
             appointment.nurse_id ??
             appointment.nurse?.id ??
             "",
-        serviceId: 
-            appointment.service_id ?? 
-            appointment.service?.id ?? 
+        serviceId:
+            appointment.service_id ??
+            appointment.service?.id ??
             "",
         newPatient: false,
         duration: durationMinutes,
@@ -398,7 +400,7 @@ function formatDateForInput(date) {
                 delete: false,
             }"
         />
-
+            
         <div
             v-if="showNewAppointmentModal"
             class="modal fade show modal-bg"
@@ -649,6 +651,7 @@ function formatDateForInput(date) {
 
 .vuecal__views-bar {
     background-color: $mainRed;
+
     button {
         color: #fff;
     }
@@ -660,14 +663,18 @@ function formatDateForInput(date) {
 
 .vuecal__cell-events {
     width: 100%;
+
     .vuecal__event {
         background-color: $mainRedHover;
         border-color: $mainRed;
+
         .vuecal__event-details {
             font-size: 20px;
+
             .vuecal__event-title {
                 padding-bottom: 5px;
             }
+
             .vuecal__event-time {
                 border-top: 1px solid #fff;
                 padding-top: 5px;
@@ -677,9 +684,7 @@ function formatDateForInput(date) {
     }
 }
 
-.vuecal--default-theme.vuecal--light
-    .vuecal__weekday:not(.vuecal__weekday--today)
-    .vuecal__weekday-date {
+.vuecal--default-theme.vuecal--light .vuecal__weekday:not(.vuecal__weekday--today) .vuecal__weekday-date {
     background-color: $mainRedHover;
     color: #fff;
 }
@@ -717,6 +722,7 @@ function formatDateForInput(date) {
         width: 30px;
         height: 30px;
         transition: 0.3s;
+
         &:hover {
             background-color: darkred;
         }

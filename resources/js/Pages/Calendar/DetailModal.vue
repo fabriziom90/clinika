@@ -1,11 +1,14 @@
 <script setup>
 import { ref, defineEmits } from "vue";
+import { useConfigStore } from "@/stores/main";
 
 const emit = defineEmits(["close"]);
 const props = defineProps({
     show: Boolean,
     item: Object,
 });
+
+const configStore = useConfigStore();
 
 const formatDate = (date) => {
     const dateObj = new Date(date);
@@ -25,9 +28,11 @@ const formatHour = (date) => {
 };
 </script>
 <template lang="">
+
     <div v-if="show" class="modal fade show modal-bg" style="display: block">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
+                
                 <div class="modal-header">
                     <h5 class="modal-title">Dettaglio appuntamento</h5>
                     <button
@@ -38,7 +43,8 @@ const formatHour = (date) => {
                 </div>
                 <div class="modal-body">
                     <h3>
-                        {{ item.service?.name }} - {{ item.service?.code}}
+                        <span v-if="configStore.user.roles[0] === 'superadmin'">{{item.doctor.user.name}} {{item.doctor.user.surname}}</span>
+                        <span v-else>{{ item.service?.name }} - {{ item.service?.code}}</span>
                     </h3>
                     <div class="infos">
                         <strong>Giorno ed ora</strong>:
@@ -82,10 +88,12 @@ const formatHour = (date) => {
 </template>
 <style lang="scss" scoped>
 @use "../../../scss/_partials/variables" as *;
+
 h3 {
     color: $mainRed;
     margin-bottom: 0px;
 }
+
 strong {
     color: $mainRed;
 }

@@ -49,7 +49,7 @@ const filteredLogs = computed(() => props.logs.data);
               'bg-success': log.event === 'login',
               'bg-secondary': log.event === 'logout',
               'bg-danger': log.event === 'login_failed',
-              'bg-warning': ['created', 'updated', 'deleted'].includes(log.event),
+              'bg-warning': ['created', 'updated', 'deleted', 'update'].includes(log.event),
               'bg-dark': log.event === 'generate_pdf' || log.event === 'void'
             }">
               {{ log.event }}
