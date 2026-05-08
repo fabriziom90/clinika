@@ -669,10 +669,11 @@ function formatDateForInput(date) {
         border-color: $mainRed;
 
         .vuecal__event-details {
-            font-size: 20px;
+            font-size: 15px;
 
             .vuecal__event-title {
                 padding-bottom: 5px;
+                font-size: 15px;
             }
 
             .vuecal__event-time {

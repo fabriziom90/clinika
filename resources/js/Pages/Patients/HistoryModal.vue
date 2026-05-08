@@ -53,6 +53,7 @@ const formatType = (type) => {
                     <h5 class="modal-title">Storico referti</h5>
                     <button type="button" class="btn-close" @click="$emit('close')"></button>
                 </div>
+
                 <div class="modal-body">
                     <div class="p-4 mb-3 border-red" v-for="version in versions" :key="version.id"
                         :class="version.is_voided ? 'bg-red-opacity' : ''">

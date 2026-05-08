@@ -92,9 +92,9 @@ class MedicalEntryController extends Controller
         ]);
 
         $appointment = $entry->appointment()->with([
-            'medicalEntry.latestVersion.vitalParameters',
-            'medicalEntry.latestVersion.prescriptions',
-            'medicalEntry.latestVersion.attachments',
+            'medicalEntry.latestActiveVersion.vitalParameters',
+            'medicalEntry.latestActiveVersion.prescriptions',
+            'medicalEntry.latestActiveVersion.attachments',
             'doctor.user',
         ])->first();
 
@@ -174,9 +174,12 @@ class MedicalEntryController extends Controller
                 'message' => 'Versione contrassegnata come annullata',
             ])->with([
                 'appointmentEntry' => $entry->appointment()->with([
-                    'medicalEntry.latestVersion.vitalParameters',
-                    'medicalEntry.latestVersion.prescriptions',
-                    'medicalEntry.latestVersion.attachments',
+                    'medicalEntry.latestActiveVersion.vitalParameters',
+                    'medicalEntry.latestActiveVersion.prescriptions',
+                    'medicalEntry.latestActiveVersion.attachments',
+                    'medicalEntry.versions.attachments',
+                    'medicalEntry.versions.prescriptions',
+                    'medicalEntry.versions.vitalParameters',
                     'doctor.user',
                 ])->first(),
             ]);
@@ -236,6 +239,9 @@ class MedicalEntryController extends Controller
                 'medicalEntry.latestActiveVersion.vitalParameters',
                 'medicalEntry.latestActiveVersion.prescriptions',
                 'medicalEntry.latestActiveVersion.attachments',
+                'medicalEntry.versions.attachments',
+                    'medicalEntry.versions.prescriptions',
+                    'medicalEntry.versions.vitalParameters',
                 'doctor.user',
             ])->first(),
         ]);
