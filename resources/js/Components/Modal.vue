@@ -16,6 +16,7 @@ const confirmDelete = () => {
     router.delete(route(`${props.baseRoute}.destroy`, props.item.id), {
         preserveScroll: true,
         onSuccess: (page) => {
+
             emit("deleted", page.props.items || page.props.specialties);
             emit("close");
         },
@@ -39,7 +40,7 @@ const displayName = (item) => {
     }
 
     // case product or drugs
-    if(item.product?.name || item.drug?.name){
+    if (item.product?.name || item.drug?.name) {
         return item.product ? item.product.name : item.drug.name;
     }
 
@@ -58,11 +59,7 @@ const displayName = (item) => {
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Conferma eliminazione</h5>
-                    <button
-                        type="button"
-                        class="btn-close"
-                        @click="$emit('close')"
-                    ></button>
+                    <button type="button" class="btn-close" @click="$emit('close')"></button>
                 </div>
                 <div class="modal-body">
                     <p>Vuoi davvero eliminare "{{ displayName(item) }}"?</p>

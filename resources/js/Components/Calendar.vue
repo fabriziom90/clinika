@@ -1,13 +1,14 @@
 <script setup>
 import { VueCal } from "vue-cal";
 import "../../../node_modules/vue-cal/dist/vue-cal.css";
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { useForm } from "@inertiajs/vue3";
 import { useToast } from "vue-toast-notification";
 import Modal from "@/Components/Modal.vue";
 import DetailModal from "@/Pages/Calendar/DetailModal.vue";
 import { useConfigStore } from "@/stores/main";
 import PersonForm from "@/Components/PersonForm.vue";
+import { useAppointmentStore } from "@/stores/appointments";
 
 // debounce variable to handle click or doubleClick
 let clickTimeout = null;
@@ -23,6 +24,7 @@ const props = defineProps({
 });
 
 const configStore = useConfigStore();
+const appointmentsStore = useAppointmentStore();
 
 const $toast = useToast();
 // variable to show new appointment modal
@@ -38,6 +40,7 @@ const eventToShow = ref(null);
 
 // variable for dragging
 const editingEventId = ref(null);
+const isEditingAppointment = ref(false);
 const suppressClickAfterDrag = ref(false);
 
 //check if there is an event handling
@@ -68,18 +71,26 @@ const formAppointment = useForm({
     notes: "",
 });
 
+onMounted(() => {
+    appointmentsStore.setAppointments(props.appointments);
+
+});
+
 // computed property to show events in calendar
 const calendarEvents = computed(() => {
 
-    return props.appointments.map((appointment) => ({
+    return appointmentsStore.items.map((appointment) => ({
         id: appointment.id,
         start: isoToLocalDate(appointment.start_time),
         end: isoToLocalDate(appointment.end_time),
-        title: configStore.user.roles[0] === 'superadmin' ? `${appointment.doctor.user.name} ${appointment.doctor.user.surname}` : appointment.service?.name,
+        title:
+            configStore.user.roles[0] === "superadmin"
+                ? `${appointment.doctor.user.name} ${appointment.doctor.user.surname}`
+                : appointment.service?.name,
     }));
 });
 
-// computed property to get doctor's services 
+// computed property to get doctor's services
 const availableServices = computed(() => {
     if (props.doctor) {
         return props.doctor.services ?? [];
@@ -88,10 +99,10 @@ const availableServices = computed(() => {
     if (!newAppointmentData.value.doctorId) return [];
 
     const doc = props.doctors.find(
-        doctor => doctor.id === newAppointmentData.value.doctorId
+        (doctor) => doctor.id === newAppointmentData.value.doctorId,
     );
 
-    return doc?.services ?? []
+    return doc?.services ?? [];
 });
 
 //watch to prepopulate duration
@@ -99,13 +110,14 @@ watch(
     () => newAppointmentData.value.serviceId,
     (serviceId) => {
         if (!serviceId) return;
-        const service = availableServices.value.find(s => s.id === serviceId)
+
+        if (isEditingAppointment.value) return;
+        const service = availableServices.value.find((s) => s.id === serviceId);
 
         if (!service) return;
         newAppointmentData.value.duration = service.pivot.duration_minutes;
-
-    }
-)
+    },
+);
 
 // click on empty cell in calendar to get date and time and show modal for new appointment insertion
 const handleCellClick = (clickedTime) => {
@@ -135,10 +147,14 @@ const handleNewAppointment = () => {
         formAppointment.patch(
             route("admin.appointments.update", editingEventId.value),
             {
-                onSuccess: () => {
+                onSuccess: (page) => {
                     showNewAppointmentModal.value = false;
                     // reset editing flag
                     editingEventId.value = null;
+
+                    //update store
+                    appointmentsStore.setAppointments(page.props.appointments);
+
                     // reset modale dati (come già fai)
                     Object.assign(newAppointmentData.value, {
                         date: null,
@@ -158,12 +174,15 @@ const handleNewAppointment = () => {
                     $toast.error(flat.join("<br>"));
                     onSaving.value = false;
                 },
-            }
+            },
         );
     } else {
         formAppointment.post(route("admin.appointments.store"), {
-            onSuccess: () => {
+            onSuccess: (page) => {
                 showNewAppointmentModal.value = false;
+
+                appointmentsStore.setAppointments(page.props.appointments);
+
 
                 // reset dei dati della modale
                 Object.assign(newAppointmentData.value, {
@@ -218,19 +237,21 @@ const handleEventDblClick = (event) => {
 
 // function that close delete modal
 const handleDeleted = (event) => {
+
     showDeleteModal.value = false;
+    appointmentsStore.remove(eventToDelete.value.id);
 };
 
 // function that open delete modal
 const openDeleteModal = (eventClicked) => {
-    const event = props.appointments.find(
-        (e) => e.id === eventClicked.event.id
+    const event = appointmentsStore.items.find(
+        (e) => e.id === eventClicked.event.id,
     );
 
     if (!event) return;
 
-    showDeleteModal.value = true;
     eventToDelete.value = event;
+    showDeleteModal.value = true;
 };
 
 // function that close delete modal
@@ -241,29 +262,22 @@ const closeDeleteModal = () => {
 
 // function that open detail modal
 const openDetailModal = (eventClicked) => {
-    const event = props.appointments.find(
-        (e) => e.id === eventClicked.event.id
-    );
-    console.log(event);
-    if (!event) return;
+    appointmentsStore.select(eventClicked.event.id);
 
     showDetailModal.value = true;
-    eventToShow.value = event;
 };
 
 // function that close detail modal
 const closeDetailModal = () => {
-    eventToShow.value = null;
+    appointmentsStore.select(null);
     showDetailModal.value = false;
 };
 
 // function that handles drag and drop
 const openEditFromCalendar = (payload) => {
     // normalizing payload vuecal
-    const ev =
-        payload?.event ??
-        payload?.originalEvent ??
-        payload;
+    const ev = payload?.event ?? payload?.originalEvent ?? payload;
+
 
     if (!ev || !ev.id) {
         console.error("Evento non valido", payload);
@@ -271,8 +285,8 @@ const openEditFromCalendar = (payload) => {
     }
 
     // get complete event from backend
-    const appointment = props.appointments.find(
-        a => String(a.id) === String(ev.id)
+    const appointment = appointmentsStore.items.find(
+        (a) => String(a.id) === String(ev.id),
     );
 
     if (!appointment) {
@@ -281,36 +295,22 @@ const openEditFromCalendar = (payload) => {
     }
 
     editingEventId.value = appointment.id;
+    isEditingAppointment.value = true;
 
     // date from drag
     const start = new Date(ev.start);
     const end = new Date(ev.end);
 
-    const durationMinutes = Math.max(
-        1,
-        Math.round((end - start) / 60000)
-    );
+    const durationMinutes = Math.max(1, Math.round((end - start) / 60000));
 
     // complete
     newAppointmentData.value = {
         date: formatDateForInput(start),
         startTime: formatTime(start),
-        doctorId:
-            appointment.doctor_id ??
-            appointment.doctor?.id ??
-            "",
-        patientId:
-            appointment.patient_id ??
-            appointment.patient?.id ??
-            "",
-        nurseId:
-            appointment.nurse_id ??
-            appointment.nurse?.id ??
-            "",
-        serviceId:
-            appointment.service_id ??
-            appointment.service?.id ??
-            "",
+        doctorId: appointment.doctor_id ?? appointment.doctor?.id ?? "",
+        patientId: appointment.patient_id ?? appointment.patient?.id ?? "",
+        nurseId: appointment.nurse_id ?? appointment.nurse?.id ?? "",
+        serviceId: appointment.service_id ?? appointment.service?.id ?? "",
         newPatient: false,
         duration: durationMinutes,
         notes: appointment.notes ?? "",
@@ -318,8 +318,7 @@ const openEditFromCalendar = (payload) => {
 
     // Inertia form
     formAppointment.date = newAppointmentData.value.date;
-    formAppointment.start_time =
-        `${newAppointmentData.value.date} ${newAppointmentData.value.startTime}:00`;
+    formAppointment.start_time = `${newAppointmentData.value.date} ${newAppointmentData.value.startTime}:00`;
     formAppointment.doctor_id = newAppointmentData.value.doctorId;
     formAppointment.patient_id = newAppointmentData.value.patientId;
     formAppointment.nurse_id = newAppointmentData.value.nurseId;
@@ -333,8 +332,12 @@ const openEditFromCalendar = (payload) => {
     setTimeout(() => (suppressClickAfterDrag.value = false), 300);
 };
 
-
-
+// wrapper function for edit event from button
+const editFromButton = (event) => {
+    openEditFromCalendar({
+        event,
+    });
+};
 
 // function that create new patient from modal
 const handleNewPatient = (newPatient) => {
@@ -357,7 +360,7 @@ function isoToLocalDate(iso) {
         d.getMonth(),
         d.getDate(),
         d.getHours(),
-        d.getMinutes()
+        d.getMinutes(),
     );
 }
 
@@ -376,268 +379,184 @@ function formatDateForInput(date) {
 </script>
 
 <template lang="">
-
-        <vue-cal
-            :time="true"
-            default-view="week"
-            locale="it"
-            :views="['week', 'month']"
-            :titlebar="false"
-            @cell-click="handleCellClick"
-            :events="calendarEvents"
-            :today-button="false"
-            :time-cell-height="120"
-            :time-from="7 * 60"
-            :time-to="22 * 60"
-            @event-click="handleEventClick"
-            @event-dblclick="handleEventDblClick"
-            @event-drop="openEditFromCalendar"
-            @event-change="openEditFromCalendar"
-            :editable-events="{
-                title: false,
-                drag: true,
-                resize: false,
-                delete: false,
-            }"
-        />
-            
-        <div
-            v-if="showNewAppointmentModal"
-            class="modal fade show modal-bg"
-            style="display: block"
-        >
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header d-flex justify-content-between">
-                        <h5 class="modal-title">{{ editingEventId ? 'Modifica appuntamento' : 'Nuovo appuntamento' }}</h5>
-                        <button
-                            type="button"
-                            class="close-modal"
-                            @click="showNewAppointmentModal = false"
-                        >
-                            <i class="fas fa-times"></i>
-                        </button>
+    <vue-cal
+        :time="true"
+        default-view="week"
+        locale="it"
+        :views="['week', 'month']"
+        :titlebar="false"
+        @cell-click="handleCellClick"
+        :events="calendarEvents"
+        :today-button="false"
+        :time-cell-height="120"
+        :time-from="7 * 60"
+        :time-to="22 * 60"
+        @event-click="handleEventClick"
+        @event-dblclick="handleEventDblClick"
+        @event-drop="openEditFromCalendar"
+        @event-change="openEditFromCalendar"
+        :editable-events="{
+            title: false,
+            drag: true,
+            resize: false,
+            delete: false,
+        }"
+    >
+        <template #event="{ event }">
+            <div class="event-wrapper">
+                <div class="d-flex">
+                    <div class="event-title">
+                        {{ event.title }}
                     </div>
-                    <div class="modal-body">
-                        <form class="row g-3">
-                            <div class="col-12 col-md-4">
-                                <label class="form-label">Medico</label>
-
-                                <!-- SE siamo nella pagina del medico -->
-                                <select
-                                    v-if="doctor"
-                                    class="form-select"
-                                    v-model="newAppointmentData.doctorId"
-                                    disabled
-                                >
-                                    <option :value="doctor.id">
-                                        {{ doctor.user.name }} {{ doctor.user.surname }}
-                                    </option>
-                                </select>
-
-                                <!-- SE siamo nell'agenda generale -->
-                                <select
-                                    v-else
-                                    class="form-select"
-                                    v-model="newAppointmentData.doctorId"
-                                    :class="{ 'is-invalid': formAppointment.errors.doctor_id }"
-                                >
-                                    <option value="">Seleziona medico</option>
-                                    <option
-                                        v-for="doc in doctors"
-                                        :key="doc.id"
-                                        :value="doc.id"
-                                    >
-                                        {{ doc.user.name }} {{ doc.user.surname }}
-                                    </option>
-                                </select>
-
-                                <span
-                                    v-if="formAppointment.errors.doctor_id"
-                                    class="text-danger"
-                                >
-                                    {{ formAppointment.errors.doctor_id }}
-                                </span>
-                            </div>
-
-                            <div class="col-12 col-md-4">
-                                <label class="form-label">Infermiere</label>
-                                <select
-                                    v-model="newAppointmentData.nurseId"
-                                    class="form-select"
-                                >
-                                    <option value="">
-                                        Seleziona infermiere
-                                    </option>
-                                    <option
-                                        v-for="nurse in nurses"
-                                        :key="nurse.id"
-                                        :value="nurse.id"
-                                    >
-                                        {{ nurse.user.name }}
-                                        {{ nurse.user.surname }}
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="col-12 col-md-4">
-                                <label class="form-label">Paziente</label>
-                                <select
-                                    :class="{
-                                        'is-invalid':
-                                            formAppointment.errors.patient_id,
-                                    }"
-                                    v-model="newAppointmentData.patientId"
-                                    class="form-select"
-                                    @change="
-                                        newAppointmentData.newPatient =
-                                            newAppointmentData.patientId ===
-                                            'new'
-                                    "
-                                >
-                                    <option value="">Seleziona paziente</option>
-                                    <option
-                                        v-for="patient in patients"
-                                        :key="patient.id"
-                                        :value="patient.id"
-                                    >
-                                        {{ patient.name }}
-                                        {{ patient.surname }}
-                                    </option>
-                                    <option value="new">Nuovo paziente</option>
-                                </select>
-                                <span
-                                    v-if="formAppointment.errors.patient_id"
-                                    class="text-danger"
-                                    >{{
-                                        formAppointment.errors.patient_id
-                                    }}</span>
-                            </div>
-
-                            <div
-                                v-if="newAppointmentData.newPatient"
-                                class="mt-4"
-                            >
-                                <PersonForm
-                                    :nationalities="nationalities"
-                                    formType="patient"
-                                    :inlineMode="true"
-                                    @savedInline="handleNewPatient"
-                                />
-                            </div>
-
-                            <div class="col-12 col-md-6 mt-3">
-                                <label class="form-label">Titolo</label>
-                                <select name="" id="" class="form-select" v-model="newAppointmentData.serviceId">
-                                    <option value="">Seleziona prestazione</option>
-                                    <option :value="service.id" :key="service.id" v-for="service in availableServices">{{ service.name }}</option>
-                                </select>
-                            </div>
-                            <div class="col-12 col-md-6 mt-3">
-                                <label for="" class="form-label"
-                                    >Giorno appuntamento</label
-                                >
-                                <input
-                                    :class="{
-                                        'is-invalid':
-                                            formAppointment.errors.date,
-                                    }"
-                                    type="date"
-                                    class="form-control"
-                                    v-model="newAppointmentData.date"
-                                    placeholder="Data appuntamento"
-                                />
-                                <span
-                                    v-if="formAppointment.errors.date"
-                                    class="text-danger"
-                                    >{{
-                                        formAppointment.errors.date
-                                    }}</span>
-                            </div>
-                            <div class="col-12 col-md-6 mt-3">
-                                <label for="" class="form-label"
-                                    >Orario appuntamento</label
-                                >
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    :class="{
-                                        'is-invalid':
-                                            formAppointment.errors.start_time,
-                                    }"
-                                    v-model="newAppointmentData.startTime"
-                                    placeholder="Orario appuntamento"
-                                />
-                                <span
-                                    v-if="formAppointment.errors.start_time"
-                                    class="text-danger"
-                                    >{{
-                                        formAppointment.errors.start_time
-                                    }}</span>
-                            </div>
-                            <div class="col-12 col-md-6 mt-3">
-                                <label class="form-label"
-                                    >Durata (minuti)</label
-                                >
-                                <input
-                                    type="number"
-                                    min="1"
-                                    v-model="newAppointmentData.duration"
-                                    class="form-control"
-                                    :class="{
-                                        'is-invalid':
-                                            formAppointment.errors.duration,
-                                    }"
-                                    placeholder="30"
-                                />
-                                <span
-                                    v-if="formAppointment.errors.duration"
-                                    class="text-danger"
-                                    >{{
-                                        formAppointment.errors.duration
-                                    }}</span>
-                            </div>
-
-                            <div class="col-12 mt-3">
-                                <label class="form-label">Note</label>
-                                <textarea
-                                    v-model="newAppointmentData.notes"
-                                    class="form-control"
-                                    rows="3"
-                                    placeholder="Inserisci eventuali note..."
-                                ></textarea>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
+                    <div class="event-actions">
                         <button
-                            class="secondary-button"
-                            @click="showNewAppointmentModal = false"
+                            class="btn btn-sm btn-warning"
+                            @click.stop="editFromButton(event)"
                         >
-                            Annulla
-                        </button>
-                        <button
-                            class="main-button"
-                            @click="handleNewAppointment"
-                        >
-                            Salva
+                            <i class="fas fa-edit"></i>
                         </button>
                     </div>
                 </div>
             </div>
+        </template>
+</vue-cal>
+<div v-if="showNewAppointmentModal" class="modal fade show modal-bg" style="display: block">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header d-flex justify-content-between">
+                <h5 class="modal-title">
+                    {{
+                    editingEventId
+                    ? "Modifica appuntamento"
+                    : "Nuovo appuntamento"
+                    }}
+                </h5>
+                <button type="button" class="close-modal" @click="showNewAppointmentModal = false">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="row g-3">
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">Medico</label>
+
+                        <!-- SE siamo nella pagina del medico -->
+                        <select v-if="doctor" class="form-select" v-model="newAppointmentData.doctorId" disabled>
+                            <option :value="doctor.id">
+                                {{ doctor.user.name }}
+                                {{ doctor.user.surname }}
+                            </option>
+                        </select>
+
+                        <!-- SE siamo nell'agenda generale -->
+                        <select v-else class="form-select" v-model="newAppointmentData.doctorId" :class="{
+                                    'is-invalid':
+                                        formAppointment.errors.doctor_id,
+                                }">
+                            <option value="">Seleziona medico</option>
+                            <option v-for="doc in doctors" :key="doc.id" :value="doc.id">
+                                {{ doc.user.name }} {{ doc.user.surname }}
+                            </option>
+                        </select>
+
+                        <span v-if="formAppointment.errors.doctor_id" class="text-danger">
+                            {{ formAppointment.errors.doctor_id }}
+                        </span>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">Infermiere</label>
+                        <select v-model="newAppointmentData.nurseId" class="form-select">
+                            <option value="">Seleziona infermiere</option>
+                            <option v-for="nurse in nurses" :key="nurse.id" :value="nurse.id">
+                                {{ nurse.user.name }}
+                                {{ nurse.user.surname }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">Paziente</label>
+                        <select :class="{
+                                    'is-invalid':
+                                        formAppointment.errors.patient_id,
+                                }" v-model="newAppointmentData.patientId" class="form-select" @change="
+                                    newAppointmentData.newPatient =
+                                        newAppointmentData.patientId === 'new'
+                                ">
+                            <option value="">Seleziona paziente</option>
+                            <option v-for="patient in patients" :key="patient.id" :value="patient.id">
+                                {{ patient.name }}
+                                {{ patient.surname }}
+                            </option>
+                            <option value="new">Nuovo paziente</option>
+                        </select>
+                        <span v-if="formAppointment.errors.patient_id" class="text-danger">{{
+                            formAppointment.errors.patient_id }}</span>
+                    </div>
+
+                    <div v-if="newAppointmentData.newPatient" class="mt-4">
+                        <PersonForm :nationalities="nationalities" formType="patient" :inlineMode="true"
+                            @savedInline="handleNewPatient" />
+                    </div>
+
+                    <div class="col-12 col-md-6 mt-3">
+                        <label class="form-label">Titolo</label>
+                        <select name="" id="" class="form-select" v-model="newAppointmentData.serviceId">
+                            <option value="">Seleziona prestazione</option>
+                            <option :value="service.id" :key="service.id" v-for="service in availableServices">
+                                {{ service.name }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-6 mt-3">
+                        <label for="" class="form-label">Giorno appuntamento</label>
+                        <input :class="{
+                                    'is-invalid': formAppointment.errors.date,
+                                }" type="date" class="form-control" v-model="newAppointmentData.date"
+                            placeholder="Data appuntamento" />
+                        <span v-if="formAppointment.errors.date" class="text-danger">{{ formAppointment.errors.date
+                            }}</span>
+                    </div>
+                    <div class="col-12 col-md-6 mt-3">
+                        <label for="" class="form-label">Orario appuntamento</label>
+                        <input type="text" class="form-control" :class="{
+                                    'is-invalid':
+                                        formAppointment.errors.start_time,
+                                }" v-model="newAppointmentData.startTime" placeholder="Orario appuntamento" />
+                        <span v-if="formAppointment.errors.start_time" class="text-danger">{{
+                            formAppointment.errors.start_time }}</span>
+                    </div>
+                    <div class="col-12 col-md-6 mt-3">
+                        <label class="form-label">Durata (minuti)</label>
+                        <input type="number" min="1" v-model="newAppointmentData.duration" class="form-control" :class="{
+                                    'is-invalid':
+                                        formAppointment.errors.duration,
+                                }" placeholder="30" />
+                        <span v-if="formAppointment.errors.duration" class="text-danger">{{
+                            formAppointment.errors.duration }}</span>
+                    </div>
+
+                    <div class="col-12 mt-3">
+                        <label class="form-label">Note</label>
+                        <textarea v-model="newAppointmentData.notes" class="form-control" rows="3"
+                            placeholder="Inserisci eventuali note..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary-button" @click="showNewAppointmentModal = false">
+                    Annulla
+                </button>
+                <button class="main-button" @click="handleNewAppointment">
+                    Salva
+                </button>
+            </div>
         </div>
-        <Modal
-            :show="showDeleteModal"
-            :item="eventToDelete"
-            baseRoute="admin.appointments"
-            @close="closeDeleteModal"
-            @deleted="handleDeleted"
-        />
-        <DetailModal
-            :show="showDetailModal"
-            @close="closeDetailModal"
-            :item="eventToShow"
-        />
-    
+    </div>
+</div>
+<Modal :show="showDeleteModal" :item="eventToDelete" baseRoute="admin.appointments" @close="closeDeleteModal"
+    @deleted="handleDeleted" />
+<DetailModal :key="eventToShow?.id + '-' + eventToShow?.status" :show="showDetailModal" @close="closeDetailModal" />
 </template>
 
 <style lang="scss">

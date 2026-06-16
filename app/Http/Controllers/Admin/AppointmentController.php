@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\AppointmentStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentRequest;
@@ -10,7 +11,9 @@ use App\Models\Doctor;
 use App\Models\Nationality;
 use App\Models\Nurse;
 use App\Models\Patient;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\Enum;
 
 class AppointmentController extends Controller
 {
@@ -77,6 +80,7 @@ class AppointmentController extends Controller
 
         $appointment = new Appointment;
         $appointment->doctor_id = $form_data['doctor_id'];
+        $appointment->status = AppointmentStatus::Scheduled;
         $appointment->nurse_id = $form_data['nurse_id'];
         $appointment->patient_id = $form_data['patient_id'];
         $appointment->service_id = $form_data['service_id'];
@@ -154,5 +158,15 @@ class AppointmentController extends Controller
                 'message' => 'Appuntamento cancellato correttamente',
             ],
         ]);
+    }
+
+    public function updateStatus(Request $request, Appointment $appointment){
+        $validated = $request->validate([
+            'status' => ['required', new Enum(AppointmentStatus::class)],
+        ]);
+
+        $appointment->update(['status' => $validated['status']]);
+
+        return redirect()->back();
     }
 }

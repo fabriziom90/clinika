@@ -2,6 +2,7 @@
 import { Head } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Calendar from "@/Components/Calendar.vue";
+import { useAppointmentStore } from "@/stores/appointments";
 
 const props = defineProps({
     appointments: Array,
@@ -12,13 +13,15 @@ const props = defineProps({
     userIsSuperadmin: Boolean,
 });
 
+const appointmentsStore = useAppointmentStore();
+appointmentsStore.setAppointments(props.appointments);
 
 </script>
 
 <template lang="">
     <Head title="Agenda"></Head>
     <AuthenticatedLayout section="calendar">
-        
+
         <h2>Calendario</h2>
 
         <Calendar
@@ -43,6 +46,7 @@ const props = defineProps({
 
 .vuecal__views-bar {
     background-color: $mainRed;
+
     button {
         color: #fff;
     }
@@ -54,14 +58,18 @@ const props = defineProps({
 
 .vuecal__cell-events {
     width: 100%;
+
     .vuecal__event {
         background-color: $mainRedHover;
         border-color: $mainRed;
+
         .vuecal__event-details {
             font-size: 20px;
+
             .vuecal__event-title {
                 padding-bottom: 5px;
             }
+
             .vuecal__event-time {
                 border-top: 1px solid #fff;
                 padding-top: 5px;
@@ -71,9 +79,7 @@ const props = defineProps({
     }
 }
 
-.vuecal--default-theme.vuecal--light
-    .vuecal__weekday:not(.vuecal__weekday--today)
-    .vuecal__weekday-date {
+.vuecal--default-theme.vuecal--light .vuecal__weekday:not(.vuecal__weekday--today) .vuecal__weekday-date {
     background-color: $mainRedHover;
     color: #fff;
 }
@@ -111,6 +117,7 @@ const props = defineProps({
         width: 30px;
         height: 30px;
         transition: 0.3s;
+
         &:hover {
             background-color: darkred;
         }

@@ -69,6 +69,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('roles-permissions', [RoleController::class, 'index'])->name('roles-permissions.index');
         Route::post('roles-permissions/toggle', [RoleController::class, 'togglePermission'])->name('roles-permissions.toggle');
         Route::resource('appointments', AppointmentController::class);
+        Route::put("/appointments/{appointment}/status", [AppointmentController::class, 'updateStatus']);
     });
 });
 

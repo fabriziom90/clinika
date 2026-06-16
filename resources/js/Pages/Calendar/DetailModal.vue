@@ -1,6 +1,9 @@
 <script setup>
-import { ref, defineEmits } from "vue";
+import { ref, defineEmits, computed } from "vue";
 import { useConfigStore } from "@/stores/main";
+import { useToast } from "vue-toast-notification";
+import { router } from "@inertiajs/vue3";
+import { useAppointmentStore } from "@/stores/appointments";
 
 const emit = defineEmits(["close"]);
 const props = defineProps({
@@ -8,7 +11,13 @@ const props = defineProps({
     item: Object,
 });
 
+const appointmentsStore = useAppointmentStore();
 const configStore = useConfigStore();
+
+const editingStatus = ref(false);
+const selectedStatus = ref("scheduled");
+const $toast = useToast();
+const item = computed(() => appointmentsStore.selected);
 
 const formatDate = (date) => {
     const dateObj = new Date(date);
@@ -26,15 +35,47 @@ const formatHour = (date) => {
 
     return `${hours}:${minutes}`;
 };
+
+const updateStatus = () => {
+
+    router.put(`/admin/appointments/${item.value.id}/status`, { status: selectedStatus.value }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            appointmentStore.updateStatus(
+                item.value.id,
+                selectedStatus.value,
+                getLabel(selectedStatus.value)
+            )
+            $toast.success("Stato appuntamento cambiato correttamente");
+
+        }
+    })
+}
 </script>
 <template lang="">
 
     <div v-if="show" class="modal fade show modal-bg" style="display: block">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                
+
                 <div class="modal-header">
-                    <h5 class="modal-title">Dettaglio appuntamento</h5>
+                    <h5 class="modal-title">Dettaglio appuntamento -
+                        <span class="status-pill" @click="editingStatus = !editingStatus">
+                            {{ item.status_label }}
+                        </span>
+                    </h5>
+                    <div v-if="editingStatus" class="status-editor ms-2">
+                        <select class="form-select py-0 my-0" v-model="selectedStatus">
+                            <option value="scheduled">Prenotato</option>
+                            <option value="completed">Completato</option>
+                            <option value="cancelled">Cancellato</option>
+                            <option value="no_show">Assente</option>
+                        </select>
+
+                        <button class="secondary-button py-0" @click="updateStatus">
+                            Salva
+                        </button>
+                    </div>
                     <button
                         type="button"
                         class="btn-close"
@@ -101,5 +142,27 @@ strong {
 .infos {
     font-size: 15px;
     font-style: italic;
+}
+
+.status-pill {
+    background: #ffffff;
+    color: #C53238;
+    padding: 4px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: 0.3s;
+
+    &:active,
+    &:hover {
+        background: #fcd7d9;
+    }
+}
+
+.status-editor {
+    margin-top: 5px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
 </style>

@@ -26,4 +26,9 @@ class Service extends Model implements AuditableContract
     {
         $this->belongsTo(Appointment::class);
     }
+
+    public function invoiceItems()
+    {
+        return $this->hasMany(InvoiceItem::class);
+    }
 }
