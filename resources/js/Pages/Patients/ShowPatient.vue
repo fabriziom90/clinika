@@ -93,6 +93,9 @@ const formatDate = (dateString) => {
                                     <div class="col-12 col-md-2"> <label for="" class="form-label">Indirizzo</label>
                                         <p>{{ patient.address }}</p>
                                     </div>
+                                    <div class="col-12 col-md-2"><label for="" class="form-label">CAP</label>
+                                        <p>{{ patient.zip_code }}</p>
+                                    </div>
                                 </div>
                                 <hr>
                                 <div class="row gy-3">
@@ -106,7 +109,7 @@ const formatDate = (dateString) => {
                                     <div class="col-12 col-md-2"> <label for="" class="form-label">Telefono</label>
                                         <p>{{
                                             patient.phone
-                                            }}</p>
+                                        }}</p>
                                     </div>
                                 </div>
                             </div>

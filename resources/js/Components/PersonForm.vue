@@ -41,6 +41,7 @@ const form = useForm({
     birthday: "",
     birth_city: "",
     city: "",
+    zip_code: "",
     address: "",
     nationality_id: "",
     personal_code: "",
@@ -85,6 +86,7 @@ onMounted(() => {
     form.birthday = person.birthday ?? "";
     form.birth_city = person.birth_city ?? "";
     form.city = person.city ?? "";
+    form.zip_code = person.zip_code ?? "";
     form.address = person.address ?? "";
     form.nationality_id = person.nationality_id ?? "";
     form.personal_code = person.personal_code ?? "";
@@ -124,7 +126,7 @@ const hideSuggestions = (type) => {
     }, 200);
 };
 
-// Add service row 
+// Add service row
 const addRow = () => {
     form.services.push({
         name: "",
@@ -182,7 +184,7 @@ watch(
 );
 
 watch(() => form.specialty_id, (newVal, oldVal) => {
-     if (!props.person) {
+    if (!props.person) {
         form.services = [{
             service_id: "",
             price: "",
@@ -199,7 +201,7 @@ const onServiceChange = (index) => {
     const selected = filteredServices.value.find(
         s => s.id === row.service_id
     )
-    
+
     if (selected) {
         row.duration = selected.default_duration
         row.price = selected.default_price
@@ -470,6 +472,22 @@ const handleSubmitForm = () => {
                 }}</span>
             </div>
             <div class="col-12 col-md-4">
+                <label for="" class="form-label">CAP</label>
+                <input
+                    type="text"
+                    class="form-control"
+                    :class="{ 'is-invalid': form.errors.zip_code }"
+                    placeholder="Inserisci cap"
+                    name="zip_code"
+                    id="zip_code"
+                    v-model="form.zip_code"
+                    required
+                />
+                <span v-if="form.errors.zip_code" class="text-danger">{{
+                    form.errors.zip_code
+                }}</span>
+            </div>
+            <div class="col-12 col-md-4">
                 <label for="" class="form-label">Codice fiscale</label>
                 <input
                     type="text"
@@ -578,7 +596,7 @@ const handleSubmitForm = () => {
                                 <option :value="0">Disattiva</option>
                             </select>
                         </div>
-                        <div class="col-md-2">    
+                        <div class="col-md-2">
                             <button
                                 v-if="form.services.length > 1"
                                 class="main-button"
@@ -590,7 +608,7 @@ const handleSubmitForm = () => {
                         </div>
                     </div>
 
-                    
+
                 </div>
                 <button class="secondary-button mb-3" type="button" @click="addRow">
                     + Aggiungi prestazione

@@ -5,12 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMedicalEntryRequest;
 use App\Http\Requests\UpdateMedicalEntryRequest;
-
 use App\Models\MedicalEntry;
-use Illuminate\Support\Facades\Auth;
-
-use OwenIt\Auditing\Models\Audit;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Auth;
+use OwenIt\Auditing\Models\Audit;
 
 class MedicalEntryController extends Controller
 {
@@ -68,17 +66,17 @@ class MedicalEntryController extends Controller
         ]);
 
         // CREAZIONE PARAMETRI VITALI collegati alla versione
-        if (!empty($data['vital_parameters'])) {
-            $vitals = collect($data['vital_parameters'])->filter(fn($v) => $v !== null && $v !== '')->toArray();
-            if (!empty($vitals)) {
+        if (! empty($data['vital_parameters'])) {
+            $vitals = collect($data['vital_parameters'])->filter(fn ($v) => $v !== null && $v !== '')->toArray();
+            if (! empty($vitals)) {
                 $version->vitalParameters()->create($vitals);
             }
         }
 
         // CREAZIONE PRESCRIZIONI collegate alla versione
-        if (!empty($data['prescriptions'])) {
+        if (! empty($data['prescriptions'])) {
             foreach ($data['prescriptions'] as $prescriptionData) {
-                if (!empty($prescriptionData['drug_name'] ?? null)) {
+                if (! empty($prescriptionData['drug_name'] ?? null)) {
                     $version->prescriptions()->create($prescriptionData);
                 }
             }
@@ -102,7 +100,7 @@ class MedicalEntryController extends Controller
         Audit::forceCreate([
             'user_id' => $user->id,
             'user_type' => get_class($user),
-            'event' => 'create',
+            'event' => 'created',
             'auditable_type' => get_class($entry),
             'auditable_id' => $entry->id,
             'ip_address' => request()->ip(),
@@ -139,17 +137,17 @@ class MedicalEntryController extends Controller
      * Update the specified resource in storage.
      */
     public function update(UpdateMedicalEntryRequest $request, MedicalEntry $medicalEntry)
-    {   
-        
+    {
+
         $entry = $medicalEntry;
         $data = $request->validated();
         $user = Auth::user();
 
         // Recupero ultima versione
         $latestVersion = $entry->latestVersion;
-        
+
         // Se è richiesto il void della versione
-        if (!empty($data['is_voided'])) {
+        if (! empty($data['is_voided'])) {
             $latestVersion->update([
                 'is_voided' => true,
                 'voided_at' => now(),
@@ -195,17 +193,17 @@ class MedicalEntryController extends Controller
         ]);
 
         // Aggiorno parametri vitali
-        if (!empty($data['vital_parameters'])) {
-            $vitals = collect($data['vital_parameters'])->filter(fn($v) => $v !== null && $v !== '')->toArray();
-            if (!empty($vitals)) {
+        if (! empty($data['vital_parameters'])) {
+            $vitals = collect($data['vital_parameters'])->filter(fn ($v) => $v !== null && $v !== '')->toArray();
+            if (! empty($vitals)) {
                 $newVersion->vitalParameters()->create($vitals);
             }
         }
 
         // Aggiorno prescrizioni
-        if (!empty($data['prescriptions'])) {
+        if (! empty($data['prescriptions'])) {
             foreach ($data['prescriptions'] as $prescriptionData) {
-                if (!empty($prescriptionData['drug_name'] ?? null)) {
+                if (! empty($prescriptionData['drug_name'] ?? null)) {
                     $newVersion->prescriptions()->create($prescriptionData);
                 }
             }
@@ -222,7 +220,7 @@ class MedicalEntryController extends Controller
         Audit::forceCreate([
             'user_id' => $user->id,
             'user_type' => get_class($user),
-            'event' => 'update',
+            'event' => 'updated',
             'auditable_type' => get_class($entry),
             'auditable_id' => $entry->id,
             'ip_address' => request()->ip(),
@@ -240,8 +238,8 @@ class MedicalEntryController extends Controller
                 'medicalEntry.latestActiveVersion.prescriptions',
                 'medicalEntry.latestActiveVersion.attachments',
                 'medicalEntry.versions.attachments',
-                    'medicalEntry.versions.prescriptions',
-                    'medicalEntry.versions.vitalParameters',
+                'medicalEntry.versions.prescriptions',
+                'medicalEntry.versions.vitalParameters',
                 'doctor.user',
             ])->first(),
         ]);
@@ -256,7 +254,7 @@ class MedicalEntryController extends Controller
             'doctor.user',
             'latestActiveVersion.vitalParameters',
             'latestActiveVersion.prescriptions',
-            'latestActiveVersion.attachments'
+            'latestActiveVersion.attachments',
         ]);
 
         $version = $medicalEntry->latestActiveVersion;

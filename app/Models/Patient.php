@@ -22,6 +22,7 @@ class Patient extends Model implements AuditableContract
         'email',
         'nationality_id',
         'genre',
+        'zip_code'
     ];
 
     protected $casts = [
@@ -33,6 +34,7 @@ class Patient extends Model implements AuditableContract
         'address' => 'encrypted',
         'phone' => 'encrypted',
         'email' => 'encrypted',
+        'zip_code' => 'encrypted'
 
     ];
 
@@ -77,7 +79,7 @@ class Patient extends Model implements AuditableContract
     {
         $sensitive = [
             'personal_code', 'birthday', 'birth_city',
-            'city', 'address', 'phone', 'email', 'genre',
+            'city', 'zip_code', 'address', 'phone', 'email', 'genre',
             'password', 'remember_token',
         ];
 

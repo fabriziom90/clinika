@@ -79,13 +79,4 @@ const displayName = (item) => {
 <style lang="scss" scoped>
 @use "../../scss/app.scss";
 @use "../../scss/_partials/variables" as *;
-
-.modal-bg {
-    background-color: $mainBgTransparent;
-
-    .modal-header {
-        background-color: $mainRed;
-        color: #fff;
-    }
-}
 </style>

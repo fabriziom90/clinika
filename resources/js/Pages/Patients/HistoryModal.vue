@@ -67,23 +67,23 @@ const formatType = (type) => {
                             </div>
                             <div class="col-2">
                                 <label for=""><strong>Pressione</strong></label>
-                                <p>{{ version.vital_parameters.pressure }}</p>
+                                <p>{{ version.vital_parameters?.pressure }}</p>
                             </div>
                             <div class="col-4">
                                 <label for=""><strong>Frequenza Cardiaca</strong></label>
-                                <p>{{ version.vital_parameters.heart_rate }}</p>
+                                <p>{{ version.vital_parameters?.heart_rate }}</p>
                             </div>
                             <div class="col-2">
                                 <label for=""><strong>Temperatura</strong></label>
-                                <p>{{ version.vital_parameters.temperature }}</p>
+                                <p>{{ version.vital_parameters?.temperature }}</p>
                             </div>
                             <div class="col-2">
                                 <label for=""><strong>Peso</strong></label>
-                                <p>{{ version.vital_parameters.weight }}</p>
+                                <p>{{ version.vital_parameters?.weight }}</p>
                             </div>
                             <div class="col-2">
                                 <label for=""><strong>Altezza</strong></label>
-                                <p>{{ version.vital_parameters.height }}</p>
+                                <p>{{ version.vital_parameters?.height }}</p>
                             </div>
                         </div>
                         <div class="row" v-for="prescription in version.prescriptions"

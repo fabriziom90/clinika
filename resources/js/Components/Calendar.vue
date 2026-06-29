@@ -410,10 +410,10 @@ function formatDateForInput(date) {
                     </div>
                     <div class="event-actions">
                         <button
-                            class="btn btn-sm btn-warning"
+                            class="btn btn-xs rounded-5 ms-2 btn-light"
                             @click.stop="editFromButton(event)"
                         >
-                            <i class="fas fa-edit"></i>
+                            <i class="fas fa-pencil"></i>
                         </button>
                     </div>
                 </div>
@@ -647,6 +647,11 @@ function formatDateForInput(date) {
             background-color: darkred;
         }
     }
+}
+
+.btn-xs {
+    font-size: 12px;
+    padding: 5px 7px;
 }
 
 /* NUOVA VERSIONE: Stili modal */

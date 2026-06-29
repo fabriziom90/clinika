@@ -82,7 +82,11 @@ const logout = () => {
                 >
             </li>
             <li class="list-item" v-if="hasRole('superadmin')">
-                <a href="#">Fatture</a>
+                <Link
+                    :class="isRouteActive(['invoices']) ? 'active' : ''"
+                    :href="route('admin.invoices.index')"
+                    >Fatture</Link
+                >
             </li>
             <li class="list-item submenu-open" v-if="hasRole('superadmin')">
                 <a
@@ -268,7 +272,7 @@ ul {
             display: relative;
         }
 
-        &.submenu-open:hover > .submenu {
+        &.submenu-open:hover>.submenu {
             display: block;
             position: absolute;
             z-index: 100;
@@ -278,6 +282,7 @@ ul {
 
             li {
                 padding: 20px 30px;
+
                 &:not(:last-child) {
                     border-bottom: 1px solid $mainRed;
                 }

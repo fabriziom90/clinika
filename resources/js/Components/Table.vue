@@ -104,8 +104,8 @@ const totalPages = computed(() =>
 );
 
 const paginatedItems = computed(() => {
-    
-    if(Object.keys(sortedItems.value).length === 0) return 0;
+
+    if (Object.keys(sortedItems.value).length === 0) return 0;
     const start = (currentPage.value - 1) * perPage.value;
     const end = start + perPage.value;
     return sortedItems.value.slice(start, end);
@@ -161,10 +161,10 @@ const saveEdit = (id) => {
             emit(
                 "updated",
                 page.props.specialties ||
-                    page.props.clinicRooms ||
-                    page.props.inventoryProducts ||
-                    page.props.products ||
-                    page.props.items
+                page.props.clinicRooms ||
+                page.props.inventoryProducts ||
+                page.props.products ||
+                page.props.items
             );
         },
         onError: (err) => {
@@ -260,22 +260,14 @@ function normalizeValueForInput(value, key) {
         <table class="custom-table">
             <thead>
                 <tr>
-                    <th
-                        v-for="(col, key) in columns"
-                        :key="key"
-                        @click="sortBy(key)"
-                    >
+                    <th v-for="(col, key) in columns" :key="key" @click="sortBy(key)">
                         {{ col }}
-                        <i
-                            v-if="sortColumn === key"
-                            :class="[
-                                'fa',
-                                sortDirection === 'asc'
-                                    ? 'fa-sort-up'
-                                    : 'fa-sort-down',
-                            ]"
-                            class="ms-1"
-                        ></i>
+                        <i v-if="sortColumn === key" :class="[
+                            'fa',
+                            sortDirection === 'asc'
+                                ? 'fa-sort-up'
+                                : 'fa-sort-down',
+                        ]" class="ms-1"></i>
                     </th>
                     <th>Strumenti</th>
                 </tr>
@@ -283,12 +275,8 @@ function normalizeValueForInput(value, key) {
                 <!-- 🔽 Riga filtri per colonna -->
                 <tr>
                     <th v-for="(col, key) in columns" :key="key">
-                        <input
-                            v-model="columnFilters[key]"
-                            type="text"
-                            class="form-control column-filter"
-                            placeholder="Filtra..."
-                        />
+                        <input v-model="columnFilters[key]" type="text" class="form-control column-filter"
+                            placeholder="Filtra..." />
                     </th>
                     <th></th>
                 </tr>
@@ -297,110 +285,70 @@ function normalizeValueForInput(value, key) {
                 <tr v-for="item in paginatedItems" :key="item.id">
                     <td v-for="(col, key) in columns" :key="key">
                         <!-- Editing inline -->
-                        <template
-                            v-if="
-                                editingItem === item.id &&
-                                props.editableColumns.includes(key)
-                            "
-                        >
-                            <input
-                                v-if="key.toLowerCase().includes('date')"
-                                type="date"
-                                class="form-control"
-                                :value="
-                                    normalizeValueForInput(
-                                        editForms[item.id][key],
-                                        key
-                                    )
-                                "
-                                @input="
+                        <template v-if="
+                            editingItem === item.id &&
+                            props.editableColumns.includes(key)
+                        ">
+                            <input v-if="key.toLowerCase().includes('date')" type="date" class="form-control" :value="normalizeValueForInput(
+                                editForms[item.id][key],
+                                key
+                            )
+                                " @input="
                                     editForms[item.id][key] =
-                                        $event.target.value
-                                "
-                            />
+                                    $event.target.value
+                                    " />
 
-                            <input
-                                v-else
-                                v-model="editForms[item.id][key]"
-                                class="form-control"
-                            />
+                            <input v-else v-model="editForms[item.id][key]" class="form-control" />
                         </template>
                         <template v-else>
                             {{ displayValue(item, key) }}
                         </template>
                     </td>
                     <td class="actions">
-                        <template
-                            v-if="props.baseRoute === 'admin.clinic-rooms'"
-                        >
+                        <template v-if="props.baseRoute === 'admin.clinic-rooms'">
                             <Link class="show-button" :href="showUrl(item.id)">
                                 <i class="fas fa-eye"></i>
                             </Link>
                         </template>
-                        <template
-                            v-if="
-                                props.editableColumns.length &&
-                                editingItem !== item.id
-                            "
-                        >
-                            <button
-                                class="edit-button"
-                                @click="startEdit(item)"
-                            >
+                        <template v-if="
+                            props.editableColumns.length &&
+                            editingItem !== item.id
+                        ">
+                            <button class="edit-button" @click="startEdit(item)">
                                 <i class="fas fa-edit"></i>
                             </button>
                         </template>
 
                         <template v-else-if="editingItem === item.id">
-                            <button
-                                class="save-edit-button"
-                                @click="saveEdit(item.id)"
-                            >
+                            <button class="save-edit-button" @click="saveEdit(item.id)">
                                 <i class="fas fa-check"></i>
                             </button>
-                            <button
-                                class="cancel-edit-button"
-                                @click="cancelEdit"
-                            >
+                            <button class="cancel-edit-button" @click="cancelEdit">
                                 <i class="fas fa-times"></i>
                             </button>
                         </template>
 
                         <!-- Pulsanti standard per altre entità -->
-                        <Link
-                            v-if="!props.editableColumns.length"
-                            class="show-button"
-                            :href="showUrl(item.id)"
-                        >
+                        <Link v-if="!props.editableColumns.length" class="show-button" :href="showUrl(item.id)">
                             <i class="fas fa-eye"></i>
                         </Link>
-                        <Link
-                            v-if="!props.editableColumns.length && hasRole('superadmin')"
-                            class="edit-button"
-                            :href="editUrl(item.id)"
-                        >
+                        <Link v-if="!props.editableColumns.length && hasRole('superadmin')" class="edit-button"
+                            :href="editUrl(item.id)">
                             <i class="fas fa-edit"></i>
                         </Link>
 
-                        <button v-if="hasRole('superadmin')"
-                            class="delete-button"
-                            @click="
-                                () => {
-                                    deletingItem = item;
-                                    showDeleteModal = true;
-                                }
-                            "
-                        >
+                        <button v-if="hasRole('superadmin')" class="delete-button" @click="
+                            () => {
+                                deletingItem = item;
+                                showDeleteModal = true;
+                            }
+                        ">
                             <i class="fas fa-trash"></i>
                         </button>
-                        <button
-                            v-if="
-                                baseRoute === 'admin.doctors' ||
-                                baseRoute === 'admin.nurses'
-                            "
-                            class="btn-blue"
-                            @click="sendResetEmail(item)"
-                        >
+                        <button v-if="
+                            baseRoute === 'admin.doctors' ||
+                            baseRoute === 'admin.nurses'
+                        " class="btn-blue" @click="sendResetEmail(item)">
                             <i class="fas fa-envelope"></i>
                         </button>
                     </td>
@@ -418,27 +366,20 @@ function normalizeValueForInput(value, key) {
                 <i class="fas fa-angle-left"></i>
             </button>
             <span>Pagina {{ currentPage }} di {{ totalPages }}</span>
-            <button
-                :disabled="currentPage === totalPages"
-                @click="currentPage++"
-            >
+            <button :disabled="currentPage === totalPages" @click="currentPage++">
                 <i class="fas fa-angle-right"></i>
             </button>
         </div>
     </div>
-    <Modal
-        :show="showDeleteModal"
-        :item="deletingItem"
-        :baseRoute="baseRoute"
-        @close="closeDeleteModal"
-        @deleted="handleDeleted"
-    />
+    <Modal :show="showDeleteModal" :item="deletingItem" :baseRoute="baseRoute" @close="closeDeleteModal"
+        @deleted="handleDeleted" />
 </template>
 
 <style lang="scss" scoped>
 @use "../../scss/_partials/mixins" as *;
 @use "../../scss/_partials/variables" as *;
 @use "../../scss/app.scss";
+
 .table-wrapper {
     width: 100%;
 }
@@ -457,18 +398,6 @@ select {
 
     .global-filter {
         padding: 5px;
-    }
-}
-
-.pagination {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    margin-top: 10px;
-
-    button {
-        margin: 0 8px;
-        @include button-link($mainRed, $mainRedHover, #fff);
     }
 }
 </style>

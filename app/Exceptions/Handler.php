@@ -34,7 +34,7 @@ class Handler extends ExceptionHandler
     public function render($request, Throwable $exception)
     {
         // Se è una richiesta Inertia
-        if ($request->header('X-Inertia')) {
+        // if ($request->header('X-Inertia')) {
 
             // 403 (Forbidden)
             if ($exception instanceof \Illuminate\Auth\Access\AuthorizationException ||
@@ -54,7 +54,7 @@ class Handler extends ExceptionHandler
                     'message' => 'Pagina non trovata.',
                 ])->toResponse($request)->setStatusCode(404);
             }
-        }
+        // }
 
         return parent::render($request, $exception);
     }

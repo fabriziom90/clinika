@@ -19,12 +19,12 @@ class Service extends Model implements AuditableContract
 
     public function doctors()
     {
-        $this->belongsToMany(Doctor::class)->withPivot(['price', 'duration_minutes', 'active']);
+        return $this->belongsToMany(Doctor::class)->withPivot(['price', 'duration_minutes', 'active']);
     }
 
     public function appointment()
     {
-        $this->belongsTo(Appointment::class);
+        return $this->belongsTo(Appointment::class);
     }
 
     public function invoiceItems()

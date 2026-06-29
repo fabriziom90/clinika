@@ -17,7 +17,7 @@ class HandleInertiaRequests extends Middleware
     /**
      * Determine the current asset version.
      */
-    public function version(Request $request): string|null
+    public function version(Request $request): ?string
     {
         return parent::version($request);
     }
@@ -36,7 +36,8 @@ class HandleInertiaRequests extends Middleware
                     ? array_merge(
                         $request->user()->only('id', 'name', 'surname', 'email'),
                         [
-                            'roles' => $request->user()->getRoleNames(), // 👈 Aggiungi i ruoli qui
+                            'roles' => $request->user()->getRoleNames(),
+                            'permissions' => $request->user()->getAllPermissions()->pluck('name'),
                         ]
                     )
                     : null,

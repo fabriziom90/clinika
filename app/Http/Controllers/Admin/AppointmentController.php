@@ -160,7 +160,13 @@ class AppointmentController extends Controller
         ]);
     }
 
-    public function updateStatus(Request $request, Appointment $appointment){
+    public function updateStatus(Request $request, Appointment $appointment)
+    {
+        abort_unless(
+            auth()->user()->can('appointment.change-status'),
+            403
+        );
+
         $validated = $request->validate([
             'status' => ['required', new Enum(AppointmentStatus::class)],
         ]);

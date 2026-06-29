@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\DoctorController;
 use App\Http\Controllers\Admin\DrugController;
 use App\Http\Controllers\Admin\InventoryDrugController;
 use App\Http\Controllers\Admin\InventoryProductController;
+use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\MedicalEntryController;
 use App\Http\Controllers\Admin\NurseController;
 use App\Http\Controllers\Admin\PatientController;
@@ -69,7 +70,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('roles-permissions', [RoleController::class, 'index'])->name('roles-permissions.index');
         Route::post('roles-permissions/toggle', [RoleController::class, 'togglePermission'])->name('roles-permissions.toggle');
         Route::resource('appointments', AppointmentController::class);
-        Route::put("/appointments/{appointment}/status", [AppointmentController::class, 'updateStatus']);
+        Route::put('/appointments/{appointment}/status', [AppointmentController::class, 'updateStatus']);
+
+        Route::resource('invoices', InvoiceController::class);
+        Route::get('/invoices/create/{appointment}', [InvoiceController::class, 'create'])->name('invoices.create');
+        Route::put('/invoices/{invoice}/change-status', [InvoiceController::class, 'changeStatus'])->name('invoices.change-status');
     });
 });
 

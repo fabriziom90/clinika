@@ -8,7 +8,7 @@ const props = defineProps({
     nationalities: Array,
 });
 
-const $toast = useToast();
+
 </script>
 <template lang="">
     <Head title="Aggiungi paziente"></Head>

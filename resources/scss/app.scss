@@ -1,19 +1,25 @@
-@use './_partials/variables' as *;
-@use './_partials/mixins' as *; 
+@use "./_partials/variables" as *;
+@use "./_partials/mixins" as *;
 
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
 
-
-body{
-    font-family: 'Roboto', sans-serif;
+body {
+    font-family: "Roboto", sans-serif;
     font-size: 18px;
 }
 
-h1, h2, h3, h4, h5, h6, button, a{
-    font-family: 'Montserrat'
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+button,
+a {
+    font-family: "Montserrat";
 }
 
-a{
+a {
     color: #000;
     text-decoration: none;
 }
@@ -25,69 +31,68 @@ hr {
     opacity: 1;
 }
 
-.bg-main-red{
+.bg-main-red {
     background-color: $mainRed;
 }
 
-.border-red{
+.border-red {
     border: 2px solid $mainRed;
     border-radius: 20px;
 }
 
-.z-10{
+.z-10 {
     z-index: 10;
 }
 
-.main-button{
+.main-button {
     @include button-submit($mainRed, $mainGreen, #fff);
 }
 
-.show-button{
+.show-button {
     @include button-link($mainGreen, $mainGreenHover, #fff);
 }
 
-.edit-button{
+.edit-button {
     @include button-link($mainYellow, $mainYellowHover, #fff);
 }
 
-.secondary-button{
+.secondary-button {
     @include button-link($mainGrey, $mainGreyHover, #fff);
 }
 
-.delete-button, .cancel-edit-button{
+.delete-button,
+.cancel-edit-button {
     @include button-link($mainRed, $mainRedHover, #fff);
 }
 
-.btn-negative{
+.btn-negative {
     @include button-negative(#fff, $mainWhiteHover, $mainRed);
 }
 
-.save-edit-button{
+.save-edit-button {
     @include button-link(#147e14, #147e14bb, #fff);
 }
 
-.btn-blue{
+.btn-blue {
     @include button-link($mainBlue, $mainBlueHover, #fff);
 }
 
-.not-button{
+.not-button {
     color: red;
     background-color: transparent;
     border: none;
 }
 
-input.form-check-inline{
+input.form-check-inline {
     height: 30px;
     width: 30px;
     vertical-align: middle;
     margin: 10px;
-    
 }
 
-input.form-check-inline:checked{
-    accent-color: $mainRed
+input.form-check-inline:checked {
+    accent-color: $mainRed;
 }
-
 
 .custom-table {
     width: 100%;
@@ -138,4 +143,23 @@ input.form-check-inline:checked{
     }
 }
 
+.pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 10px;
 
+    button {
+        margin: 0 8px;
+        @include button-link($mainRed, $mainRedHover, #fff);
+    }
+}
+
+.modal-bg {
+    background-color: $mainBgTransparent;
+
+    .modal-header {
+        background-color: $mainRed;
+        color: #fff;
+    }
+}

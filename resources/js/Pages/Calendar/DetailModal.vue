@@ -13,6 +13,7 @@ const props = defineProps({
 
 const appointmentsStore = useAppointmentStore();
 const configStore = useConfigStore();
+console.log(configStore);
 
 const editingStatus = ref(false);
 const selectedStatus = ref("scheduled");
@@ -36,20 +37,38 @@ const formatHour = (date) => {
     return `${hours}:${minutes}`;
 };
 
+const isAdmin = computed(() => configStore.user.roles.includes("superadmin"));
+
+const getLabel = (status) => {
+    const labels = {
+        scheduled: "Prenotato",
+        completed: "Completato",
+        cancelled: "Cancellato",
+        no_show: "Assente"
+    }
+
+    return labels[status] ?? status;
+}
+
 const updateStatus = () => {
 
     router.put(`/admin/appointments/${item.value.id}/status`, { status: selectedStatus.value }, {
         preserveScroll: true,
         onSuccess: () => {
-            appointmentStore.updateStatus(
+            appointmentsStore.updateStatus(
                 item.value.id,
                 selectedStatus.value,
                 getLabel(selectedStatus.value)
             )
+            editingStatus.value = false;
             $toast.success("Stato appuntamento cambiato correttamente");
 
         }
     })
+}
+
+const generateInvoice = () => {
+    router.get(route('admin.invoices.create', item.value.id));
 }
 </script>
 <template lang="">
@@ -60,11 +79,17 @@ const updateStatus = () => {
 
                 <div class="modal-header">
                     <h5 class="modal-title">Dettaglio appuntamento -
-                        <span class="status-pill" @click="editingStatus = !editingStatus">
+                        <span class="status-pill me-2" :class="{ 'cursor-default': !isAdmin}" @click="editingStatus = !editingStatus">
                             {{ item.status_label }}
                         </span>
+                        <span class="status-pill" v-if="configStore.hasPermission('appointment.store') && item.status === 'completed' && !item.invoice" @click="generateInvoice">
+                            Genera fattura
+                        </span>
+                        <span v-if="configStore.hasPermission('appointment.store') && item.invoice">
+                            Visualizza fattura
+                        </span>
                     </h5>
-                    <div v-if="editingStatus" class="status-editor ms-2">
+                    <div v-if="configStore.hasPermission('appointment.store') && editingStatus" class="status-editor ms-2" >
                         <select class="form-select py-0 my-0" v-model="selectedStatus">
                             <option value="scheduled">Prenotato</option>
                             <option value="completed">Completato</option>

@@ -3,14 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Auditable;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
 class InvoiceItem extends Model implements AuditableContract
 {
     use Auditable;
-    use SoftDeletes;
 
     protected $fillable = [
         'invoice_id',
@@ -22,13 +20,17 @@ class InvoiceItem extends Model implements AuditableContract
         'total',
     ];
 
+    protected $casts = [
+        'description' => 'encrypted',
+    ];
+
     public function invoice()
     {
         return $this->belongsTo(Invoice::class);
     }
 
-    public function service(){
+    public function service()
+    {
         return $this->belongsTo(Service::class);
     }
-
 }

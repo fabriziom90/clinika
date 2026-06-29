@@ -49,6 +49,7 @@ class RoleSeeder extends Seeder
             'medical-attachment' => 'Allegato clinico',
             'prescription' => 'Prescrizione',
             'vital-parameter' => 'Parametri vitali',
+            'invoices' => 'Fatture',
         ];
 
         // === AZIONI CRUD ===
@@ -89,6 +90,24 @@ class RoleSeeder extends Seeder
             Role::updateOrCreate(
                 ['name' => $role['name']],
                 ['display_name' => $role['display_name']]
+            );
+        }
+
+        $extraPermissions = [
+            [
+                'name' => 'invoices.change-status',
+                'display_name' => 'Cambia stato fattura',
+            ],
+            [
+                'name' => 'appointment.change-status',
+                'display_name' => 'Cambia stato appuntamento',
+            ],
+        ];
+
+        foreach ($extraPermissions as $permission) {
+            Permission::updateOrCreate(
+                ['name' => $permission['name']],
+                ['display_name' => $permission['display_name']]
             );
         }
 
