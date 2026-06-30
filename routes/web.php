@@ -58,7 +58,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('medical-records/{id}/entries', [MedicalEntryController::class, 'index'])->name('medical-entries.index');
         Route::post('medical-entries', [MedicalEntryController::class, 'store'])->name('medical-entries.store');
         Route::put('medical-entries/{medical_entry}', [MedicalEntryController::class, 'update'])->name('medical-entries.update');
-        Route::get('/medical-entries/{medicalEntry}/pdf', [MedicalEntryController::class, 'generatePdf'])->name('medical-entries.pdf');
+        Route::get('/medical-entries/{version}/pdf', [MedicalEntryController::class, 'versionPdf'])->name('medical-entries.pdf');
         Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
         Route::put('inventory-products/{inventoryProduct}/update-quantity', [InventoryProductController::class, 'updateQuantity'])->name('inventory-products.update-quantity');
         Route::put('inventory-products/{inventoryProduct}/update-expiration', [InventoryProductController::class, 'updateExpiryDate'])->name('inventory-products.update-expiration');
@@ -75,6 +75,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('invoices', InvoiceController::class);
         Route::get('/invoices/create/{appointment}', [InvoiceController::class, 'create'])->name('invoices.create');
         Route::put('/invoices/{invoice}/change-status', [InvoiceController::class, 'changeStatus'])->name('invoices.change-status');
+
     });
 });
 

@@ -79,7 +79,7 @@ const formatType = (type) => {
 }
 
 const downloadPdf = () => {
-    const id = medicalAppointment.value.medical_entry.id
+    const id = medicalAppointment.value.medical_entry.latest_active_version.id
 
     window.open(
         route('admin.medical-entries.pdf', id),
@@ -106,7 +106,9 @@ const downloadPdf = () => {
 
                     <button class="btn-negative me-2" v-if="hasMedicalEntry"
                         @click="showHistory = true">Storico</button>
-                    <button class="btn-negative" v-if="hasMedicalEntry" @click="downloadPdf">PDF</button>
+                    <button class="btn-negative" v-if="medicalAppointment.medical_entry" @click="downloadPdf">
+                        Visualizza PDF
+                    </button>
                     <button class="btn-negative"
                         v-if="canCreateAppointment && medicalAppointment.medical_entry === null"
                         @click="showModal = true">Aggiungi visita</button>

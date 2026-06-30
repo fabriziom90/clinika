@@ -9,15 +9,15 @@ use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
 class MedicalEntry extends Model implements AuditableContract
 {
-    use HasFactory;
     use Auditable;
+    use HasFactory;
 
     protected $fillable = [
         'medical_record_id',
         'appointment_id',
         'doctor_id',
         'cancelled_by',
-        'cancelled_at'
+        'cancelled_at',
     ];
 
     public function medicalRecord()
@@ -35,7 +35,7 @@ class MedicalEntry extends Model implements AuditableContract
         return $this->belongsTo(Appointment::class);
     }
 
-     public function versions()
+    public function versions()
     {
         return $this->hasMany(MedicalEntryVersion::class)->orderByDesc('version');
     }

@@ -43,6 +43,12 @@ const formatType = (type) => {
     return found ? found.label : type;
 }
 
+const downloadPdf = (version) => {
+    window.open(
+        route('admin.medical-entries.pdf', version.id),
+        '_blank'
+    )
+}
 </script>
 
 <template>
@@ -57,9 +63,16 @@ const formatType = (type) => {
                 <div class="modal-body">
                     <div class="p-4 mb-3 border-red" v-for="version in versions" :key="version.id"
                         :class="version.is_voided ? 'bg-red-opacity' : ''">
-                        <h5>{{ version.title }} - {{ formatType(version.type) }} - {{ formatDate(version.created_at) }}
-                            {{ getTime(version.created_at) }}
-                        </h5>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5>{{ version.title }} - {{ formatType(version.type) }} - {{ formatDate(version.created_at)
+                            }}
+                                {{ getTime(version.created_at) }}
+                                <span v-if="version.is_voided" class="main-red">ANNULLATA</span>
+                            </h5>
+                            <button class="main-button" @click="downloadPdf(version)">
+                                PDF
+                            </button>
+                        </div>
                         <p>{{ version.content }}</p>
                         <div class="row">
                             <div class="col-12">
@@ -134,6 +147,12 @@ const formatType = (type) => {
     .bg-red-opacity {
         background-color: $mainRedOpacity;
 
+    }
+
+    h5 {
+        span {
+            color: $mainRed;
+        }
     }
 }
 </style>

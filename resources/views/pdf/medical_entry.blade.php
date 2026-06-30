@@ -3,7 +3,11 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Referto Medico #{{ $entry->id }}</title>
+
+    <title>
+        Referto Medico #{{ $version->id }}
+    </title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,57 +17,47 @@
             padding: 0;
         }
 
-        /* Intestazione colorata */
         .header {
             background-color: #C53238;
-            color: #fff;
+            color: white;
             padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
-        .header .logo {
+        .logo {
             width: 80px;
             height: 80px;
-            background-color: #ecf0f1;
-            text-align: center;
-            line-height: 80px;
-            font-weight: bold;
-            color: #2c3e50;
         }
 
-        .header .clinic-info {
+        .clinic-info {
             text-align: right;
         }
+
 
         .section {
             padding: 15px;
         }
+
 
         h2,
         h3 {
             margin: 5px 0;
         }
 
-        .vital-params,
-        .prescriptions {
-            margin-top: 10px;
-            border-collapse: collapse;
+
+        table {
             width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
         }
 
-        .vital-params th,
-        .vital-params td,
-        .prescriptions th,
-        .prescriptions td {
+
+        th,
+        td {
             border: 1px solid #999;
             padding: 5px;
+            text-align: left;
         }
 
-        .attachments ul {
-            padding-left: 20px;
-        }
 
         .footer {
             text-align: center;
@@ -71,107 +65,374 @@
             margin-top: 30px;
             color: #555;
         }
+
+
+        .signature {
+            margin-top: 50px;
+        }
+
+        .voided-box {
+            margin-bottom: 25px;
+            background-color: #E9363F;
+            border: 1px solid #E9363F;
+            border-radius: 10px;
+            padding: 10px 0 10px 10px;
+            color: #fff;
+        }
     </style>
+
 </head>
+
 
 <body>
 
-    <!-- INTESTAZIONE -->
+
     <div class="header">
-        <div class="logo"><img src="{{ public_path('images/logo_clinika.png') }}" class="logo" alt="Logo struttura">
-        </div>
-        <div class="clinic-info">
-            <strong>Clinica Medica Fittizia</strong><br>
-            Via della Salute 123, 00100 Roma<br>
-            Tel: 06-1234567
-        </div>
+
+        <table style="border:0">
+
+            <tr>
+
+                <td style="border:0">
+                    <img src="{{ public_path('images/logo_clinika.png') }}" class="logo">
+                </td>
+
+
+                <td style="border:0; text-align:right">
+
+                    <strong>
+                        Clinica Medica Fittizia
+                    </strong>
+
+                    <br>
+
+                    Via della Salute 123
+                    <br>
+
+                    Roma
+
+                    <br>
+
+                    Tel: 06-1234567
+
+                </td>
+
+            </tr>
+
+        </table>
+
     </div>
 
-    <!-- INFORMAZIONI PAZIENTE -->
+
+
     <div class="section">
-        <h2>Referto Medico</h2>
-        <p><strong>Paziente:</strong> {{ $entry->appointment->patient->name ?? 'Mario' }}
-            {{ $entry->appointment->patient->surname ?? 'Rossi' }}</p>
-        <p><strong>Data Appuntamento:</strong> {{ $entry->appointment->start_time ?? '01/01/2026 09:00' }}</p>
-        <p><strong>Medico:</strong> {{ $entry->doctor->user->name ?? 'Giovanni' }}
-            {{ $entry->doctor->user->surname ?? 'Verdi' }}</p>
+        @if ($version->is_voided)
+            <div class="voided-box">
+                <strong>DOCUMENTO ANNULLATO</strong><br>
+                Questo referto è stato annullato.<br>
+
+                @if ($version->void_reason)
+                    Motivo: {{ $version->void_reason }}<br>
+                @endif
+
+                @if ($version->voided_at)
+                    Data annullamento: {{ $version->voided_at }}
+                @endif
+            </div>
+        @endif
+        <h2>
+            Referto Medico
+        </h2>
+
+
+        <p>
+            <strong>Paziente:</strong>
+
+            {{ $entry->appointment->patient->name }}
+
+            {{ $entry->appointment->patient->surname }}
+
+        </p>
+
+
+        <p>
+            <strong>Data appuntamento:</strong>
+
+            {{ $entry->appointment->start_time }}
+
+        </p>
+
+
+        <p>
+
+            <strong>Medico:</strong>
+
+            {{ $entry->doctor->user->name }}
+
+            {{ $entry->doctor->user->surname }}
+
+        </p>
+
+
     </div>
 
-    <!-- CONTENUTO REFERTI -->
+
+
     <div class="section">
-        <h3>{{ $version->title ?? 'Visita Medica' }} ({{ ucfirst($version->type ?? 'visit') }})</h3>
-        <p>{{ $version->content ?? 'Nessun contenuto disponibile' }}</p>
+
+
+        <h3>
+
+            {{ $version->title }}
+
+            -
+
+            {{ ucfirst($version->type) }}
+
+        </h3>
+
+
+        <p>
+
+            {{ $version->content }}
+
+        </p>
+
+
     </div>
 
-    <!-- PARAMETRI VITALI -->
+
+
+
     @if ($version->vitalParameters)
         <div class="section">
-            <h3>Parametri Vitali</h3>
-            <table class="vital-params">
+
+
+            <h3>
+                Parametri Vitali
+            </h3>
+
+
+            <table>
+
                 <tr>
-                    <th>Pressione</th>
-                    <th>Frequenza Cardiaca</th>
-                    <th>Temperatura</th>
-                    <th>Peso</th>
-                    <th>Altezza</th>
+
+                    <th>
+                        Pressione
+                    </th>
+
+                    <th>
+                        Frequenza Cardiaca
+                    </th>
+
+                    <th>
+                        Temperatura
+                    </th>
+
+                    <th>
+                        Peso
+                    </th>
+
+                    <th>
+                        Altezza
+                    </th>
+
                 </tr>
+
+
                 <tr>
-                    <td>{{ $version->vitalParameters->pressure ?? '-' }}</td>
-                    <td>{{ $version->vitalParameters->heart_rate ?? '-' }} bpm</td>
-                    <td>{{ $version->vitalParameters->temperature ?? '-' }} °C</td>
-                    <td>{{ $version->vitalParameters->weight ?? '-' }} kg</td>
-                    <td>{{ $version->vitalParameters->height ?? '-' }} cm</td>
+
+                    <td>
+                        {{ $version->vitalParameters->pressure ?? '-' }}
+                    </td>
+
+
+                    <td>
+                        {{ $version->vitalParameters->heart_rate ?? '-' }}
+                        bpm
+                    </td>
+
+
+                    <td>
+                        {{ $version->vitalParameters->temperature ?? '-' }}
+                        °C
+                    </td>
+
+
+                    <td>
+                        {{ $version->vitalParameters->weight ?? '-' }}
+                        kg
+                    </td>
+
+
+                    <td>
+                        {{ $version->vitalParameters->height ?? '-' }}
+                        cm
+                    </td>
+
+
                 </tr>
+
+
             </table>
+
+
         </div>
     @endif
 
-    <!-- PRESCRIZIONI -->
-    @if ($version->prescriptions && $version->prescriptions->count() > 0)
+
+
+
+
+    @if ($version->prescriptions->count())
+
+
         <div class="section">
-            <h3>Prescrizioni</h3>
-            <table class="prescriptions">
+
+
+            <h3>
+                Prescrizioni
+            </h3>
+
+
+
+            <table>
+
+
                 <tr>
-                    <th>Farmaco</th>
-                    <th>Dosaggio</th>
-                    <th>Frequenza</th>
-                    <th>Durata</th>
-                    <th>Note</th>
+
+                    <th>
+                        Farmaco
+                    </th>
+
+                    <th>
+                        Dosaggio
+                    </th>
+
+                    <th>
+                        Frequenza
+                    </th>
+
+                    <th>
+                        Durata
+                    </th>
+
+                    <th>
+                        Note
+                    </th>
+
+
                 </tr>
+
+
+
                 @foreach ($version->prescriptions as $prescription)
                     <tr>
-                        <td>{{ $prescription->drug_name }}</td>
-                        <td>{{ $prescription->dosage }}</td>
-                        <td>{{ $prescription->frequency }}</td>
-                        <td>{{ $prescription->duration }}</td>
-                        <td>{{ $prescription->notes }}</td>
+
+
+                        <td>
+                            {{ $prescription->drug_name }}
+                        </td>
+
+
+                        <td>
+                            {{ $prescription->dosage }}
+                        </td>
+
+
+                        <td>
+                            {{ $prescription->frequency }}
+                        </td>
+
+
+                        <td>
+                            {{ $prescription->duration }}
+                        </td>
+
+
+                        <td>
+                            {{ $prescription->notes }}
+                        </td>
+
+
                     </tr>
                 @endforeach
+
+
             </table>
+
+
         </div>
+
+
     @endif
 
-    <!-- ALLEGATI -->
-    @if ($version->attachments && $version->attachments->count() > 0)
-        <div class="section attachments">
-            <h3>Allegati</h3>
+
+
+
+
+    @if ($version->attachments->count())
+
+
+        <div class="section">
+
+
+            <h3>
+                Allegati
+            </h3>
+
+
             <ul>
+
                 @foreach ($version->attachments as $attachment)
-                    <li><a href="{{ $attachment->url }}">{{ $attachment->name }}</a></li>
+                    <li>
+                        {{ $attachment->name }}
+                    </li>
                 @endforeach
+
+
             </ul>
+
+
         </div>
+
+
     @endif
 
-    <!-- FIRMA MEDICO -->
-    <div class="section" style="margin-top:40px;">
-        <p>__________________________</p>
-        <p>Firma del Medico</p>
+
+
+
+
+    <div class="section signature">
+
+
+        <p>
+            ______________________________
+        </p>
+
+
+        <p>
+            Firma del medico
+        </p>
+
+
     </div>
+
+
+
 
     <div class="footer">
+
         Documento generato da Clinica Medica Fittizia
+
+        <br>
+
+        Versione referto:
+        {{ $version->id }}
+
     </div>
+
+
 
 </body>
 

@@ -11,6 +11,7 @@ use App\Models\Nationality;
 use App\Models\Nurse;
 use App\Models\Patient;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use OwenIt\Auditing\Models\Audit;
 
@@ -138,37 +139,37 @@ class PatientController extends Controller
             'nationality',
             'appointments' => function ($q) use ($user) {
                 $q->where('doctor_id', $user->doctor->id ?? null)
-                ->orderByDesc('start_time')
-                ->with([
-                    'medicalEntry.doctor.user',
-                    'medicalEntry.appointment',
-                    'medicalEntry.latestActiveVersion.attachments',
-                    'medicalEntry.latestActiveVersion.prescriptions',
-                    'medicalEntry.latestActiveVersion.vitalParameters',
-                    'medicalEntry.versions.attachments',
-                    'medicalEntry.versions.prescriptions',
-                    'medicalEntry.versions.vitalParameters'
-                ]);
+                    ->orderByDesc('start_time')
+                    ->with([
+                        'medicalEntry.doctor.user',
+                        'medicalEntry.appointment',
+                        'medicalEntry.latestActiveVersion.attachments',
+                        'medicalEntry.latestActiveVersion.prescriptions',
+                        'medicalEntry.latestActiveVersion.vitalParameters',
+                        'medicalEntry.versions.attachments',
+                        'medicalEntry.versions.prescriptions',
+                        'medicalEntry.versions.vitalParameters',
+                    ]);
             },
             'medicalRecord.medicalEntries' => function ($q) use ($user) {
                 $q->where('doctor_id', $user->doctor->id ?? null)
-                ->orderByDesc('created_at')
-                ->with([
-                    'doctor.user',
-                    'appointment',
-                    'latestActiveVersion.attachments',
-                    'latestActiveVersion.prescriptions',
-                    'latestActiveVersion.vitalParameters'
-                ]);
+                    ->orderByDesc('created_at')
+                    ->with([
+                        'doctor.user',
+                        'appointment',
+                        'latestActiveVersion.attachments',
+                        'latestActiveVersion.prescriptions',
+                        'latestActiveVersion.vitalParameters',
+                    ]);
             },
 
         ])->findOrFail($patient->id);
-        
+
         // check GDPR permissions
         $this->authorize('view', $patient->medicalRecord);
 
         app(\App\Observers\PatientObserver::class)->viewed($patient);
-        
+
         return Inertia::render('Patients/ShowPatient', ['patient' => $patient]);
     }
 

@@ -9,8 +9,8 @@ use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
 class MedicalEntryVersion extends Model implements AuditableContract
 {
-    use HasFactory;
     use Auditable;
+    use HasFactory;
 
     protected $fillable = [
         'medical_entry_id',
@@ -22,14 +22,16 @@ class MedicalEntryVersion extends Model implements AuditableContract
         'is_voided',
         'void_reason',
         'voided_by',
-        'voided_at'
+        'voided_at',
+        'pdf_path',
     ];
 
     // RELAZIONE CON L'ENTRY PRINCIPALE
-    public function entry()
+    public function medicalEntry()
     {
         return $this->belongsTo(MedicalEntry::class, 'medical_entry_id');
     }
+
     // PRESCRIPTIONS LEGATE A QUESTA VERSIONE
     public function prescriptions()
     {

@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMedicalEntryRequest;
 use App\Http\Requests\UpdateMedicalEntryRequest;
 use App\Models\MedicalEntry;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\MedicalEntryVersion;
+use App\Services\MedicalEntryVersionPdfService;
 use Illuminate\Support\Facades\Auth;
 use OwenIt\Auditing\Models\Audit;
 
@@ -60,7 +61,8 @@ class MedicalEntryController extends Controller
         // Creazione prima versione della visita
         $version = $entry->versions()->create([
             'version' => 1,
-            'type' => $data['type'] ?? 'visit',   // default visit
+            'doctor_id' => $data['doctor_id'],
+            'type' => $data['type'] ?? 'visit',
             'title' => $data['title'] ?? null,
             'content' => $data['content'] ?? null,
         ]);
@@ -151,7 +153,7 @@ class MedicalEntryController extends Controller
             $latestVersion->update([
                 'is_voided' => true,
                 'voided_at' => now(),
-                'voided_by' => $user->doctor->id,
+                'voided_by' => $user->doctor->user->id,
                 'void_reason' => $data['void_reason'] ?? 'Voided per correzione',
             ]);
 
@@ -245,38 +247,29 @@ class MedicalEntryController extends Controller
         ]);
     }
 
-    public function generatePdf(MedicalEntry $medicalEntry)
+    public function versionPdf(MedicalEntryVersion $version, MedicalEntryVersionPdfService $pdfService)
     {
-        $this->authorize('view', $medicalEntry);
-
-        $medicalEntry->load([
-            'appointment',
-            'doctor.user',
-            'latestActiveVersion.vitalParameters',
-            'latestActiveVersion.prescriptions',
-            'latestActiveVersion.attachments',
-        ]);
-
-        $version = $medicalEntry->latestActiveVersion;
-
-        $user = auth()->user();
+        $this->authorize(
+            'view',
+            $version->medicalEntry->medicalRecord
+        );
+        $user = Auth::user();
         Audit::forceCreate([
             'user_id' => $user->id,
             'user_type' => get_class($user),
-            'event' => 'generate_pdf',
-            'auditable_type' => get_class($medicalEntry),
-            'auditable_id' => $medicalEntry->id,
+            'event' => 'show_pdf',
+            'auditable_type' => get_class($version),
+            'auditable_id' => $version->id,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
-            'old_values' => $medicalEntry->toArray(),
+            'old_values' => $version->toArray(),
             'new_values' => [],
         ]);
 
-        $pdf = Pdf::loadView('pdf.medical_entry', [
-            'entry' => $medicalEntry,
-            'version' => $version,
-        ]);
+        $path = $pdfService->getPdfPath($version);
 
-        return $pdf->download('referto-'.$medicalEntry->id.'.pdf');
+        return response()->file(
+            storage_path('app/'.$path)
+        );
     }
 }

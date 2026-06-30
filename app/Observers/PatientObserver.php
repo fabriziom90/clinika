@@ -92,4 +92,19 @@ class PatientObserver
     {
         //
     }
+
+    public function showPdf(Patient $patient): void
+    {
+        Audit::forceCreate([
+            'user_id' => Auth::id(),
+            'user_type' => Auth::user() ? get_class(Auth::user()) : null,
+            'event' => 'viewed pdf',
+            'auditable_type' => get_class($patient),
+            'auditable_id' => $patient->id,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'old_values' => [],
+            'new_values' => [],
+        ]);
+    }
 }
