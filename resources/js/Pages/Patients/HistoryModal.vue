@@ -45,7 +45,7 @@ const formatType = (type) => {
 
 const downloadPdf = (version) => {
     window.open(
-        route('admin.medical-entries.pdf', version.id),
+        route('admin.medical-entries.pdf', version.uuid),
         '_blank'
     )
 }
@@ -65,7 +65,7 @@ const downloadPdf = (version) => {
                         :class="version.is_voided ? 'bg-red-opacity' : ''">
                         <div class="d-flex justify-content-between align-items-center">
                             <h5>{{ version.title }} - {{ formatType(version.type) }} - {{ formatDate(version.created_at)
-                            }}
+                                }}
                                 {{ getTime(version.created_at) }}
                                 <span v-if="version.is_voided" class="main-red">ANNULLATA</span>
                             </h5>

@@ -12,6 +12,11 @@ class MedicalEntryVersion extends Model implements AuditableContract
     use Auditable;
     use HasFactory;
 
+    public function getRouteKeyName()
+    {
+        return 'uuid';
+    }
+
     protected $fillable = [
         'medical_entry_id',
         'version',
@@ -24,6 +29,7 @@ class MedicalEntryVersion extends Model implements AuditableContract
         'voided_by',
         'voided_at',
         'pdf_path',
+        'uuid',
     ];
 
     // RELAZIONE CON L'ENTRY PRINCIPALE

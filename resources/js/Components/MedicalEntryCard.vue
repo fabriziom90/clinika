@@ -79,10 +79,10 @@ const formatType = (type) => {
 }
 
 const downloadPdf = () => {
-    const id = medicalAppointment.value.medical_entry.latest_active_version.id
+    const uuid = medicalAppointment.value.medical_entry.latest_active_version.uuid
 
     window.open(
-        route('admin.medical-entries.pdf', id),
+        route('admin.medical-entries.pdf', uuid),
         '_blank'
     )
 }

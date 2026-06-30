@@ -9,6 +9,7 @@ use App\Models\MedicalEntry;
 use App\Models\MedicalEntryVersion;
 use App\Services\MedicalEntryVersionPdfService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use OwenIt\Auditing\Models\Audit;
 
 class MedicalEntryController extends Controller
@@ -60,6 +61,7 @@ class MedicalEntryController extends Controller
 
         // Creazione prima versione della visita
         $version = $entry->versions()->create([
+            'uuid' => Str::uuid(),
             'version' => 1,
             'doctor_id' => $data['doctor_id'],
             'type' => $data['type'] ?? 'visit',
@@ -187,6 +189,7 @@ class MedicalEntryController extends Controller
 
         // CREAZIONE NUOVA VERSIONE
         $newVersion = $entry->versions()->create([
+            'uuid' => Str::uuid(),
             'version' => ($latestVersion->version ?? 0) + 1,
             'type' => $data['type'] ?? $latestVersion->type,
             'title' => $data['title'] ?? $latestVersion->title,

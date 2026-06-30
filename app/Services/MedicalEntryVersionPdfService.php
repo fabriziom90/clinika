@@ -51,8 +51,8 @@ class MedicalEntryVersionPdfService
         }
 
         $filename = sprintf(
-            'medical-entry-version-%s.pdf',
-            $version->id
+            'mev-%s.pdf',
+            $version->uuid
         );
 
         $path = $directory.'/'.$filename;

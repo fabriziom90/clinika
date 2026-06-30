@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
 
     <title>
-        Referto Medico #{{ $version->id }}
+        Referto Medico #{{ $version->uuid }}
     </title>
 
     <style>
