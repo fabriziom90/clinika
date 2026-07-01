@@ -9,8 +9,8 @@ use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
 class Prescription extends Model implements AuditableContract
 {
-    use HasFactory;
     use Auditable;
+    use HasFactory;
 
     protected $fillable = [
         'medical_entry_version_id',
@@ -19,6 +19,14 @@ class Prescription extends Model implements AuditableContract
         'frequency',
         'duration',
         'notes',
+    ];
+
+    protected $casts = [
+        'drug_name' => 'encrypted',
+        'dosage' => 'encrypted',
+        'frequency' => 'encrypted',
+        'duration' => 'encrypted',
+        'notes' => 'encrypted',
     ];
 
     public function version()

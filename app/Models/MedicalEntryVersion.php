@@ -32,6 +32,11 @@ class MedicalEntryVersion extends Model implements AuditableContract
         'uuid',
     ];
 
+    protected $casts = [
+        'content' => 'encrypted',
+        'title' => 'encrypted',
+    ];
+
     // RELAZIONE CON L'ENTRY PRINCIPALE
     public function medicalEntry()
     {
