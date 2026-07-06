@@ -138,8 +138,11 @@ class PatientController extends Controller
         $patient = Patient::with([
             'nationality',
             'appointments' => function ($q) use ($user) {
-                $q->where('doctor_id', $user->doctor->id ?? null)
-                    ->orderByDesc('start_time')
+                if (! $user->hasRole('superadmin')) {
+                    $q->where('doctor_id', $user->doctor->id ?? null);
+                }
+
+                $q->orderByDesc('start_time')
                     ->with([
                         'medicalEntry.doctor.user',
                         'medicalEntry.appointment',
@@ -152,8 +155,11 @@ class PatientController extends Controller
                     ]);
             },
             'medicalRecord.medicalEntries' => function ($q) use ($user) {
-                $q->where('doctor_id', $user->doctor->id ?? null)
-                    ->orderByDesc('created_at')
+                if (! $user->hasRole('superadmin')) {
+                    $q->where('doctor_id', $user->doctor->id ?? null);
+                }
+
+                $q->orderByDesc('created_at')
                     ->with([
                         'doctor.user',
                         'appointment',

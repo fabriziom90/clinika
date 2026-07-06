@@ -3,8 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class StoreNurseRequest extends FormRequest
+class UpdateSecretaryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,30 +23,84 @@ class StoreNurseRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'zip_code' => 'required|digits:5',
             'name' => 'required',
             'surname' => 'required',
-            'personal_code' => 'required|string|size:16',
-            'vat' => 'required|string|size:11',
-            'birthday' => 'required|date',
-            'birth_city' => 'required|string|max:30',
-            'city' => 'required|string|max:30',
-            'address' => 'required|string|max:70',
-            'phone' => 'required|string|max:15',
             'email' => 'required|string|max:70',
-            'genre' => 'required',
-            'nationality_id' => 'required',
+            'personal_code' => [
+                'required',
+                'string',
+                'max:16',
+                Rule::unique('secretaries', 'personal_code')
+                    ->ignore($this->secretary),
+            ],
+
+            'birthday' => [
+                'required',
+                'date',
+            ],
+
+            'birth_city' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'nationality_id' => [
+                'required',
+                'exists:nationalities,id',
+            ],
+
+            'city' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'address' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'phone' => [
+                'required',
+                'string',
+                'max:30',
+            ],
+
+            'genre' => [
+                'required',
+                'string',
+                'max:50',
+            ],
+
+            'employee_code' => [
+                'nullable',
+                'string',
+                'max:50',
+                Rule::unique('secretaries', 'employee_code')
+                    ->ignore($this->secretary),
+            ],
+
+            'notes' => [
+                'nullable',
+                'string',
+            ],
         ];
     }
 
-    public function messages()
+    public function messages(): array
     {
         return [
+            'zip_code.required' => 'Il CAP è obbligatorio',
+            'zip_code.digits' => 'Il CAP deve essere composto da 5 cifre.',
             'name.required' => 'Il nome è obbligatorio',
             'surname.required' => 'Il cognome è obbligatorio',
             'personal_code.required' => 'Il codice fiscale è obbligatorio',
-            'personal_code.size' => 'Il codice fiscale deve essere di :max caratteri',
+            'personal_code.size' => 'Il codice fiscale deve essere di :size caratteri',
             'vat.required' => 'La partita iva è obbligatoria',
-            'vat.size' => 'La partita iva deve essere di :max caratteri',
+            'vat.size' => 'La partita iva deve essere di :size caratteri',
             'birthday.required' => 'La data di nascita è obbligatorio',
             'birthday.date' => 'La data di nascita deve essere in un formato valido',
             'birth_city.required' => 'La città di nascita è obbligatoria',
@@ -59,7 +114,9 @@ class StoreNurseRequest extends FormRequest
             'email.required' => 'L\'indirizzo email p obbligatorio',
             'email.max' => 'L\'indirizzo email deve essere al massimo di :max caratteri',
             'genre.required' => 'Il genere dell\'utente è obbligatorio',
+            'pec.required' => 'La pec è obbligatoria',
             'nationality_id' => 'La nazionalità è obbligatoria',
+            'specialty_id' => 'La specializzazione è obbligatoria',
         ];
     }
 }

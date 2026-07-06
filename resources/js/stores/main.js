@@ -9,10 +9,20 @@ export const useConfigStore = defineStore("config", () => {
     const hasPermission = (permission) =>
         user.value?.permissions?.includes(permission);
 
+    const canAny = (...permissions) => {
+        permissions.some((permission) => hasPermission(permission));
+    };
+
+    const canAll = (...permissions) => {
+        permissions.every((permission) => hasPermission(permission));
+    };
+
     return {
         apiBaseUrl: "http://127.0.0.1:3000",
         user,
         hasRole,
         hasPermission,
+        canAny,
+        canAll,
     };
 });

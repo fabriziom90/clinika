@@ -53,7 +53,7 @@ class InvoiceController extends Controller
         Audit::forceCreate([
             'user_id' => auth()->id(),
             'user_type' => get_class(auth()->user()),
-            'event' => 'viewed invoices',
+            'event' => 'viewed',
             'auditable_type' => 'App\Models\Invoice',
             'auditable_id' => null,
             'ip_address' => request()->ip(),
@@ -85,18 +85,6 @@ class InvoiceController extends Controller
             ->first();
 
         $price = $doctorService->pivot->price;
-
-        Audit::forceCreate([
-            'user_id' => auth()->id(),
-            'user_type' => get_class(auth()->user()),
-            'event' => 'show invoice form creation',
-            'auditable_type' => 'App\Models\Invoice',
-            'auditable_id' => null,
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-            'old_values' => [],
-            'new_values' => [],
-        ]);
 
         $doctorService = $appointment->doctor->services->firstWhere('id', $appointment->service_id);
 
@@ -238,7 +226,7 @@ class InvoiceController extends Controller
             Audit::forceCreate([
                 'user_id' => auth()->id(),
                 'user_type' => get_class(auth()->user()),
-                'event' => 'invoice created',
+                'event' => 'created',
                 'auditable_type' => Invoice::class,
                 'auditable_id' => $invoice->id,
                 'ip_address' => request()->ip(),
@@ -306,18 +294,6 @@ class InvoiceController extends Controller
                 })
                 ->values()
             : collect();
-
-        Audit::forceCreate([
-            'user_id' => auth()->id(),
-            'user_type' => get_class(auth()->user()),
-            'event' => 'invoice created',
-            'auditable_type' => Invoice::class,
-            'auditable_id' => $invoice->id,
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-            'old_values' => [],
-            'new_values' => $invoice->toArray(),
-        ]);
 
         return Inertia::render('Invoices/EditInvoice', [
             'invoice' => [
@@ -431,7 +407,7 @@ class InvoiceController extends Controller
             Audit::forceCreate([
                 'user_id' => auth()->id(),
                 'user_type' => get_class(auth()->user()),
-                'event' => 'invoice updated',
+                'event' => 'updated',
                 'auditable_type' => Invoice::class,
                 'auditable_id' => $invoice->id,
                 'ip_address' => request()->ip(),
@@ -469,7 +445,7 @@ class InvoiceController extends Controller
         Audit::forceCreate([
             'user_id' => auth()->id(),
             'user_type' => get_class(auth()->user()),
-            'event' => 'invoice deleted',
+            'event' => 'deleted',
             'auditable_type' => Invoice::class,
             'auditable_id' => $invoice->id,
             'ip_address' => request()->ip(),
@@ -516,7 +492,7 @@ class InvoiceController extends Controller
         Audit::forceCreate([
             'user_id' => auth()->id(),
             'user_type' => get_class(auth()->user()),
-            'event' => 'invoice status changed',
+            'event' => 'status changed',
             'auditable_type' => Invoice::class,
             'auditable_id' => $invoice->id,
             'ip_address' => request()->ip(),

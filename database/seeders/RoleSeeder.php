@@ -34,6 +34,7 @@ class RoleSeeder extends Seeder
         $entities = [
             'patient' => 'Paziente',
             'doctor' => 'Medico',
+            'secretary' => 'Segretaria',
             'nurse' => 'Infermiere',
             'appointment' => 'Appuntamento',
             'user' => 'Utente di sistema',
@@ -84,6 +85,7 @@ class RoleSeeder extends Seeder
             ['name' => 'superadmin', 'display_name' => 'Superadmin'],
             ['name' => 'doctor', 'display_name' => 'Medico'],
             ['name' => 'nurse', 'display_name' => 'Infermiere'],
+            ['name' => 'secretary', 'display_name' => 'Segretaria'],
         ];
 
         foreach ($roles as $role) {

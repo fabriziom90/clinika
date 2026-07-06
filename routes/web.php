@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\NurseController;
 use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\SecretaryController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SpecialtyController;
 use App\Http\Controllers\ProfileController;
@@ -67,10 +68,12 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('inventory-drugs', InventoryDrugController::class);
         Route::post('/doctors/{id}/send-reset-email', [DoctorController::class, 'sendResetEmail'])->name('doctors.sendResetEmail');
         Route::post('/nurses/{id}/send-reset-email', [NurseController::class, 'sendResetEmail'])->name('nurses.sendResetEmail');
+        Route::post('/secretary/{id}/send-reset-email', [SecretaryController::class, 'sendResetEmail'])->name('secretaries.sendResetEmail');
         Route::get('roles-permissions', [RoleController::class, 'index'])->name('roles-permissions.index');
         Route::post('roles-permissions/toggle', [RoleController::class, 'togglePermission'])->name('roles-permissions.toggle');
         Route::resource('appointments', AppointmentController::class);
         Route::put('/appointments/{appointment}/status', [AppointmentController::class, 'updateStatus']);
+        Route::resource('secretaries', SecretaryController::class);
 
         Route::resource('invoices', InvoiceController::class);
         Route::get('/invoices/create/{appointment}', [InvoiceController::class, 'create'])->name('invoices.create');

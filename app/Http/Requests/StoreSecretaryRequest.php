@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreNurseRequest extends FormRequest
+class StoreSecretaryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,10 +22,11 @@ class StoreNurseRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'zip_code' => 'required|digits:5',
             'name' => 'required',
             'surname' => 'required',
+            'email' => 'required|string|max:70',
             'personal_code' => 'required|string|size:16',
-            'vat' => 'required|string|size:11',
             'birthday' => 'required|date',
             'birth_city' => 'required|string|max:30',
             'city' => 'required|string|max:30',
@@ -34,18 +35,29 @@ class StoreNurseRequest extends FormRequest
             'email' => 'required|string|max:70',
             'genre' => 'required',
             'nationality_id' => 'required',
+            'employee_code' => [
+                'nullable',
+                'string',
+                'max:50',
+                'unique:secretaries,employee_code',
+            ],
+
+            'notes' => [
+                'nullable',
+                'string',
+            ],
         ];
     }
 
     public function messages()
     {
         return [
+            'zip_code.required' => 'Il CAP è obbligatorio',
+            'zip_code.digits' => 'Il CAP deve essere composto da 5 cifre.',
             'name.required' => 'Il nome è obbligatorio',
             'surname.required' => 'Il cognome è obbligatorio',
             'personal_code.required' => 'Il codice fiscale è obbligatorio',
-            'personal_code.size' => 'Il codice fiscale deve essere di :max caratteri',
-            'vat.required' => 'La partita iva è obbligatoria',
-            'vat.size' => 'La partita iva deve essere di :max caratteri',
+            'personal_code.size' => 'Il codice fiscale deve essere di :size caratteri',
             'birthday.required' => 'La data di nascita è obbligatorio',
             'birthday.date' => 'La data di nascita deve essere in un formato valido',
             'birth_city.required' => 'La città di nascita è obbligatoria',

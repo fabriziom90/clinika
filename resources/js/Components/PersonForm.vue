@@ -25,13 +25,6 @@ const showBirthSuggestions = ref(false);
 const showResidenceSuggestions = ref(false);
 const $toast = useToast();
 
-const routeMap = {
-    doctor: "admin.doctors",
-    nurse: "admin.nurses",
-    patient: "admin.patients",
-    operator: "admin.operators",
-};
-
 const form = useForm({
     name: "",
     surname: "",
@@ -55,6 +48,7 @@ const form = useForm({
         active: 1
     }],
     user_id: "",
+    notes: "",
     inline: false,
 });
 
@@ -95,6 +89,7 @@ onMounted(() => {
     form.specialty_id = person.specialty_id ?? "";
     // form.services = person.services ?? [];
     form.user_id = person.user_id ?? "";
+    form.notes = person.notes;
 });
 
 // filter functions
@@ -614,6 +609,10 @@ const handleSubmitForm = () => {
                     + Aggiungi prestazione
                 </button>
             </div>
+        </div>
+        <div class="col-12" v-if="formType === 'secretarie'">
+            <label for="" class="form-label">Note</label>
+            <textarea placeholder="Note" name="note" id="note" v-model="form.notes" class="form-control"></textarea>
         </div>
         <div class="row mt-4">
             <div class="col-12 col-md-4">

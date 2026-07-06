@@ -347,7 +347,8 @@ function normalizeValueForInput(value, key) {
                         </button>
                         <button v-if="
                             baseRoute === 'admin.doctors' ||
-                            baseRoute === 'admin.nurses'
+                            baseRoute === 'admin.nurses' ||
+                            baseRoute === 'admin.secretaries'
                         " class="btn-blue" @click="sendResetEmail(item)">
                             <i class="fas fa-envelope"></i>
                         </button>

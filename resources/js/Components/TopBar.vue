@@ -3,8 +3,9 @@ import ApplicationLogo from "./ApplicationLogo.vue";
 import { Link, usePage } from "@inertiajs/vue3";
 import { computed, ref } from "vue";
 import { useConfigStore } from "@/stores/main";
+import { router } from "@inertiajs/vue3";
 
-const { user, hasRole } = useConfigStore()
+const { user, hasPermission, canAny, hasRole } = useConfigStore()
 
 const openWarehouse = ref(false);
 
@@ -18,7 +19,16 @@ const isRouteActive = (routes) => {
     return flag;
 };
 
-import { router } from "@inertiajs/vue3";
+const canSeeAdministration = computed(() => {
+    return (
+        hasPermission('drug.view') ||
+        hasPermission('product.view') ||
+        hasPermission('clinic-room.view') ||
+        hasPermission('role.view') ||
+        hasPermission('specialty.view') ||
+        hasPermission('audit-log.view')
+    );
+});
 
 const logout = () => {
     router.post(
@@ -32,6 +42,8 @@ const logout = () => {
         }
     );
 };
+
+
 </script>
 <template lang="">
     <div class="top-bar">
@@ -46,11 +58,11 @@ const logout = () => {
             <li class="list-item">
                 <Link :href="route('admin.appointments.index')" :class="isRouteActive(['appointments']) ? 'active' : ''">Agenda</Link>
             </li>
-            <li class="list-item submenu-open" v-if="hasRole('superadmin')">
+            <li class="list-item submenu-open" v-if="hasPermission('user.view')">
                 <a
                     href="#"
                     :class="
-                        isRouteActive(['doctors', 'nurses']) ? 'active' : ''
+                        isRouteActive(['doctors', 'nurses', 'secretaries']) ? 'active' : ''
                     "
                     >Utenti</a
                 >
@@ -69,11 +81,18 @@ const logout = () => {
                             >Infermieri</Link
                         >
                     </li>
+                    <li class="list-item">
+                        <Link
+                            :class="isRouteActive(['secretaries']) ? 'active' : ''"
+                            :href="route('admin.secretaries.index')"
+                            >Segretarie</Link
+                        >
+                    </li>
                 </ul>
             </li>
             <li
                 class="list-item"
-                v-if="hasRole('superadmin') || hasRole('doctor')"
+                v-if="hasPermission('patient.view')"
             >
                 <Link
                     :class="isRouteActive(['patients']) ? 'active' : ''"
@@ -81,14 +100,14 @@ const logout = () => {
                     >Pazienti</Link
                 >
             </li>
-            <li class="list-item" v-if="hasRole('superadmin')">
+            <li class="list-item" v-if="hasPermission('invoices.view')">
                 <Link
                     :class="isRouteActive(['invoices']) ? 'active' : ''"
                     :href="route('admin.invoices.index')"
                     >Fatture</Link
                 >
             </li>
-            <li class="list-item submenu-open" v-if="hasRole('superadmin')">
+            <li class="list-item submenu-open" v-if="canSeeAdministration">
                 <a
                     href="#"
                     :class="
@@ -100,7 +119,7 @@ const logout = () => {
                     <li
                         id="warehouse"
                         class="list-item has-submenu"
-                        v-if="hasRole('superadmin')"
+
                     >
                         <a
                             href="#"
@@ -160,7 +179,7 @@ const logout = () => {
                             </li>
                         </ul>
                     </li>
-                    <li class="list-item">
+                    <li class="list-item" v-if="hasPermission('role.view')">
                         <Link
                             :class="isRouteActive(['roles']) ? 'active' : ''"
                             :href="route('admin.roles-permissions.index')"
@@ -176,7 +195,7 @@ const logout = () => {
                             >Specializzazioni</Link
                         >
                     </li>
-                    <li class="list-item">
+                    <li class="list-item" v-if="hasRole('superadmin')">
                         <Link
                             :class="
                                 isRouteActive(['audit-logs']) ? 'active' : ''
