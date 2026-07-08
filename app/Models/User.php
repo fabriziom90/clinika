@@ -76,4 +76,9 @@ class User extends Authenticatable implements AuditableContract
     {
         return $this->hasOne(Secretary::class);
     }
+
+    public function patientHistories()
+    {
+        return $this->hasMany(PatientHealthHistory::class, 'user_id');
+    }
 }

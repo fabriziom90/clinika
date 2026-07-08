@@ -107,4 +107,19 @@ class PatientObserver
             'new_values' => [],
         ]);
     }
+
+    public function search(): void
+    {
+        Audit::forceCreate([
+            'user_id' => Auth::id(),
+            'user_type' => Auth::user() ? get_class(Auth::user()) : null,
+            'event' => 'search',
+            'auditable_type' => Patient::class,
+            'auditable_id' => null,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'old_values' => [],
+            'new_values' => [],
+        ]);
+    }
 }

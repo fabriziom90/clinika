@@ -332,12 +332,12 @@ function normalizeValueForInput(value, key) {
                         <Link v-if="!props.editableColumns.length" class="show-button" :href="showUrl(item.id)">
                             <i class="fas fa-eye"></i>
                         </Link>
-                        <Link v-if="!props.editableColumns.length && hasRole('superadmin')" class="edit-button"
-                            :href="editUrl(item.id)">
+                        <Link v-if="!props.editableColumns.length && (hasRole('superadmin') || hasRole('secretary'))"
+                            class="edit-button" :href="editUrl(item.id)">
                             <i class="fas fa-edit"></i>
                         </Link>
 
-                        <button v-if="hasRole('superadmin')" class="delete-button" @click="
+                        <button v-if="(hasRole('superadmin') || hasRole('secretary'))" class="delete-button" @click="
                             () => {
                                 deletingItem = item;
                                 showDeleteModal = true;

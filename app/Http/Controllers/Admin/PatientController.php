@@ -10,6 +10,7 @@ use App\Models\Doctor;
 use App\Models\Nationality;
 use App\Models\Nurse;
 use App\Models\Patient;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -133,10 +134,13 @@ class PatientController extends Controller
      */
     public function show(Patient $patient)
     {
+
         $user = auth()->user();
 
         $patient = Patient::with([
             'nationality',
+            'patientHistories',
+            'patientHistories.author',
             'appointments' => function ($q) use ($user) {
                 if (! $user->hasRole('superadmin')) {
                     $q->where('doctor_id', $user->doctor->id ?? null);
@@ -222,5 +226,54 @@ class PatientController extends Controller
                 'message' => 'Paziente cancellato correttamente',
             ],
         ]);
+    }
+
+    public function search(Request $request)
+    {
+
+        if (! auth()->user()->can('patient.view')) {
+            abort(403);
+        }
+
+        $search = trim($request->search);
+
+        if ($search == '') {
+            return response()->json([]);
+        }
+
+        $search = mb_strtolower($search);
+
+        $patients = Patient::query()
+            ->get()
+            ->filter(function ($patient) use ($search) {
+
+                return str_contains(
+                    mb_strtolower($patient->name),
+                    $search
+                )
+                ||
+                str_contains(
+                    mb_strtolower($patient->surname),
+                    $search
+                )
+                ||
+                str_contains(
+                    mb_strtolower($patient->personal_code),
+                    $search
+                );
+            })
+            ->take(10)
+            ->values()
+            ->map(function ($patient) {
+                return [
+                    'id' => $patient->id,
+                    'name' => $patient->name,
+                    'surname' => $patient->surname,
+                    'personal_code' => $patient->personal_code,
+                ];
+            });
+
+        return response()->json($patients);
+
     }
 }

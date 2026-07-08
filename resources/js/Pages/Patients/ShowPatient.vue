@@ -1,16 +1,22 @@
 <script setup>
 import { Head, Link } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import MedicalRecordTimeline from "@/Components/MedicalRecordTimeline.vue";
+import PatientHealthHistoryCard from "@/Components/PatientHealthHistoryCard.vue";
+import { useConfigStore } from "@/stores/main";
 
 const props = defineProps({
     patient: Object,
 });
 
+const { hasPermission } = useConfigStore();
+
 const detailsOpen = ref(false);
 
 const showDetail = () => (detailsOpen.value = !detailsOpen.value);
+
+const canEdit = computed(() => hasPermission('patient-health-history.create') || hasPermission('patient-health-history.update'));
 
 const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -116,7 +122,10 @@ const formatDate = (dateString) => {
                         </div>
                     </div>
                 </div>
+
                 <hr>
+                <PatientHealthHistoryCard :patient="patient" :histories="patient.patient_histories"
+                    :canEdit="canEdit" />
                 <MedicalRecordTimeline :patient="patient" />
             </div>
         </div>

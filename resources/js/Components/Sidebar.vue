@@ -58,22 +58,15 @@ const isRouteActive = (routeName) => currentRouteName.value === routeName;
 <template>
     <div id="sidebar">
         <div id="top-sidebar">
-            <div
-                v-for="section in currentMenu"
-                :key="section.id"
-                class="menu-section"
-            >
+
+            <div v-for="section in currentMenu" :key="section.id" class="menu-section">
                 <h3>
                     <i :class="`${section.icon} me-2`"></i>{{ section.title }}
                 </h3>
                 <hr />
                 <ul>
-                    <li
-                        
-                        :class="isRouteActive(link.route) ? 'active' : ''"
-                        v-for="link in section.links"
-                        :key="link.route"
-                    >
+                    <li :class="isRouteActive(link.route) ? 'active' : ''" v-for="link in section.links"
+                        :key="link.route">
                         <Link :href="route(link.route)">
                             <i :class="`${link.icon} me-2`"></i>{{ link.name }}
                         </Link>
@@ -144,6 +137,7 @@ const isRouteActive = (routeName) => currentRouteName.value === routeName;
                 a {
                     color: $mainRed;
                 }
+
                 background-color: #fff;
             }
 

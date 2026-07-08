@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import PatientSearch from "@/Components/PatientSearch.vue";
 import Table from "@/Components/Table.vue";
 import { Head, Link } from "@inertiajs/vue3";
 import { ref } from "vue";
@@ -10,7 +11,7 @@ const props = defineProps({
     columns: Object,
 });
 
-const { user, hasRole } = useConfigStore()
+const { user, hasPermission, hasRole } = useConfigStore()
 
 </script>
 <template lang="">
@@ -19,17 +20,19 @@ const { user, hasRole } = useConfigStore()
         <div>
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2>Elenco pazienti</h2>
-                <Link :href="route('admin.patients.create')" class="main-button" v-if="hasRole('superadmin')"
+                <Link :href="route('admin.patients.create')" class="main-button" v-if="hasPermission('patient.create')"
                     >Aggiungi paziente</Link
                 >
             </div>
         </div>
         <Table
+            v-if="hasRole('superadmin') || hasRole('secretary')"
             :items="patients"
             :columns="columns"
             baseRoute="admin.patients"
             :editableColumns="[]"
         />
+        <PatientSearch v-else-if="hasRole('doctor')" />
     </AuthenticatedLayout>
 </template>
 <style lang="scss" scoped>

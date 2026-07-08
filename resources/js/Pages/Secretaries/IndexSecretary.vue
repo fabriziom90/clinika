@@ -11,7 +11,7 @@ const props = defineProps({
 </script>
 <template lang="">
     <Head title="Segretarie"></Head>
-    <AuthenticatedLayout section="secretariess">
+    <AuthenticatedLayout section="secretaries">
         <div>
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2>Elenco segretarie</h2>

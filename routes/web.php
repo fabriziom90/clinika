@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\MedicalEntryController;
 use App\Http\Controllers\Admin\NurseController;
 use App\Http\Controllers\Admin\PatientController;
+use App\Http\Controllers\Admin\PatientHealthHistoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SecretaryController;
@@ -51,6 +52,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('nurses', NurseController::class);
         Route::resource('specialties', SpecialtyController::class);
         Route::resource('services', ServiceController::class);
+        Route::get('/patients/search', [PatientController::class, 'search'])->name('patients.search');
         Route::resource('patients', PatientController::class);
         Route::resource('clinic-rooms', ClinicRoomController::class);
         Route::resource('products', ProductController::class);
@@ -74,6 +76,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('appointments', AppointmentController::class);
         Route::put('/appointments/{appointment}/status', [AppointmentController::class, 'updateStatus']);
         Route::resource('secretaries', SecretaryController::class);
+        Route::post('/patient-health-history', [PatientHealthHistoryController::class, 'store'])->name('patient-health-history.store');
 
         Route::resource('invoices', InvoiceController::class);
         Route::get('/invoices/create/{appointment}', [InvoiceController::class, 'create'])->name('invoices.create');

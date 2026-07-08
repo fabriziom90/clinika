@@ -22,7 +22,7 @@ class Patient extends Model implements AuditableContract
         'email',
         'nationality_id',
         'genre',
-        'zip_code'
+        'zip_code',
     ];
 
     protected $casts = [
@@ -34,7 +34,7 @@ class Patient extends Model implements AuditableContract
         'address' => 'encrypted',
         'phone' => 'encrypted',
         'email' => 'encrypted',
-        'zip_code' => 'encrypted'
+        'zip_code' => 'encrypted',
 
     ];
 
@@ -58,6 +58,11 @@ class Patient extends Model implements AuditableContract
     public function appointments()
     {
         return $this->hasMany(Appointment::class);
+    }
+
+    public function patientHistories()
+    {
+        return $this->hasMany(PatientHealthHistory::class);
     }
 
     public function medicalRecord()

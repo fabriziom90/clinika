@@ -51,6 +51,7 @@ class RoleSeeder extends Seeder
             'prescription' => 'Prescrizione',
             'vital-parameter' => 'Parametri vitali',
             'invoices' => 'Fatture',
+            'patient-health-history' => 'Anamnesi Paziente',
         ];
 
         // === AZIONI CRUD ===
@@ -117,11 +118,12 @@ class RoleSeeder extends Seeder
         $superadmin = Role::findByName('superadmin');
         $doctor = Role::findByName('doctor');
         $nurse = Role::findByName('nurse');
+        $secretary = Role::findByName('secretary');
 
-        // Superamministratore → tutti i permessi
+        // Superamministratore
         $superadmin->syncPermissions(Permission::all());
 
-        // Medico → può leggere e aggiornare pazienti, creare/modificare appuntamenti, visualizzare infermieri
+        // Medico
         $doctor->syncPermissions([
             'patient.view',
             'appointment.view',
@@ -140,9 +142,52 @@ class RoleSeeder extends Seeder
 
             'vital-parameter.create',
             'vital-parameter.view',
+            'patient-health-history.create',
+            'patient-health-history.view',
+            'patient-health-history.update',
         ]);
 
-        // Infermiere → solo lettura su pazienti e appuntamenti
+        // Segretaria
+        $allPermissions = Permission::pluck('name')->toArray();
+
+        // permessi da escludere
+        $excludedPermissions = Permission::whereIn('name', [
+            'medical-record.create',
+            'medical-record.update',
+            'medical-record.delete',
+
+            'medical-entry.create',
+            'medical-entry.update',
+            'medical-entry.delete',
+
+            'medical-attachment.create',
+            'medical-attachment.update',
+            'medical-attachment.delete',
+
+            'vital-parameter.create',
+            'vital-parameter.update',
+            'vital-parameter.delete',
+
+            'prescription.create',
+            'prescription.update',
+            'prescription.delete',
+
+            'patient-health-history.create',
+            'patient-health-history.update',
+            'patient-health-history.delete',
+
+            'audit-logs.view',
+            'audit-logs.create',
+            'audit-logs.update',
+            'audit-logs.delete',
+        ])->pluck('name')->toArray();
+
+        // differenza
+        $permissions = array_values(array_diff($allPermissions, $excludedPermissions));
+
+        $secretary->syncPermissions($permissions);
+
+        // Infermiere
         $nurse->syncPermissions([
             'patient.view',
             'appointment.view',
@@ -153,6 +198,7 @@ class RoleSeeder extends Seeder
             'medical-attachment.view',
             'prescription.view',
             'vital-parameter.view',
+            'patient-health-history.view',
         ]);
 
     }

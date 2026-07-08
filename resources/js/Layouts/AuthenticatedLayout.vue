@@ -10,6 +10,7 @@ const props = defineProps({
         "patients" |
         "doctors" |
         "nurses" |
+        "secretaries" |
         "roles" |
         "specialties" |
         "clinicrooms" |
@@ -23,10 +24,7 @@ const props = defineProps({
     <div class="vw-100 vh-100">
         <TopBar />
         <main>
-            <Sidebar
-                :current-section="props.section"
-                :userRole="$page.props.auth.user.roles[0] || ''"
-            />
+            <Sidebar :current-section="props.section" :userRole="$page.props.auth.user.roles[0] || ''" />
             <div class="main-content">
                 <slot />
             </div>

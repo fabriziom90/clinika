@@ -10,11 +10,11 @@ export const useConfigStore = defineStore("config", () => {
         user.value?.permissions?.includes(permission);
 
     const canAny = (...permissions) => {
-        permissions.some((permission) => hasPermission(permission));
+        return permissions.some((permission) => hasPermission(permission));
     };
 
     const canAll = (...permissions) => {
-        permissions.every((permission) => hasPermission(permission));
+        return permissions.every((permission) => hasPermission(permission));
     };
 
     return {
