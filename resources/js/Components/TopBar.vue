@@ -198,6 +198,15 @@ const logout = () => {
                     <li class="list-item" v-if="hasRole('superadmin')">
                         <Link
                             :class="
+                                isRouteActive(['reminder-types']) ? 'active' : ''
+                            "
+                            :href="route('admin.reminder-types.index')"
+                            >Tipologie promemoria</Link
+                        >
+                    </li>
+                    <li class="list-item" v-if="hasRole('superadmin')">
+                        <Link
+                            :class="
                                 isRouteActive(['audit-logs']) ? 'active' : ''
                             "
                             :href="route('admin.audit-logs.index')"

@@ -52,6 +52,7 @@ class RoleSeeder extends Seeder
             'vital-parameter' => 'Parametri vitali',
             'invoices' => 'Fatture',
             'patient-health-history' => 'Anamnesi Paziente',
+            'reminder-type' => 'Tipologia promemoria',
         ];
 
         // === AZIONI CRUD ===

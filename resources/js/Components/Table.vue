@@ -198,6 +198,8 @@ const sendResetEmail = (item) => {
 };
 
 const displayValue = (item, key) => {
+
+
     // prezzo totale
     if (key === "price") {
         const base = item.product || item.drug;
@@ -301,6 +303,9 @@ function normalizeValueForInput(value, key) {
                             <input v-else v-model="editForms[item.id][key]" class="form-control" />
                         </template>
                         <template v-else>
+                            {{ console.log(item.active == true) }}
+                            <div v-if="key === 'name' && item.active != undefined" class="status-dot"
+                                :class="item.active == true ? 'active' : 'inactive'"></div>
                             {{ displayValue(item, key) }}
                         </template>
                     </td>
@@ -399,6 +404,22 @@ select {
 
     .global-filter {
         padding: 5px;
+    }
+}
+
+.status-dot {
+    display: inline-block;
+    vertical-align: middle;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+
+    &.active {
+        background-color: #28a745;
+    }
+
+    &.inactive {
+        background-color: #dc3545;
     }
 }
 </style>

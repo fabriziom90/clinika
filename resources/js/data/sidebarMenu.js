@@ -170,7 +170,30 @@ export const sidebarMenus = {
             title: "Logs di sistema",
             roles: ["superadmin"],
             path: "/",
-            icon: "fa-clipboard-list",
+            icon: "fas fa-clipboard-list",
+        },
+    ],
+    remindertypes: [
+        {
+            id: "reminder-types",
+            title: "Tipologie di promemoria",
+            roles: ["superadmin", "secretary"],
+            path: "/",
+            icon: "fas fa-alarm-clock",
+            links: [
+                {
+                    name: "Lista tipologie",
+                    route: "admin.reminder-types.index",
+                    path: "/",
+                    icon: "fas fa-list",
+                },
+                {
+                    name: "Aggiungi tipologia",
+                    route: "admin.reminder-types.create",
+                    path: "/create",
+                    icon: "fas fa-plus",
+                },
+            ],
         },
     ],
     superadmin: [],
