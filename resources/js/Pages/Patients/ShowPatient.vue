@@ -118,6 +118,20 @@ const formatDate = (dateString) => {
                                         }}</p>
                                     </div>
                                 </div>
+                                <hr>
+                                <div class="row gy-3">
+                                    <div class="col-12">
+                                        <h3>Promemoria notifiche attivi per: </h3>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="d-flex">
+                                            {{ console.log(patient) }}
+                                            <div class="me-3" v-for="type in patient.reminder_types" :key="type.id">
+                                                {{ type.name }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

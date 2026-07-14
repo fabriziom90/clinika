@@ -91,20 +91,4 @@ const save = () => {
         </div>
     </AuthenticatedLayout>
 </template>
-<style lang="scss" scoped>
-.custom-switch {
-    width: 3.5rem;
-    height: 1.8rem;
-    cursor: pointer;
-}
-
-.custom-switch:checked {
-    background-color: #c53238;
-    border-color: #c53238;
-}
-
-.custom-switch:focus {
-    border-color: #c53238;
-    box-shadow: 0 0 0 .25rem rgba(197, 50, 56, .25);
-}
-</style>
+<style lang="scss" scoped></style>

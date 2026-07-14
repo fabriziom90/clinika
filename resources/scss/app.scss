@@ -167,3 +167,19 @@ input.form-check-inline:checked {
         color: #fff;
     }
 }
+
+.custom-switch {
+    width: 3.5rem;
+    height: 1.8rem;
+    cursor: pointer;
+}
+
+.custom-switch:checked {
+    background-color: $mainRed;
+    border-color: $mainRed;
+}
+
+.custom-switch:focus {
+    border-color: $mainRed;
+    box-shadow: 0 0 0 0.25rem rgba(197, 50, 56, 0.25);
+}

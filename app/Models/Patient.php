@@ -80,6 +80,11 @@ class Patient extends Model implements AuditableContract
         return $this->surname; // già decrypt
     }
 
+    public function reminderTypes()
+    {
+        return $this->belongsToMany(ReminderType::class, 'reminder_type_preferences');
+    }
+
     public function transformAudit(array $data): array
     {
         $sensitive = [

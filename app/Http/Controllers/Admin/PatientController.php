@@ -10,6 +10,7 @@ use App\Models\Doctor;
 use App\Models\Nationality;
 use App\Models\Nurse;
 use App\Models\Patient;
+use App\Models\ReminderType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -71,8 +72,9 @@ class PatientController extends Controller
     public function create()
     {
         $nationalities = Nationality::all();
+        $reminderTypes = ReminderType::where('active', true)->get();
 
-        return Inertia::render('Patients/CreatePatient', ['nationalities' => $nationalities]);
+        return Inertia::render('Patients/CreatePatient', ['nationalities' => $nationalities, 'reminderTypes' => $reminderTypes]);
     }
 
     /**
@@ -86,6 +88,10 @@ class PatientController extends Controller
         $newPatient->fill($form_data);
 
         $newPatient->save();
+
+        $newPatient->reminderTypes()->sync(
+            $request->input('reminder_types', []),
+        );
 
         // if request comes from create appointment modal
         if ($request->boolean('inline')) {
@@ -139,6 +145,7 @@ class PatientController extends Controller
 
         $patient = Patient::with([
             'nationality',
+            'reminderTypes',
             'patientHistories',
             'patientHistories.author',
             'appointments' => function ($q) use ($user) {
@@ -188,9 +195,12 @@ class PatientController extends Controller
      */
     public function edit(Patient $patient)
     {
-        $nationalities = Nationality::all();
+        $patient->load('reminderTypes');
 
-        return Inertia::render('Patients/EditPatient', ['nationalities' => $nationalities, 'patient' => $patient]);
+        $nationalities = Nationality::all();
+        $reminderTypes = ReminderType::where('active', true)->get();
+
+        return Inertia::render('Patients/EditPatient', ['nationalities' => $nationalities, 'reminderTypes' => $reminderTypes, 'patient' => $patient]);
     }
 
     /**
@@ -200,6 +210,10 @@ class PatientController extends Controller
     {
         $form_data = $request->validated();
         $patient->update($form_data);
+
+        $patient->reminderTypes()->sync(
+            $request->input('reminder_types', [])
+        );
 
         app(\App\Observers\PatientObserver::class)->updated($patient);
 

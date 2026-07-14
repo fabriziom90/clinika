@@ -8,6 +8,7 @@ import { useToast } from "vue-toast-notification";
 const props = defineProps({
     nationalities: Array,
     specialties: { type: Array, default: () => [] },
+    reminderTypes: { type: Array, default: () => [] },
     services: Array,
     formType: { type: String, default: "patient" },
     person: { type: Object, default: null },
@@ -48,6 +49,7 @@ const form = useForm({
         active: 1
     }],
     user_id: "",
+    reminder_types: [],
     notes: "",
     inline: false,
 });
@@ -90,6 +92,10 @@ onMounted(() => {
     // form.services = person.services ?? [];
     form.user_id = person.user_id ?? "";
     form.notes = person.notes;
+
+    if (props.formType === 'patient') {
+        form.reminder_types = person.reminder_types ? person.reminder_types.map(reminder => reminder.id) : []
+    }
 });
 
 // filter functions
@@ -613,6 +619,18 @@ const handleSubmitForm = () => {
         <div class="col-12" v-if="formType === 'secretarie'">
             <label for="" class="form-label">Note</label>
             <textarea placeholder="Note" name="note" id="note" v-model="form.notes" class="form-control"></textarea>
+        </div>
+        <div class="col-12" v-if="formType === 'patient'">
+            <h3>Metodi di promemoria appuntamenti</h3>
+            <div>
+                <div class="form-check-inline form-switch mb-3" v-for="type in reminderTypes" :key="type.id">
+                    <input v-model="form.reminder_types" :value="type.id" :checked="form.active" class="form-check-input custom-switch" type="checkbox" id="active">
+                    <label class="form-check-label mt-1 ms-2" for="active">
+                        {{ type.name}}
+                    </label>
+                </div>
+            </div>
+
         </div>
         <div class="row mt-4">
             <div class="col-12 col-md-4">

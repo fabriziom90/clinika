@@ -7,6 +7,7 @@ import { useToast } from "vue-toast-notification";
 
 const props = defineProps({
     nationalities: Array,
+    reminderTypes: Array,
     patient: Object,
 });
 
@@ -20,6 +21,7 @@ const $toast = useToast();
         </div>
         <PersonForm
             :nationalities="nationalities"
+            :reminderTypes="reminderTypes"
             formType="patient"
             :person="patient"
         />
