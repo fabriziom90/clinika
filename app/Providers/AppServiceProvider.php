@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\Appointment;
 use App\Models\Patient;
+use App\Observers\AppointmentObserver;
 use App\Observers\PatientObserver;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -24,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Patient::observe(PatientObserver::class);
+        Appointment::observe(AppointmentObserver::class);
         Inertia::share([
             // Condivide la chiave 'toast' (se presente nella sessione)
             'toast' => fn () => session('toast'),

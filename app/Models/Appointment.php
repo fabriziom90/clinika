@@ -19,7 +19,7 @@ class Appointment extends Model implements AuditableContract
         'start_time',
         'duration',
         'notes',
-        'status'
+        'status',
     ];
 
     // protected $casts = [
@@ -30,7 +30,7 @@ class Appointment extends Model implements AuditableContract
     protected $appends = ['status_label'];
 
     protected $casts = [
-        "status" => AppointmentStatus::class
+        'status' => AppointmentStatus::class,
     ];
 
     public function doctor()
@@ -65,6 +65,11 @@ class Appointment extends Model implements AuditableContract
 
     public function getStatusLabelAttribute()
     {
-        return $this->status?->label() ?? "scheduled";
+        return $this->status?->label() ?? 'scheduled';
+    }
+
+    public function appointmentReminder()
+    {
+        return $this->hasMany(AppointmentReminder::class);
     }
 }

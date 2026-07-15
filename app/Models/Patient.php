@@ -85,6 +85,11 @@ class Patient extends Model implements AuditableContract
         return $this->belongsToMany(ReminderType::class, 'reminder_type_preferences');
     }
 
+    public function appointmentReminders()
+    {
+        return $this->hasMany(AppointmentReminder::class);
+    }
+
     public function transformAudit(array $data): array
     {
         $sensitive = [
