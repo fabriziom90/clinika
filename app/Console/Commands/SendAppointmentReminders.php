@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\ReminderStatus;
 use App\Models\AppointmentReminder;
 use App\Services\ReminderSenderService;
 use Illuminate\Console\Command;
@@ -32,12 +33,27 @@ class SendAppointmentReminders extends Command
      */
     public function handle()
     {
+        // $reminders = AppointmentReminder::with([
+        //     'appointment',
+        //     'patient',
+        //     'reminderType',
+        // ])
+        //     ->where('status', 'pending')
+        //     ->where('scheduled_for', '<=', now())
+        //     ->get();
+
         $reminders = AppointmentReminder::with([
             'appointment',
             'patient',
             'reminderType',
         ])
-            ->where('status', 'pending')
+            ->where(function ($query) {
+                $query->where('status', ReminderStatus::PENDING)
+                    ->orWhere(function ($q) {
+                        $q->where('status', ReminderStatus::FAILED)
+                            ->where('attempt', '<', 3);
+                    });
+            })
             ->where('scheduled_for', '<=', now())
             ->get();
 

@@ -23,7 +23,8 @@ class StoreReminderTypeRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
+            'subject' => ['nullable', 'string'],
+            'message' => ['required', 'string'],
             'sent_before_value' => ['required', 'integer', 'min:1'],
             'sent_before_unit' => ['required', 'in:hours,days'],
             'active' => ['required', 'boolean'],
@@ -37,7 +38,8 @@ class StoreReminderTypeRequest extends FormRequest
             'name.string' => 'Il nome deve essere una stringa valida.',
             'name.max' => 'Il nome non può superare i 255 caratteri.',
 
-            'description.string' => 'La descrizione deve essere una stringa valida.',
+            'message.required' => 'Il messaggio del promemoria è obbligatorio.',
+            'message.string' => 'Il messaggio del promemoria deve essere una stringa valida.',
 
             'sent_before_value.required' => 'La tempistica è obbligatoria.',
             'sent_before_value.integer' => 'La tempistica deve essere un numero intero.',

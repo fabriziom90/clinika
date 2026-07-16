@@ -10,7 +10,8 @@ const props = defineProps({
 
 const form = useForm({
     name: "",
-    description: "",
+    subject: "",
+    message: "",
     sent_before_value: "",
     sent_before_unit: "",
     active: false
@@ -77,11 +78,26 @@ const save = () => {
                 </div>
             </div>
             <div class="col-12">
-                <label for="" class="form-label">Descrizione</label>
-                <textarea class="form-control" :class="{ 'is-invalid': form.errors.description }"
-                    v-model="form.description"></textarea>
-                <div v-if="form.errors.description" class="text-danger small mt-1">
-                    {{ form.errors.description }}
+                <h2>Testo promemoria</h2>
+            </div>
+            <div class="col-12">
+                <label for="" class="form-label">Oggetto</label>
+                <input type="text" class="form-control" :class="{ 'is-invalid': form.subject }"
+                    placeholder="Oggetto (facoltativo)" v-model="form.subject">
+                <div v-if="form.errors.subject" class="text-danger small mt-1">
+                    {{ form.errors.subject }}
+                </div>
+            </div>
+            <div class="col-12">
+                <label for="" class="form-label">Testo promemoria</label>
+                <div v-span>
+                    <em>Nel testo inserire { { nome_cognome } }, { { data_appuntamento } } e { { orario_appuntamento } }
+                        come segnaposti del nome e cognome del paziente, la data e l'orario dell'appuntamento</em>
+                </div>
+                <textarea class="form-control" :class="{ 'is-invalid': form.errors.message }"
+                    v-model="form.message"></textarea>
+                <div v-if="form.errors.message" class="text-danger small mt-1">
+                    {{ form.errors.message }}
                 </div>
             </div>
             <div class="col-12">

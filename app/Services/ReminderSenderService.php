@@ -4,6 +4,9 @@ namespace App\Services;
 
 use App\Enums\ReminderStatus;
 use App\Models\AppointmentReminder;
+use App\Notifications\Channels\EmailReminderChannel;
+use App\Notifications\Channels\SmsReminderChannel;
+use App\Notifications\Channels\WhatsappReminderChannel;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -12,20 +15,19 @@ class ReminderSenderService
     public function send(AppointmentReminder $reminder)
     {
         try {
-            switch ($reminder->reminderType->code) {
-                case 'email':
-                    $this->sendEmail($reminder);
-                    break;
-                case 'sms':
-                    $this->sendSms($reminder);
-                    break;
-                case 'whatsapp':
-                    $this->sendWhatsapp($reminder);
-                    break;
+            $reminder->update([
+                'attempts' => $reminder->attempts + 1,
+                'last_attempt_at' => now(),
+            ]);
 
-                default:
-                    throw new \Exception('Tipologia di reminder non supportata.');
-            }
+            $channel = match ($reminder->reminderType->code) {
+                'email' => app(EmailReminderChannel::class),
+                'sms' => app(SmsReminderChannel::class),
+                'whatsapp' => app(WhatsappReminderChannel::class),
+                default => throw new \Exception('Canale reminder non supportato.')
+            };
+
+            $channel->send($reminder);
 
             $reminder->update([
                 'status' => ReminderStatus::SENT,
@@ -46,32 +48,5 @@ class ReminderSenderService
 
             return false;
         }
-    }
-
-    private function sendEmail(AppointmentReminder $reminder): void
-    {
-        Log::info('EMAIL REMINDER', [
-            'appointment' => $reminder->appointment_id,
-            'patient' => $reminder->patient_id,
-        ]);
-
-    }
-
-    private function sendSms(AppointmentReminder $reminder): void
-    {
-        Log::info('SMS REMINDER', [
-            'appointment' => $reminder->appointment_id,
-            'patient' => $reminder->patient_id,
-        ]);
-
-    }
-
-    private function sendWhatsapp(AppointmentReminder $reminder): void
-    {
-        Log::info('WHATSAPP REMINDER', [
-            'appointment' => $reminder->appointment_id,
-            'patient' => $reminder->patient_id,
-        ]);
-
     }
 }

@@ -46,7 +46,8 @@ class ReminderTypeController extends Controller
         ReminderType::create([
             'name' => $form_data['name'],
             'code' => Str::slug($form_data['name']),
-            'description' => $form_data['description'],
+            'subject' => $form_data['subject'],
+            'message' => $form_data['message'],
             'sent_before_value' => $form_data['sent_before_value'],
             'sent_before_unit' => $form_data['sent_before_unit'],
             'active' => $form_data['active'],
@@ -90,7 +91,8 @@ class ReminderTypeController extends Controller
         $reminderType->update([
             'name' => $form_data['name'],
             'code' => Str::slug($form_data['name']),
-            'description' => $form_data['description'],
+            'subject' => $form_data['subject'] ?? null,
+            'message' => $form_data['message'],
             'sent_before_value' => $form_data['sent_before_value'],
             'sent_before_unit' => $form_data['sent_before_unit'],
             'active' => $form_data['active'],

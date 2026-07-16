@@ -16,29 +16,27 @@ const props = defineProps({
             </div>
         </div>
         <div class="row gy-3">
-            <div class="col-12">
+            <div class="col-12 col-md-6">
                 <label for="" class="form-label"><strong>Nome</strong></label>
                 <div>{{ reminderType.name }}</div>
-            </div>
-            <hr>
-            <div class="col-12">
+                <hr>
                 <label for="" class="form-label"><strong>Codice</strong></label>
                 <div>{{ reminderType.code }}</div>
-            </div>
-            <hr>
-            <div class="col-12">
+                <hr>
                 <label for="" class="form-label"><strong>Tempistiche</strong></label>
                 <div>{{ reminderType.sent_before_value }} {{ reminderType.sent_before_unit === 'hours' ? 'Ore' : 'Giorni' }}</div>
-            </div>
-            <hr>
-            <div class="col-12">
+                <hr>
                 <label for="" class="form-label"><strong>Attivo</strong></label>
                 <div class="rounded-active" :class="reminderType.active ? 'bg-success' : 'bg-black'">{{ reminderType.active ? 'Sì' : 'No'}}</div>
+                <hr>
             </div>
-            <hr>
-            <div class="col-12">
-                <label for="" class="form-label"><strong>Descrizione</strong></label>
-                <div>{{ reminderType.description }}</div>
+            <div class="col-12 col-md-6">
+                <div v-if="reminderType.subject != null">
+                <label for="" class="form-label"><strong>Oggetto</strong></label>
+                <div>{{ reminderType.subject }}</div>
+                </div>
+                <label for="" class="form-label"><strong>Messaggio</strong></label>
+                <div>{{ reminderType.message }}</div>
             </div>
         </div>
     </AuthenticatedLayout>

@@ -9,7 +9,7 @@ class ReminderType extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'code', 'description', 'active', 'sent_before_value', 'sent_before_unit'];
+    protected $fillable = ['name', 'code', 'subject', 'message', 'active', 'sent_before_value', 'sent_before_unit'];
 
     public function preferences()
     {
