@@ -60,7 +60,7 @@ const isRouteActive = (routeName) => currentRouteName.value === routeName;
         <div id="top-sidebar">
 
             <div v-for="section in currentMenu" :key="section.id" class="menu-section">
-                <h3>
+                <h3>{{ console.log(section) }}
                     <i :class="`${section.icon} me-2`"></i>{{ section.title }}
                 </h3>
                 <hr />

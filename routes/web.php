@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\NurseController;
 use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Admin\PatientHealthHistoryController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\AppointmentReminderController;
 use App\Http\Controllers\Admin\ReminderTypeController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SecretaryController;
@@ -79,6 +80,8 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('secretaries', SecretaryController::class);
         Route::post('/patient-health-history', [PatientHealthHistoryController::class, 'store'])->name('patient-health-history.store');
         Route::resource('/reminder-types', ReminderTypeController::class);
+        Route::get('/reminders', [AppointmentReminderController::class, 'index'])->name('reminders.index');
+        Route::get('/reminders/{reminder}', [AppointmentReminderController::class, 'show'])->name('reminders.show');
         Route::resource('invoices', InvoiceController::class);
         Route::get('/invoices/create/{appointment}', [InvoiceController::class, 'create'])->name('invoices.create');
         Route::put('/invoices/{invoice}/change-status', [InvoiceController::class, 'changeStatus'])->name('invoices.change-status');

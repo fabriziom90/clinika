@@ -7,7 +7,9 @@ import { router } from "@inertiajs/vue3";
 
 const { user, hasPermission, canAny, hasRole } = useConfigStore()
 
+const openReminders = ref(false);
 const openWarehouse = ref(false);
+const openAdministration = ref(false);
 
 const isRouteActive = (routes) => {
     let flag = false;
@@ -21,12 +23,18 @@ const isRouteActive = (routes) => {
 
 const canSeeAdministration = computed(() => {
     return (
-        hasPermission('drug.view') ||
-        hasPermission('product.view') ||
-        hasPermission('clinic-room.view') ||
         hasPermission('role.view') ||
         hasPermission('specialty.view') ||
-        hasPermission('audit-log.view')
+        hasPermission('audit-log.view') ||
+        hasPermission('reminder.view')
+    );
+});
+
+const canSeeWarehouse = computed(() => {
+    return (
+        hasPermission('drug.view') ||
+        hasPermission('product.view') ||
+        hasPermission('clinic-room.view')
     );
 });
 
@@ -107,75 +115,67 @@ const logout = () => {
                     >Fatture</Link
                 >
             </li>
-            <li class="list-item submenu-open" v-if="canSeeAdministration">
-                <a
-                    href="#"
-                    :class="
-                        isRouteActive(['specialties', 'roles']) ? 'active' : ''
+            <li class="list-item submenu-open" v-if="canSeeWarehouse">
+                <a href="#" class="submenu-toggle" :class="
+                        isRouteActive([
+                            'drugs',
+                            'products',
+                            'clinic_rooms',
+                        ])
+                            ? 'active'
+                            : ''
                     "
-                    >Amministrazione</a
+                    @click.prevent="openWarehouse = !openWarehouse"
                 >
+                    Magazzino
+                    <i class="fas" :class=" openWarehouse ? 'fa-chevron-up' : 'fa-chevron-down' "></i>
+                </a>
+
+                <ul class="submenu right-submenu" v-show="openWarehouse">
+                    <li>
+                        <Link
+                            :href="route('admin.drugs.index')"
+                            :class="{
+                                active: isRouteActive(['drugs']),
+                            }"
+                            >Medicinali</Link
+                        >
+                    </li>
+                    <li>
+                        <Link
+                            :href="route('admin.products.index')"
+                            :class="{
+                                active: isRouteActive(['products']),
+                            }"
+                            >Prodotti</Link
+                        >
+                    </li>
+                    <li>
+                        <Link
+                            :href="route('admin.clinic-rooms.index')"
+                            :class="{
+                                active: isRouteActive(['clinic_rooms']),
+                            }"
+                            >Stanze Poliambulatorio</Link
+                        >
+                    </li>
+                </ul>
+            </li>
+            <li class="list-item submenu-open" v-if="canSeeAdministration">
+                <a href="#" :class=" isRouteActive(['specialties', 'roles', 'audit-logs', 'reminder-types', 'reminders']) ? 'active' : ''" >Amministrazione <i class="fas" :class="openAdministration ? 'fa-chevron-up' : 'fa-chevron-down' "></i></a>
                 <ul class="submenu">
-                    <li
-                        id="warehouse"
-                        class="list-item has-submenu"
-
-                    >
-                        <a
-                            href="#"
-                            class="submenu-toggle"
-                            :class="
-                                isRouteActive([
-                                    'drugs',
-                                    'products',
-                                    'clinic_rooms',
-                                ])
-                                    ? 'active'
-                                    : ''
-                            "
-                            @click.prevent="openWarehouse = !openWarehouse"
-                        >
-                            Magazzino
-                            <i
-                                class="fas"
-                                :class="
-                                    openWarehouse
-                                        ? 'fa-chevron-up'
-                                        : 'fa-chevron-down'
-                                "
-                            ></i>
+                    <li id="reminders" class="list-item has-submenu" >
+                        <a href="#" class="submenu-toggle" :class="isRouteActive(['reminder-types', 'reminders', ]) ? 'active' : ''" @click.prevent="openReminders = !openReminders" > Promemoria
+                            <i class="fas" :class="openReminders ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                         </a>
-
-                        <ul
-                            class="submenu right-submenu"
-                            v-show="openWarehouse"
-                        >
-                            <li>
-                                <Link
-                                    :href="route('admin.drugs.index')"
-                                    :class="{
-                                        active: isRouteActive(['drugs']),
-                                    }"
-                                    >Medicinali</Link
-                                >
+                        <ul class="submenu right-submenu" v-show="openReminders" >
+                            <li v-if="hasRole('superadmin')">
+                                <Link :href="route('admin.reminder-types.index')" :class="{active: isRouteActive(['reminder-types'])}"
+                                >Tipologie</Link>
                             </li>
                             <li>
-                                <Link
-                                    :href="route('admin.products.index')"
-                                    :class="{
-                                        active: isRouteActive(['products']),
-                                    }"
-                                    >Prodotti</Link
-                                >
-                            </li>
-                            <li>
-                                <Link
-                                    :href="route('admin.clinic-rooms.index')"
-                                    :class="{
-                                        active: isRouteActive(['clinic_rooms']),
-                                    }"
-                                    >Stanze Poliambulatorio</Link
-                                >
+                                <Link :href="route('admin.reminders.index')" :class="{ active: isRouteActive(['reminders'])}"
+                                >Elenco</Link>
                             </li>
                         </ul>
                     </li>
@@ -193,15 +193,6 @@ const logout = () => {
                             "
                             :href="route('admin.specialties.index')"
                             >Specializzazioni</Link
-                        >
-                    </li>
-                    <li class="list-item" v-if="hasRole('superadmin')">
-                        <Link
-                            :class="
-                                isRouteActive(['reminder-types']) ? 'active' : ''
-                            "
-                            :href="route('admin.reminder-types.index')"
-                            >Tipologie promemoria</Link
                         >
                     </li>
                     <li class="list-item" v-if="hasRole('superadmin')">

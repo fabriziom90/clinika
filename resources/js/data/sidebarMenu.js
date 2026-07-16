@@ -196,5 +196,22 @@ export const sidebarMenus = {
             ],
         },
     ],
+    reminders: [
+        {
+            id: "reminders",
+            title: "Logs Promemoria",
+            roles: ["superadmin", "secretary"],
+            path: "/",
+            icon: "fas fa-clipboard-list",
+            links: [
+                {
+                    name: "Lista promemoria",
+                    route: "admin.reminders.index",
+                    path: "/",
+                    icon: "fas fa-list",
+                },
+            ]
+        },
+    ],
     superadmin: [],
 };
