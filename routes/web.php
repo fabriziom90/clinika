@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AppointmentController;
+use App\Http\Controllers\Admin\AppointmentReminderController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\ClinicRoomController;
 use App\Http\Controllers\Admin\DoctorController;
@@ -13,12 +14,12 @@ use App\Http\Controllers\Admin\NurseController;
 use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Admin\PatientHealthHistoryController;
 use App\Http\Controllers\Admin\ProductController;
-use App\Http\Controllers\Admin\AppointmentReminderController;
 use App\Http\Controllers\Admin\ReminderTypeController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SecretaryController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SpecialtyController;
+use App\Http\Controllers\Admin\ConsentTypeController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -85,6 +86,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('invoices', InvoiceController::class);
         Route::get('/invoices/create/{appointment}', [InvoiceController::class, 'create'])->name('invoices.create');
         Route::put('/invoices/{invoice}/change-status', [InvoiceController::class, 'changeStatus'])->name('invoices.change-status');
+        Route::resource('/consent-types', ConsentTypeController::class);
 
     });
 });

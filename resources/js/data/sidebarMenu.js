@@ -213,5 +213,28 @@ export const sidebarMenus = {
             ]
         },
     ],
+    consenttypes: [
+        {
+            id: "consenttypes",
+            title: "Tipologie consenso",
+            roles: ["superadmin", "secretary"],
+            path: "/",
+            icon: "fas fa-file-shield",
+            links: [
+                {
+                    name: "Lista promemoria",
+                    route: "admin.consent-types.index",
+                    path: "/",
+                    icon: "fas fa-list",
+                },
+                {
+                    name: "Aggiungi tipologia",
+                    route: "admin.consent-types.create",
+                    path: "/create",
+                    icon: "fas fa-plus",
+                },
+            ]
+        },
+    ],
     superadmin: [],
 };

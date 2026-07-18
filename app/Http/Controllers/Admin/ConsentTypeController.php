@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreConsentTypeRequest;
 use App\Http\Requests\UpdateConsentTypeRequest;
 use App\Models\ConsentType;
+use Inertia\Inertia;
 
 class ConsentTypeController extends Controller
 {
@@ -13,7 +15,18 @@ class ConsentTypeController extends Controller
      */
     public function index()
     {
-        //
+        return Inertia::render('ConsentTypes/IndexConsentTypes',
+            [
+                'consentTypes' => ConsentType::all(),
+                'columns' => [
+                    'id'  => 'ID',
+                    'code'  => 'Codice',
+                    'name'  => 'Nome',
+                    'acquisition_method' => 'Metodo acquisizione',
+                    'is_required' => 'Obbligatorio',
+                    'is_active' => 'Attivo'
+                ]
+            ]);
     }
 
     /**
@@ -21,7 +34,7 @@ class ConsentTypeController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('ConsentTypes/CreateConsentType');
     }
 
     /**
@@ -29,7 +42,7 @@ class ConsentTypeController extends Controller
      */
     public function store(StoreConsentTypeRequest $request)
     {
-        //
+        $form_data = $request->validated();
     }
 
     /**
@@ -37,7 +50,7 @@ class ConsentTypeController extends Controller
      */
     public function show(ConsentType $consentType)
     {
-        //
+        return Inertia::render('ConsentTypes/ShowConsentType', ['consentType' => $consentType]);
     }
 
     /**
@@ -45,7 +58,7 @@ class ConsentTypeController extends Controller
      */
     public function edit(ConsentType $consentType)
     {
-        //
+        return Inertia::render('ConsentTypes/EditConsentType', ['consentType' => $consentType]);
     }
 
     /**
@@ -53,7 +66,7 @@ class ConsentTypeController extends Controller
      */
     public function update(UpdateConsentTypeRequest $request, ConsentType $consentType)
     {
-        //
+        $form_data = $request->validated();
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreConsentTypeRequest extends FormRequest
 {
@@ -11,7 +12,7 @@ class StoreConsentTypeRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +23,68 @@ class StoreConsentTypeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'code' => [
+                'required',
+                'string',
+                'max:100',
+                'alpha_dash',
+                'unique:consent_types,code',
+            ],
+
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'description' => [
+                'nullable',
+                'string',
+            ],
+
+            'acquisition_method' => [
+                'required',
+                'string',
+                Rule::in([
+                    'paper',
+                    'upload',
+                    'electronic_signature',
+                ]),
+            ],
+
+            'is_required' => [
+                'required',
+                'boolean',
+            ],
+
+            'is_active' => [
+                'required',
+                'boolean',
+            ],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'code.required' => 'Il codice del consenso è obbligatorio.',
+            'code.unique' => 'Questo codice consenso è già utilizzato.',
+            'code.alpha_dash' => 'Il codice può contenere solo lettere, numeri, trattini e underscore.',
+            'code.max' => 'Il codice non può superare i 100 caratteri.',
+
+            'name.required' => 'Il nome del consenso è obbligatorio.',
+            'name.max' => 'Il nome non può superare i 255 caratteri.',
+
+            'description.string' => 'La descrizione deve essere un testo valido.',
+
+            'acquisition_method.required' => 'La modalità di acquisizione è obbligatoria.',
+            'acquisition_method.in' => 'La modalità di acquisizione selezionata non è valida.',
+
+            'is_required.required' => 'Indicare se il consenso è obbligatorio.',
+            'is_required.boolean' => 'Il valore del consenso obbligatorio non è valido.',
+
+            'is_active.required' => 'Indicare se il consenso è attivo.',
+            'is_active.boolean' => 'Il valore dello stato attivo non è valido.',
         ];
     }
 }

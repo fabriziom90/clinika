@@ -228,6 +228,14 @@ const displayValue = (item, key) => {
         value = value[k];
     }
 
+    if (
+        (key === "is_active" || key === "is_required") &&
+        value !== null &&
+        value !== undefined
+    ) {
+        return value ? "Sì" : "No";
+    }
+
     if ((keys[keys.length - 1].toLowerCase().includes("date") || keys[keys.length - 1].toLowerCase().includes("created_at")) && value) {
         return formatDate(value);
     }
@@ -303,7 +311,6 @@ function normalizeValueForInput(value, key) {
                             <input v-else v-model="editForms[item.id][key]" class="form-control" />
                         </template>
                         <template v-else>
-                            {{ console.log(item.active == true) }}
                             <div v-if="key === 'name' && item.active != undefined" class="status-dot"
                                 :class="item.active == true ? 'active' : 'inactive'"></div>
                             {{ displayValue(item, key) }}

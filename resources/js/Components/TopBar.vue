@@ -179,13 +179,6 @@ const logout = () => {
                             </li>
                         </ul>
                     </li>
-                    <li class="list-item" v-if="hasPermission('role.view')">
-                        <Link
-                            :class="isRouteActive(['roles']) ? 'active' : ''"
-                            :href="route('admin.roles-permissions.index')"
-                            >Ruoli</Link
-                        >
-                    </li>
                     <li class="list-item">
                         <Link
                             :class="
@@ -193,6 +186,22 @@ const logout = () => {
                             "
                             :href="route('admin.specialties.index')"
                             >Specializzazioni</Link
+                        >
+                    </li>
+                    <li class="list-item">
+                        <Link
+                            :class="
+                                isRouteActive(['consent-types']) ? 'active' : ''
+                            "
+                            :href="route('admin.consent-types.index')"
+                            >Tipologie consenso</Link
+                        >
+                    </li>
+                    <li class="list-item" v-if="hasPermission('role.view')">
+                        <Link
+                            :class="isRouteActive(['roles']) ? 'active' : ''"
+                            :href="route('admin.roles-permissions.index')"
+                            >Ruoli</Link
                         >
                     </li>
                     <li class="list-item" v-if="hasRole('superadmin')">
