@@ -132,7 +132,7 @@ class DoctorController extends Controller
     {
         $user = Auth::user();
 
-        $doctor = Doctor::with(['user', 'nationality', 'specialty', 'appointments.service', 'appointments.patient', 'services'])->findOrFail($doctor->id);
+        $doctor = Doctor::with(['user', 'nationality', 'specialty', 'appointments.service', 'appointments.patient', 'appointments.doctor', 'appointments.doctor.user', 'services'])->findOrFail($doctor->id);
         $doctors = Doctor::all();
         $patients = Patient::all();
         $nurses = Nurse::all();

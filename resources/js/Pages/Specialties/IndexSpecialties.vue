@@ -28,7 +28,7 @@ const handleInlineUpdate = (updatedData) => {
                 </div>
             </div>
 
-            
+
 
             <Table
                 :items="localSpecialties"

@@ -1,10 +1,12 @@
 <script setup>
 import Modal from "./Modal.vue";
 import { ref, computed, watch } from "vue";
-import { Link, useForm, usePage } from "@inertiajs/vue3";
-import { router } from "@inertiajs/vue3";
-import { formatDate } from "@/utilities/formatDateFunction";
-import { useConfigStore } from "@/stores/main";
+import { useForm, usePage } from "@inertiajs/vue3";
+import { formatTableValue } from "../utilities/tableFormatter.js";
+import TableActions from "./TableActions.vue";
+import { useTableSorting } from "@/composables/useTableSorting.js";
+import { useTablePagination } from "@/composables/useTablePagination.js";
+import { useTableFilters } from "@/composables/useTableFilters.js";
 
 const props = defineProps({
     items: {
@@ -25,23 +27,15 @@ const props = defineProps({
     },
 });
 
+//emit defining
 const emit = defineEmits(["updated"]);
 
-const { user, hasRole } = useConfigStore();
-
-// state
-const perPage = ref(10);
-const currentPage = ref(1);
-const globalFilter = ref("");
+//page
 const page = usePage();
 
 // delete state
 const deletingItem = ref(null);
 const showDeleteModal = ref(false);
-const preventPageReset = ref(false);
-
-// filter by column
-const columnFilters = ref({});
 
 // count number of columns
 const columnCount = computed(() => Object.keys(props.columns).length + 1);
@@ -50,83 +44,24 @@ const columnCount = computed(() => Object.keys(props.columns).length + 1);
 const editingItem = ref(null);
 const editForms = ref({});
 
-// global filtering + per column
-const filteredItems = computed(() => {
-    let filtered = props.items;
+//column filtering
+const items = computed(() => props.items);
+const { globalFilter, columnFilters, filteredItems } = useTableFilters(items);
 
-    if (globalFilter.value) {
-        const g = globalFilter.value.toLowerCase();
-        filtered = filtered.filter((item) =>
-            Object.values(item).some((v) => String(v).toLowerCase().includes(g))
-        );
-    }
+//sorting
+const { sortColumn, sortDirection, sortBy, sortedItems } = useTableSorting(filteredItems);
 
-    Object.keys(columnFilters.value).forEach((key) => {
-        const val = columnFilters.value[key];
-        if (val) {
-            filtered = filtered.filter((item) =>
-                String(item[key]).toLowerCase().includes(val.toLowerCase())
-            );
-        }
-    });
+//pagination
+const {
+    perPage,
+    currentPage,
+    totalPages,
+    paginatedItems,
+    preventPageReset,
+    watchItems,
+} = useTablePagination(sortedItems);
 
-    return filtered;
-});
-
-// sorting
-const sortColumn = ref(null);
-const sortDirection = ref("asc");
-
-function sortBy(column) {
-    if (sortColumn.value === column) {
-        sortDirection.value = sortDirection.value === "asc" ? "desc" : "asc";
-    } else {
-        sortColumn.value = column;
-        sortDirection.value = "asc";
-    }
-}
-
-const sortedItems = computed(() => {
-    if (!sortColumn.value) return filteredItems.value;
-    return [...filteredItems.value].sort((a, b) => {
-        const valA = a[sortColumn.value];
-        const valB = b[sortColumn.value];
-
-        if (valA < valB) return sortDirection.value === "asc" ? -1 : 1;
-        if (valA > valB) return sortDirection.value === "asc" ? 1 : -1;
-        return 0;
-    });
-});
-
-// pagination
-const totalPages = computed(() =>
-    Object.keys(sortedItems.value).length === 0 ? 1 : Math.ceil(sortedItems.value.length / perPage.value)
-);
-
-const paginatedItems = computed(() => {
-
-    if (Object.keys(sortedItems.value).length === 0) return 0;
-    const start = (currentPage.value - 1) * perPage.value;
-    const end = start + perPage.value;
-    return sortedItems.value.slice(start, end);
-});
-
-watch([perPage, filteredItems], () => {
-    if (!preventPageReset.value) {
-        currentPage.value = 1;
-    }
-    preventPageReset.value = false;
-});
-
-watch(
-    () => props.items.length,
-    () => {
-        if (!preventPageReset.value) {
-            currentPage.value = totalPages.value || 1;
-        }
-        preventPageReset.value = false;
-    }
-);
+watchItems(() => props.items.length);
 
 // actions (show, edit, delete)
 const showUrl = (id) => {
@@ -136,7 +71,7 @@ const editUrl = (id) => {
     return route(`${props.baseRoute}.edit`, id);
 };
 
-// --- editing online (for specializations...)
+// --- editing inline (for specializations...)
 const startEdit = (item) => {
     if (!props.editableColumns.length) return;
     editingItem.value = item.id;
@@ -183,64 +118,6 @@ const closeDeleteModal = () => {
 
 const handleDeleted = (updatedItems) => {
     emit("updated", updatedItems);
-};
-
-const sendResetEmail = (item) => {
-    const routeName = `${props.baseRoute}.sendResetEmail`;
-
-    router.post(
-        route(routeName, item.id),
-        {},
-        {
-            preserveScroll: true,
-        }
-    );
-};
-
-const displayValue = (item, key) => {
-
-
-    // prezzo totale
-    if (key === "price") {
-        const base = item.product || item.drug;
-        if (base?.unit_price != null && item.units != null) {
-            return `${base.unit_price * item.units}€`;
-        }
-        return "";
-    }
-
-    // per il nome personalizzato "item_name"
-    if (key === "item_name") {
-        if (item.product && item.product.name != null) {
-            return item.product.name;
-        }
-        if (item.drug && item.drug.name != null) {
-            return item.drug.name;
-        }
-        return "";
-    }
-
-    // altri campi
-    const keys = key.split(".");
-    let value = item;
-    for (let k of keys) {
-        if (value == null) return "";
-        value = value[k];
-    }
-
-    if (
-        (key === "is_active" || key === "is_required") &&
-        value !== null &&
-        value !== undefined
-    ) {
-        return value ? "Sì" : "No";
-    }
-
-    if ((keys[keys.length - 1].toLowerCase().includes("date") || keys[keys.length - 1].toLowerCase().includes("created_at")) && value) {
-        return formatDate(value);
-    }
-
-    return value ?? "";
 };
 
 function normalizeValueForInput(value, key) {
@@ -313,58 +190,23 @@ function normalizeValueForInput(value, key) {
                         <template v-else>
                             <div v-if="key === 'name' && item.active != undefined" class="status-dot"
                                 :class="item.active == true ? 'active' : 'inactive'"></div>
-                            {{ displayValue(item, key) }}
+                            {{ formatTableValue(item, key) }}
                         </template>
                     </td>
-                    <td class="actions">
-                        <template v-if="props.baseRoute === 'admin.clinic-rooms'">
-                            <Link class="show-button" :href="showUrl(item.id)">
-                                <i class="fas fa-eye"></i>
-                            </Link>
-                        </template>
-                        <template v-if="
-                            props.editableColumns.length &&
-                            editingItem !== item.id
-                        ">
-                            <button class="edit-button" @click="startEdit(item)">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        </template>
+                    <TableActions
+                        :item="item"
+                        :baseRoute="baseRoute"
+                        :editableColumns="editableColumns"
+                        :editingItem="editingItem"
 
-                        <template v-else-if="editingItem === item.id">
-                            <button class="save-edit-button" @click="saveEdit(item.id)">
-                                <i class="fas fa-check"></i>
-                            </button>
-                            <button class="cancel-edit-button" @click="cancelEdit">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </template>
-
-                        <!-- Pulsanti standard per altre entità -->
-                        <Link v-if="!props.editableColumns.length" class="show-button" :href="showUrl(item.id)">
-                            <i class="fas fa-eye"></i>
-                        </Link>
-                        <Link v-if="!props.editableColumns.length && (hasRole('superadmin') || hasRole('secretary'))"
-                            class="edit-button" :href="editUrl(item.id)">
-                            <i class="fas fa-edit"></i>
-                        </Link>
-
-                        <button v-if="(hasRole('superadmin') || hasRole('secretary'))" class="delete-button" @click="
-                            () => {
-                                deletingItem = item;
-                                showDeleteModal = true;
-                            }
-                        ">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                        <button v-if="
-                            baseRoute === 'admin.doctors' ||
-                            baseRoute === 'admin.nurses' ||
-                            baseRoute === 'admin.secretaries'
-                        " class="btn-blue" @click="sendResetEmail(item)">
-                            <i class="fas fa-envelope"></i>
-                        </button>
-                    </td>
+                        @startEdit="startEdit"
+                        @cancelEdit="cancelEdit"
+                        @saveEdit="saveEdit"
+                        @delete="(item) => {
+                            deletingItem = item;
+                            showDeleteModal = true;
+                        }"
+                    />
                 </tr>
                 <tr v-if="!paginatedItems.length">
                     <td :colspan="columnCount" class="text-center">
