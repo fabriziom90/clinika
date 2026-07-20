@@ -222,13 +222,13 @@ export const sidebarMenus = {
             icon: "fas fa-file-shield",
             links: [
                 {
-                    name: "Lista promemoria",
+                    name: "Lista tipologie consensi",
                     route: "admin.consent-types.index",
                     path: "/",
                     icon: "fas fa-list",
                 },
                 {
-                    name: "Aggiungi tipologia",
+                    name: "Aggiungi tipologia consenso",
                     route: "admin.consent-types.create",
                     path: "/create",
                     icon: "fas fa-plus",

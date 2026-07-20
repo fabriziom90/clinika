@@ -10,6 +10,17 @@ export const formatTableValue = (item, key) => {
         return "";
     }
 
+    if(key == "acquisition_method"){
+        const labels = {
+            "paper": "Cartaceo",
+            "upload": "Upload",
+            "electronic_signature": "Firma elettronica"
+        }
+
+        return labels[item.acquisition_method];
+
+    }
+
     // per il nome personalizzato "item_name"
     if (key === "item_name") {
         if (item.product && item.product.name != null) {

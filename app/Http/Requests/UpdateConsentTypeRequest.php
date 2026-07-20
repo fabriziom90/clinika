@@ -23,15 +23,6 @@ class UpdateConsentTypeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'code' => [
-                'required',
-                'string',
-                'max:100',
-                'alpha_dash',
-                Rule::unique('consent_types', 'code')
-                    ->ignore($this->consent_type),
-            ],
-
             'name' => [
                 'required',
                 'string',
@@ -68,11 +59,6 @@ class UpdateConsentTypeRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'code.required' => 'Il codice del consenso è obbligatorio.',
-            'code.unique' => 'Questo codice consenso è già utilizzato.',
-            'code.alpha_dash' => 'Il codice può contenere solo lettere, numeri, trattini e underscore.',
-            'code.max' => 'Il codice non può superare i 100 caratteri.',
-
             'name.required' => 'Il nome del consenso è obbligatorio.',
             'name.max' => 'Il nome non può superare i 255 caratteri.',
 

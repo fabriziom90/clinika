@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreConsentTypeRequest;
 use App\Http\Requests\UpdateConsentTypeRequest;
 use App\Models\ConsentType;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class ConsentTypeController extends Controller
@@ -43,6 +44,22 @@ class ConsentTypeController extends Controller
     public function store(StoreConsentTypeRequest $request)
     {
         $form_data = $request->validated();
+
+        $consentType = ConsentType::create([
+            'name' => $form_data['name'],
+            'code' => Str::slug($form_data['name']),
+            'description' => $form_data['description'],
+            'acquisition_method' => $form_data['acquisition_method'],
+            'is_active' => $form_data['is_active'],
+            'is_required' => $form_data['is_required']
+        ]);
+
+        return redirect()
+        ->route('admin.consent-types.index')
+        ->with('toast', [
+            'type' => 'success',
+            'message' => 'Tipologia consenso creata correttamente.',
+        ]);
     }
 
     /**
@@ -58,6 +75,7 @@ class ConsentTypeController extends Controller
      */
     public function edit(ConsentType $consentType)
     {
+
         return Inertia::render('ConsentTypes/EditConsentType', ['consentType' => $consentType]);
     }
 
@@ -67,6 +85,22 @@ class ConsentTypeController extends Controller
     public function update(UpdateConsentTypeRequest $request, ConsentType $consentType)
     {
         $form_data = $request->validated();
+
+        $consentType->update([
+            'name' => $form_data['name'],
+            'code' => Str::slug($form_data['name']),
+            'acquisition_method' => $form_data['acquisition_method'],
+            'description' => $form_data['description'],
+            'is_active' => $form_data['is_active'],
+            'is_required' => $form_data['is_required']
+        ]);
+
+        return redirect()
+            ->route('admin.consent-types.index')
+            ->with('toast', [
+                'type' => 'success',
+                'message' => 'Tipologia consenso modificata correttamente.',
+            ]);
     }
 
     /**
@@ -74,6 +108,13 @@ class ConsentTypeController extends Controller
      */
     public function destroy(ConsentType $consentType)
     {
-        //
+        $consentType->delete();
+
+        return redirect()
+            ->route('admin.consent-types.index')
+            ->with('toast', [
+                'type' => 'success',
+                'message' => 'Tipologia consenso cancellata correttamente.',
+            ]);
     }
 }

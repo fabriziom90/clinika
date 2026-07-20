@@ -11,4 +11,9 @@ class ConsentType extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = ['code', 'name', 'description', 'acquisition_method', 'is_required', 'is_active'];
+
+    protected $casts = [
+        'is_required' => 'boolean',
+        'is_active'     => 'boolean'
+    ];
 }
