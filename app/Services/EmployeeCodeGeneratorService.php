@@ -16,7 +16,7 @@ class EmployeeCodeGeneratorService
     {
 
         if (! isset($this->prefixes[$modelClass])) {
-            throw new InvalidArgumentException("Nessun prefisso. configurato per {$modelClass}");
+            throw new InvalidArgumentException("Nessun prefisso configurato per {$modelClass}");
         }
 
         $prefix = $this->prefixes[$modelClass];

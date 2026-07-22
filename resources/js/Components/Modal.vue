@@ -6,17 +6,27 @@ const props = defineProps({
     show: Boolean,
     item: Object,
     baseRoute: String,
+    parentId: {
+        type: [Number, String],
+        default: null
+    }
 });
 
 const emit = defineEmits(["close", "deleted"]);
 
 const confirmDelete = () => {
     if (!props.item) return;
-
-    router.delete(route(`${props.baseRoute}.destroy`, props.item.id), {
+    console.log(props);
+    const routeParams = props.parentId
+    ? {
+        consent_type: props.parentId,
+        consent_version: props.item.id
+    }
+    : props.item.id;
+    console.log(routeParams);
+    router.delete(route(`${props.baseRoute}.destroy`, routeParams), {
         preserveScroll: true,
         onSuccess: (page) => {
-
             emit("deleted", page.props.items || page.props.specialties);
             emit("close");
         },

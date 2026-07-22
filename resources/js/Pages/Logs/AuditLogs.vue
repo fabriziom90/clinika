@@ -44,8 +44,7 @@ const filteredLogs = computed(() => props.logs.data);
                     <td>{{ `${log.user?.name} ${log.user?.surname}` || 'Sconosciuto' }}</td>
                     <td>
                         <span class="badge" :class="{
-                            'bg-primary': log.event === 'viewed' || log.event === 'viewed all patients',
-
+                            'bg-primary': log.event === 'viewed' || log.event === 'viewed all patients' || log.event === 'viewed all consent types' || log.event === 'viewed all consent versions',
                             'bg-success': log.event === 'login',
                             'bg-secondary': log.event === 'logout',
                             'bg-danger': log.event === 'login_failed',

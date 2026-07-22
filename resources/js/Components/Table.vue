@@ -25,6 +25,10 @@ const props = defineProps({
         type: Array,
         default: () => [], // es. ['name'] per le specializzazioni
     },
+    parentId: {
+        type: [Number, String],
+        default: null
+    }
 });
 
 //emit defining
@@ -226,7 +230,7 @@ function normalizeValueForInput(value, key) {
             </button>
         </div>
     </div>
-    <Modal :show="showDeleteModal" :item="deletingItem" :baseRoute="baseRoute" @close="closeDeleteModal"
+    <Modal :show="showDeleteModal" :item="deletingItem" :baseRoute="baseRoute" :parentId="parentId" @close="closeDeleteModal"
         @deleted="handleDeleted" />
 </template>
 

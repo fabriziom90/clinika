@@ -236,5 +236,28 @@ export const sidebarMenus = {
             ]
         },
     ],
+    consentversions: [
+        {
+            id: "consentversions",
+            title: "Versioni tipologia consenso",
+            roles: ["superadmin", "secretary"],
+            path: "/",
+            icon: "fas fa-copy",
+            links: [
+                // {
+                //     name: "Lista versioni",
+                //     route: "admin.consent-types.consent-versions.index",
+                //     path: "/",
+                //     icon: "fas fa-list",
+                // },
+                // {
+                //     name: "Aggiungi versione",
+                //     route: "admin.consent-types.consent-versions.create",
+                //     path: "/create",
+                //     icon: "fas fa-plus",
+                // },
+            ]
+        },
+    ],
     superadmin: [],
 };

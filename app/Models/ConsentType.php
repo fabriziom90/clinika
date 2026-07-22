@@ -16,4 +16,9 @@ class ConsentType extends Model
         'is_required' => 'boolean',
         'is_active'     => 'boolean'
     ];
+
+    public function versions()
+    {
+        return $this->hasMany(ConsentVersion::class);
+    }
 }

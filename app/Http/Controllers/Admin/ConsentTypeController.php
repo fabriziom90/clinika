@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreConsentTypeRequest;
 use App\Http\Requests\UpdateConsentTypeRequest;
 use App\Models\ConsentType;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use OwenIt\Auditing\Models\Audit;
 
 class ConsentTypeController extends Controller
 {
@@ -16,6 +18,18 @@ class ConsentTypeController extends Controller
      */
     public function index()
     {
+        Audit::forceCreate([
+            'user_id' => Auth::id(),
+            'user_type' => Auth::user() ? get_class(Auth::user()) : null,
+            'event' => 'viewed all consent types',
+            'auditable_type' => 'App\Models\ConsentType',
+            'auditable_id' => null,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'old_values' => [],
+            'new_values' => [],
+        ]);
+
         return Inertia::render('ConsentTypes/IndexConsentTypes',
             [
                 'consentTypes' => ConsentType::all(),
@@ -54,6 +68,8 @@ class ConsentTypeController extends Controller
             'is_required' => $form_data['is_required']
         ]);
 
+        app(\App\Observers\ConsentType::class)->created($consentType);
+
         return redirect()
         ->route('admin.consent-types.index')
         ->with('toast', [
@@ -75,6 +91,7 @@ class ConsentTypeController extends Controller
      */
     public function edit(ConsentType $consentType)
     {
+        app(\App\Observers\ConsentType::class)->viewed($consentType);
 
         return Inertia::render('ConsentTypes/EditConsentType', ['consentType' => $consentType]);
     }
@@ -94,6 +111,8 @@ class ConsentTypeController extends Controller
             'is_active' => $form_data['is_active'],
             'is_required' => $form_data['is_required']
         ]);
+
+        app(\App\Observers\ConsentType::class)->updated($consentType);
 
         return redirect()
             ->route('admin.consent-types.index')

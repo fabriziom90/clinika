@@ -25,8 +25,6 @@ const props = defineProps({
     }
 });
 
-const config = tableConfig[props.baseRoute] ?? {};
-
 const emit = defineEmits([
     "startEdit",
     "cancelEdit",
@@ -34,20 +32,24 @@ const emit = defineEmits([
     "delete",
 ]);
 
+const config = tableConfig[props.baseRoute] ?? {};
+const actions = config.actions ?? {};
+
 const { hasRole } = useConfigStore();
 
-const showUrl = (id) => {
-    return route(`${props.baseRoute}.show`, id);
+const getActionUrl = (action) => {
+    const routeName = config.routes?.[action] ?? `${props.baseRoute}.${action}`;
+
+    const params = config.routeParams?.[action]?.(props.item) ?? props.item.id;
+
+    return route(routeName, params);
 };
 
-const editUrl = (id) => {
-    return route(`${props.baseRoute}.edit`, id);
-};
-
-const sendResetEmail = (item) => {
+const sendResetEmail = () => {
     const routeName = `${props.baseRoute}.sendResetEmail`;
+
     router.post(
-        route(routeName, item.id),
+        route(routeName, props.item.id),
         {},
         {
             preserveScroll: true,
@@ -59,22 +61,18 @@ const sendResetEmail = (item) => {
 <template>
 
     <td class="actions">
-        <!-- Show solo per clinic rooms -->
-        <template v-if="config.showButton">
-            <Link class="show-button" :href="showUrl(item.id)" >
-                <i class="fas fa-eye"></i>
-            </Link>
-        </template>
+        <Link v-if="actions.show" class="show-button" :href="getActionUrl('show')">
+            <i class="fas fa-eye"></i>
+        </Link>
 
-        <!-- Edit inline -->
-        <template v-if=" props.editableColumns.length && editingItem !== item.id ">
-            <button class="edit-button" @click="$emit('startEdit', item)" >
+        <template v-if="editableColumns.length && editingItem !== item.id">
+            <button class="edit-button" @click="$emit('startEdit', item)">
                 <i class="fas fa-edit"></i>
             </button>
         </template>
 
-        <template v-else-if="editingItem === item.id" >
-            <button class="save-edit-button" @click="$emit('saveEdit', item.id)" >
+        <template v-else-if="editingItem === item.id">
+            <button class="save-edit-button" @click="$emit('saveEdit', item.id)">
                 <i class="fas fa-check"></i>
             </button>
             <button class="cancel-edit-button" @click="$emit('cancelEdit')">
@@ -82,22 +80,21 @@ const sendResetEmail = (item) => {
             </button>
         </template>
 
-        <!-- Show standard -->
-        <Link v-if="!props.editableColumns.length" class="show-button" :href="showUrl(item.id)" >
-            <i class="fas fa-eye"></i>
-        </Link>
-        <!-- Edit standard -->
-        <Link v-if="!props.editableColumns.length && (hasRole('superadmin') || hasRole('secretary'))" class="edit-button" :href="editUrl(item.id)">
+        <Link v-if="actions.edit && !editableColumns.length && (hasRole('superadmin') || hasRole('secretary'))" class="edit-button"
+ :href="getActionUrl('edit')">
             <i class="fas fa-edit"></i>
         </Link>
 
-        <!-- Delete -->
+        <Link v-if="actions.versions" class="btn-blue" :href="route('admin.consent-types.consent-versions.index', item.id)" title="Gestisci versioni">
+            <i class="fas fa-clock-rotate-left"></i>
+        </Link>
+
+        <button v-if="actions.resetEmail" class="btn-blue" @click="sendResetEmail">
+            <i class="fas fa-envelope"></i>
+        </button>
+
         <button v-if="hasRole('superadmin') || hasRole('secretary')" class="delete-button" @click="$emit('delete', item)">
             <i class="fas fa-trash"></i>
-        </button>
-        <!-- Reset email utenti -->
-        <button v-if="config.resetEmail" class="btn-blue" @click="sendResetEmail(item)">
-            <i class="fas fa-envelope"></i>
         </button>
     </td>
 
