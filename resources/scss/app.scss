@@ -85,6 +85,10 @@ hr {
     @include button-link($mainBlue, $mainBlueHover, #fff);
 }
 
+.btn-dark {
+    @include button-link($mainBlack, $mainBlackHover, #fff);
+}
+
 .not-button {
     color: red;
     background-color: transparent;

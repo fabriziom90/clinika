@@ -90,6 +90,11 @@ class Patient extends Model implements AuditableContract
         return $this->hasMany(AppointmentReminder::class);
     }
 
+    public function consents()
+    {
+        return $this->hasMany(PatientConsent::class);
+    }
+
     public function transformAudit(array $data): array
     {
         $sensitive = [

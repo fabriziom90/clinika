@@ -14,6 +14,15 @@ export const tableConfig = {
         },
     },
 
+    "admin.patients": {
+        actions: {
+            show: true,
+            edit: true,
+            resetEmail: true,
+            showConsenses: true
+        },
+    },
+
     "admin.nurses": {
         actions: {
             show: true,
@@ -42,6 +51,7 @@ export const tableConfig = {
         actions: {
             show: true,
             edit: false,
+            generatePdf: true
         },
 
         routes: {
@@ -55,4 +65,21 @@ export const tableConfig = {
             }),
         },
     },
+    "admin.patient.consents": {
+        actions: {
+            show: false,
+            edit: true,
+        },
+
+        routes:{
+            edit: "admin.patient.consents.edit"
+        },
+
+        routeParams: {
+            edit: (item) => ({
+                patient: item.patient_id,
+                consent: item.id
+            })
+        }
+    }
 };

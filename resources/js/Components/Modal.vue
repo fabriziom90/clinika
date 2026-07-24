@@ -16,14 +16,23 @@ const emit = defineEmits(["close", "deleted"]);
 
 const confirmDelete = () => {
     if (!props.item) return;
-    console.log(props);
-    const routeParams = props.parentId
-    ? {
-        consent_type: props.parentId,
-        consent_version: props.item.id
+
+    let routeParams;
+
+    if (props.baseRoute === "admin.consent-types.consent-versions") {
+        routeParams = {
+            consent_type: props.parentId,
+            consent_version: props.item.id,
+        };
+    } else if (props.baseRoute === "admin.patient.consents") {
+        routeParams = {
+            patient: props.parentId,
+            consent: props.item.id,
+        };
+    } else {
+        routeParams = props.item.id;
     }
-    : props.item.id;
-    console.log(routeParams);
+
     router.delete(route(`${props.baseRoute}.destroy`, routeParams), {
         preserveScroll: true,
         onSuccess: (page) => {

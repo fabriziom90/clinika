@@ -194,7 +194,10 @@ function normalizeValueForInput(value, key) {
                         <template v-else>
                             <div v-if="key === 'name' && item.active != undefined" class="status-dot"
                                 :class="item.active == true ? 'active' : 'inactive'"></div>
-                            {{ formatTableValue(item, key) }}
+                            <span  v-if="key === 'pdf_path' && item.pdf_path" v-html="formatTableValue(item, key)"></span>
+                            <template v-else>
+                                {{ formatTableValue(item, key) }}
+                            </template>
                         </template>
                     </td>
                     <TableActions

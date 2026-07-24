@@ -4,7 +4,8 @@ namespace App\Observers;
 
 use App\Models\ConsentVersion;
 use Illuminate\Support\Facades\Auth;
-use OwenIt\Auditing\Audit;
+use OwenIt\Auditing\Models\Audit;
+
 
 class ConsentVersionObserver
 {
@@ -68,6 +69,21 @@ class ConsentVersionObserver
             'user_id' => Auth::id(),
             'user_type' => Auth::user() ? get_class(Auth::user()) : null,
             'event' => 'viewed',
+            'auditable_type' => get_class($consentVersion),
+            'auditable_id' => $consentVersion->id,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'old_values' => [],
+            'new_values' => [],
+        ]);
+    }
+
+    public function showPdf(ConsentVersion $consentVersion): void
+    {
+        Audit::forceCreate([
+            'user_id' => Auth::id(),
+            'user_type' => Auth::user() ? get_class(Auth::user()) : null,
+            'event' => 'show pdf',
             'auditable_type' => get_class($consentVersion),
             'auditable_id' => $consentVersion->id,
             'ip_address' => request()->ip(),

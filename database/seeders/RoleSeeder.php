@@ -53,7 +53,8 @@ class RoleSeeder extends Seeder
             'invoices' => 'Fatture',
             'patient-health-history' => 'Anamnesi Paziente',
             'reminder-type' => 'Tipologia promemoria',
-            'consent-type'  => 'Tipologia consensi'
+            'consent-type'  => 'Tipologia consensi',
+            'consent-version' => 'Versione tipologia consensi'
         ];
 
         // === AZIONI CRUD ===

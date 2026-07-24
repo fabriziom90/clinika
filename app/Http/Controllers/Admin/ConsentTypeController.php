@@ -68,7 +68,7 @@ class ConsentTypeController extends Controller
             'is_required' => $form_data['is_required']
         ]);
 
-        app(\App\Observers\ConsentType::class)->created($consentType);
+        app(\App\Observers\ConsentTypeObserver::class)->created($consentType);
 
         return redirect()
         ->route('admin.consent-types.index')
@@ -83,6 +83,7 @@ class ConsentTypeController extends Controller
      */
     public function show(ConsentType $consentType)
     {
+        app(\App\Observers\ConsentTypeObserver::class)->viewed($consentType);
         return Inertia::render('ConsentTypes/ShowConsentType', ['consentType' => $consentType]);
     }
 
@@ -91,7 +92,6 @@ class ConsentTypeController extends Controller
      */
     public function edit(ConsentType $consentType)
     {
-        app(\App\Observers\ConsentType::class)->viewed($consentType);
 
         return Inertia::render('ConsentTypes/EditConsentType', ['consentType' => $consentType]);
     }
@@ -112,7 +112,7 @@ class ConsentTypeController extends Controller
             'is_required' => $form_data['is_required']
         ]);
 
-        app(\App\Observers\ConsentType::class)->updated($consentType);
+        app(\App\Observers\ConsentTypeObserver::class)->updated($consentType);
 
         return redirect()
             ->route('admin.consent-types.index')

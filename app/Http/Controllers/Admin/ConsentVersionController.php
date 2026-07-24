@@ -7,7 +7,9 @@ use App\Http\Requests\StoreConsentVersionRequest;
 use App\Http\Requests\UpdateConsentVersionRequest;
 use App\Models\ConsentType;
 use App\Models\ConsentVersion;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use OwenIt\Auditing\Models\Audit;
 
@@ -67,14 +69,14 @@ class ConsentVersionController extends Controller
                 ->update(['is_active' => false]);
         }
 
-        $consentType->versions()->create([
+        $consentVersion = $consentType->versions()->create([
             'version' => ($consentType->versions()->max('version') ?? 0) + 1,
             'content' => $form_data['content'],
             'published_at' => now(),
             'is_active' => $form_data['is_active'],
         ]);
 
-        app(\App\Observers\ConsentVersion::class)->created($consentVersion);
+        app(\App\Observers\ConsentVersionObserver::class)->created($consentVersion);
 
         return redirect()
             ->route('admin.consent-types.consent-versions.index', $consentType)
@@ -89,7 +91,7 @@ class ConsentVersionController extends Controller
      */
     public function show(ConsentType $consentType, ConsentVersion $consentVersion)
     {
-        app(\App\Observers\ConsentVersion::class)->viewed($consentVersion);
+        app(\App\Observers\ConsentVersionObserver::class)->viewed($consentVersion);
 
         return Inertia::render('ConsentVersions/ShowConsentVersion', [
             'consentType' => $consentType,
@@ -127,7 +129,7 @@ class ConsentVersionController extends Controller
 
         $consentVersion->delete();
 
-        app(\App\Observers\ConsentVersion::class)->deleted($consentVersion);
+        app(\App\Observers\ConsentVersionObserver::class)->deleted($consentVersion);
 
         return redirect()
             ->route('admin.consent-types.consent-versions.index', $consentType)
@@ -135,5 +137,23 @@ class ConsentVersionController extends Controller
                 'type' => 'success',
                 'message' => 'Versione del consenso eliminata correttamente.',
             ]);
+    }
+
+    public function generatePdf(ConsentType $consentType, ConsentVersion $consentVersion) {
+        abort_unless($consentVersion->consent_type_id === $consentType->id, 404);
+
+        app(\App\Observers\ConsentVersionObserver::class)->viewed($consentVersion);
+
+        $consentVersion = $consentVersion->load('consentType');
+
+        $pdf = Pdf::loadView('pdf.consent-version',
+            [
+                'consentVersion' => $consentVersion,
+            ]
+        );
+
+        return $pdf->stream(
+            'consenso-' .Str::slug($consentVersion->consentType->name) .'-versione-' .$consentVersion->version .'.pdf'
+        );
     }
 }

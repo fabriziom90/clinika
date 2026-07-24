@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePatientRequest;
 use App\Http\Requests\UpdatePatientRequest;
 use App\Models\Appointment;
+use App\Models\ConsentType;
 use App\Models\Doctor;
 use App\Models\Nationality;
 use App\Models\Nurse;
@@ -13,7 +14,6 @@ use App\Models\Patient;
 use App\Models\ReminderType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use OwenIt\Auditing\Models\Audit;
 
@@ -73,8 +73,15 @@ class PatientController extends Controller
     {
         $nationalities = Nationality::all();
         $reminderTypes = ReminderType::where('active', true)->get();
+        $consentTypes = ConsentType::query()
+            ->where('is_active', true)
+            ->with([
+                'versions' => function($query) {
+                    $query->where('is_active', true)->latest('version');
+                }
+            ])->get();
 
-        return Inertia::render('Patients/CreatePatient', ['nationalities' => $nationalities, 'reminderTypes' => $reminderTypes]);
+        return Inertia::render('Patients/CreatePatient', ['nationalities' => $nationalities, 'reminderTypes' => $reminderTypes, 'consentTypes' => $consentTypes]);
     }
 
     /**
@@ -88,6 +95,8 @@ class PatientController extends Controller
         $newPatient->fill($form_data);
 
         $newPatient->save();
+
+        app(\App\Observers\PatientObserver::class)->created($newPatient);
 
         $newPatient->reminderTypes()->sync(
             $request->input('reminder_types', []),
@@ -114,7 +123,7 @@ class PatientController extends Controller
                 $appointments = Appointment::with(['doctor.user', 'nurse.user', 'patient'])->get();
             }
 
-            app(\App\Observers\PatientObserver::class)->created($newPatient);
+
 
             return Inertia::render('Calendar/IndexCalendar', [
                 'newPerson' => $newPatient,
@@ -125,14 +134,14 @@ class PatientController extends Controller
                 'appointments' => $appointments,
                 'userIsSuperadmin' => auth()->user()->hasRole('superadmin'),
             ]);
-        } else {
-
-            return redirect()->route('admin.patients.index')->with([
-                'toast' => [
-                    'type' => 'success',
-                    'message' => 'Paziente aggiunto correttamente.',
-                ]]);
         }
+
+        return redirect()->route('admin.patients.index')->with([
+            'toast' => [
+                'type' => 'success',
+                'message' => 'Paziente aggiunto correttamente.',
+            ]]);
+
     }
 
     /**
@@ -182,9 +191,6 @@ class PatientController extends Controller
 
         ])->findOrFail($patient->id);
 
-        // check GDPR permissions
-        $this->authorize('view', $patient->medicalRecord);
-
         app(\App\Observers\PatientObserver::class)->viewed($patient);
 
         return Inertia::render('Patients/ShowPatient', ['patient' => $patient]);
@@ -195,7 +201,9 @@ class PatientController extends Controller
      */
     public function edit(Patient $patient)
     {
-        $patient->load('reminderTypes');
+        $patient->load(['reminderTypes', 'consents' => function ($query){
+            $query->latest();
+        }]);
 
         $nationalities = Nationality::all();
         $reminderTypes = ReminderType::where('active', true)->get();

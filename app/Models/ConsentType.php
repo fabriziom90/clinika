@@ -21,4 +21,8 @@ class ConsentType extends Model
     {
         return $this->hasMany(ConsentVersion::class);
     }
+
+    public function patientConsents(){
+        return $this->hasMany(PatientConsent::class);
+    }
 }

@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AppointmentReminderController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\ClinicRoomController;
 use App\Http\Controllers\Admin\ConsentTypeController;
+use App\Http\Controllers\Admin\ConsentVersionController;
 use App\Http\Controllers\Admin\DoctorController;
 use App\Http\Controllers\Admin\DrugController;
 use App\Http\Controllers\Admin\InventoryDrugController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\Admin\InventoryProductController;
 use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\MedicalEntryController;
 use App\Http\Controllers\Admin\NurseController;
+use App\Http\Controllers\Admin\PatientConsentController;
 use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Admin\PatientHealthHistoryController;
 use App\Http\Controllers\Admin\ProductController;
@@ -20,7 +22,6 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SecretaryController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SpecialtyController;
-use App\Http\Controllers\Admin\ConsentVersionController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -56,6 +57,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('nurses', NurseController::class);
         Route::resource('specialties', SpecialtyController::class);
         Route::resource('services', ServiceController::class);
+        Route::get('/patients/{patient}/consents/{consent}/document', [PatientConsentController::class, 'document'])->name('patient.consents.document');
         Route::get('/patients/search', [PatientController::class, 'search'])->name('patients.search');
         Route::resource('patients', PatientController::class);
         Route::resource('clinic-rooms', ClinicRoomController::class);
@@ -89,7 +91,9 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/invoices/{invoice}/change-status', [InvoiceController::class, 'changeStatus'])->name('invoices.change-status');
         Route::resource('/consent-types', ConsentTypeController::class);
         Route::resource('/consent-types.consent-versions', ConsentVersionController::class);
+        Route::get('/consent-types/{consent_type}/consent-versions/{consent_version}/generate-pdf', [ConsentVersionController::class, 'generatePdf'])->name('consent-types.consent-versions.generate-pdf');
 
+        Route::resource('patient.consents', PatientConsentController::class);
     });
 });
 

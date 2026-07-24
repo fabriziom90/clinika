@@ -81,4 +81,9 @@ class User extends Authenticatable implements AuditableContract
     {
         return $this->hasMany(PatientHealthHistory::class, 'user_id');
     }
+
+    public function recordedPatientConsents()
+    {
+        return $this->hasMany(PatientConsent::class, 'recorded_by');
+    }
 }

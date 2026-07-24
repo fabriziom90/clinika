@@ -30,6 +30,7 @@ const emit = defineEmits([
     "cancelEdit",
     "saveEdit",
     "delete",
+    "generatePdf"
 ]);
 
 const config = tableConfig[props.baseRoute] ?? {};
@@ -57,6 +58,18 @@ const sendResetEmail = () => {
     );
 };
 
+const generatePdf = () => {
+    const routeName = config.routes?.generatePdf ?? `${props.baseRoute}.generate-pdf`;
+
+    window.open(
+        route(routeName, {
+            consent_type: props.item.consent_type_id,
+            consent_version: props.item.id,
+        }),
+        "_blank"
+    );
+};
+
 </script>
 <template>
 
@@ -79,7 +92,7 @@ const sendResetEmail = () => {
                 <i class="fas fa-times"></i>
             </button>
         </template>
-
+        {{  console.log(actions) }}
         <Link v-if="actions.edit && !editableColumns.length && (hasRole('superadmin') || hasRole('secretary'))" class="edit-button"
  :href="getActionUrl('edit')">
             <i class="fas fa-edit"></i>
@@ -87,6 +100,14 @@ const sendResetEmail = () => {
 
         <Link v-if="actions.versions" class="btn-blue" :href="route('admin.consent-types.consent-versions.index', item.id)" title="Gestisci versioni">
             <i class="fas fa-clock-rotate-left"></i>
+        </Link>
+
+        <button v-if="actions.generatePdf" class="btn-blue" @click="generatePdf" title="Genera PDF">
+            <i class="fas fa-file-pdf"></i>
+        </button>
+
+        <Link v-if="actions.showConsenses" class="btn-dark" :href="route('admin.patient.consents.index', item.id)" title="Consensi paziente">
+            <i class="fas fa-user-shield"></i>
         </Link>
 
         <button v-if="actions.resetEmail" class="btn-blue" @click="sendResetEmail">

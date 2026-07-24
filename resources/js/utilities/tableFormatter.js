@@ -15,6 +15,28 @@ export const formatTableValue = (item, key) => {
         return item.consent_type.name;
     }
 
+    if(key === 'recorded_by'){
+        return `${item.recorded_by.name} ${item.recorded_by.surname}`
+    }
+
+    if (key === "pdf_path") {
+        if (!item.pdf_path) {
+            return "";
+        }
+
+        const url = route(
+            "admin.patient.consents.document",
+            {
+                patient: item.patient_id,
+                consent: item.id,
+            }
+        );
+
+        return `<a href="${url}" target="_blank" class="btn btn-sm btn-primary">
+            Visualizza consenso
+        </a>`;
+    }
+
     //acquisition method
     if(key == "acquisition_method"){
         const labels = {

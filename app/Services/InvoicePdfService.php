@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 class InvoicePdfService
 {
     /**
-     * Genera e salva il PDF della fattura
+     * generate and save pdf
      */
     public function generate(Invoice $invoice): string
     {
@@ -42,8 +42,8 @@ class InvoicePdfService
     }
 
     /**
-     * Restituisce il PDF della fattura.
-     * Se non esiste lo genera.
+     * get invoice's pdf.
+     * if doesn't exist, it generates it.
      */
     public function getPdfPath(Invoice $invoice): string
     {
