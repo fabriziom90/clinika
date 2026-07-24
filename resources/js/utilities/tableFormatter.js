@@ -37,8 +37,20 @@ export const formatTableValue = (item, key) => {
         </a>`;
     }
 
+    //status patient consent
+    if(key === 'status'){
+        const labels = {
+            "accepted": "Accettato",
+            "pending": "In attesa",
+            "rejected": "Rifiutato",
+            'revoked': "Revocato"
+        }
+
+        return labels[item.status];
+    }
+
     //acquisition method
-    if(key == "acquisition_method"){
+    if(key === "acquisition_method"){
         const labels = {
             "paper": "Cartaceo",
             "upload": "Upload",

@@ -9,9 +9,8 @@ use App\Models\ConsentType;
 use App\Models\Patient;
 use App\Models\PatientConsent;
 use App\Services\PatientConsentPdfService;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
+
 
 class PatientConsentController extends Controller
 {
@@ -35,6 +34,7 @@ class PatientConsentController extends Controller
             'columns' => [
                 'id' => 'ID',
                 'consent_type.name' => 'Tipologia consenso',
+                'status'    => 'Stato',
                 'consent_version.version' => 'Versione',
                 'acquisition_method' => 'Metodo di acquisizione',
                 'recorded_by' => 'Registrato da',

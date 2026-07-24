@@ -136,11 +136,26 @@ class PatientController extends Controller
             ]);
         }
 
-        return redirect()->route('admin.patients.index')->with([
-            'toast' => [
-                'type' => 'success',
-                'message' => 'Paziente aggiunto correttamente.',
-            ]]);
+        if (ConsentType::where('is_active', true)->exists()) {
+            return redirect()
+                ->route('admin.patient.consents.create', $newPatient)
+                ->with([
+                    'toast' => [
+                        'type' => 'success',
+                        'message' => 'Paziente aggiunto correttamente. Ora puoi registrare i consensi.',
+                    ],
+                ]);
+        }
+
+        // Nessun consenso attivo: vai all'elenco pazienti.
+        return redirect()
+            ->route('admin.patients.index')
+            ->with([
+                'toast' => [
+                    'type' => 'success',
+                    'message' => 'Paziente aggiunto correttamente.',
+                ],
+            ]);
 
     }
 
