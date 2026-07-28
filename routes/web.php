@@ -86,9 +86,9 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('/reminder-types', ReminderTypeController::class);
         Route::get('/reminders', [AppointmentReminderController::class, 'index'])->name('reminders.index');
         Route::get('/reminders/{reminder}', [AppointmentReminderController::class, 'show'])->name('reminders.show');
-        Route::resource('invoices', InvoiceController::class);
-        Route::get('/invoices/create/{appointment}', [InvoiceController::class, 'create'])->name('invoices.create');
         Route::put('/invoices/{invoice}/change-status', [InvoiceController::class, 'changeStatus'])->name('invoices.change-status');
+        Route::get('/invoices/create/{appointment}', [InvoiceController::class, 'create'])->name('invoices.create');
+        Route::resource('invoices', InvoiceController::class);
         Route::resource('/consent-types', ConsentTypeController::class);
         Route::resource('/consent-types.consent-versions', ConsentVersionController::class);
         Route::get('/consent-types/{consent_type}/consent-versions/{consent_version}/generate-pdf', [ConsentVersionController::class, 'generatePdf'])->name('consent-types.consent-versions.generate-pdf');

@@ -30,7 +30,7 @@ const handleFileChange = (event) => {
 };
 
 const submit = () => {
-    console.log(form.data());
+    
     form.transform((data) => ({
             ...data,
             _method: "PUT",

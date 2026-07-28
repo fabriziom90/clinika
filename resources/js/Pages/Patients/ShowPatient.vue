@@ -125,7 +125,7 @@ const formatDate = (dateString) => {
                                     </div>
                                     <div class="col-12">
                                         <div class="d-flex">
-                                            {{ console.log(patient) }}
+                                            
                                             <div class="me-3" v-for="type in patient.reminder_types" :key="type.id">
                                                 {{ type.name }}
                                             </div>

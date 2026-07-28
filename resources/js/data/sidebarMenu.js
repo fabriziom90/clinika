@@ -213,6 +213,23 @@ export const sidebarMenus = {
             ]
         },
     ],
+    invoices: [
+        {
+            id: "invoices",
+            title: "Fatture",
+            roles: ["superadmin", "secretary"],
+            path: "/",
+            icon: "fas fa-money-check-dollar",
+            links: [
+                {
+                    name: "Elenco fatture",
+                    route: "admin.reminders.index",
+                    path: "/",
+                    icon: "fas fa-list",
+                },
+            ]
+        },
+    ],
     consenttypes: [
         {
             id: "consenttypes",

@@ -179,9 +179,9 @@ class SecretaryController extends Controller
      */
     public function destroy(Secretary $secretary)
     {
-        $doctor->user()->delete();
+        $secretary->user()->delete();
 
-        $doctor->delete();
+        $secretary->delete();
 
         app(\App\Observers\SecretaryObserver::class)->forceDeleted($secretary);
 

@@ -4,7 +4,7 @@ namespace App\Observers;
 
 use App\Models\Secretary;
 use Illuminate\Support\Facades\Auth;
-use OwenIt\Auditing\Audit;
+use OwenIt\Auditing\Models\Audit;
 
 class SecretaryObserver
 {

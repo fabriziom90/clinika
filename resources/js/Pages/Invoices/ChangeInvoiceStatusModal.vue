@@ -26,7 +26,7 @@ watch(
 
 
 const changeStatus = (invoice, status) => {
-    router.put(route('admin.invoices.change-status', props.invoice.id),
+    router.put(route('admin.invoices.change-status', props.invoice.uuid),
         { status: selectedStatus.value },
         {
             preserveScroll: true,

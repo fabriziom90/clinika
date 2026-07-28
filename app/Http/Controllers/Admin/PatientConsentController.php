@@ -10,22 +10,39 @@ use App\Models\Patient;
 use App\Models\PatientConsent;
 use App\Services\PatientConsentPdfService;
 use Illuminate\Support\Facades\File;
-
+use OwenIt\Auditing\Models\Audit;
 
 class PatientConsentController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(\App\Models\PatientConsent::class, 'consent');
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Patient $patient)
     {
         $patient->load([
-            'consents' => function($query){
+            'consents' => function ($query) {
                 $query->orderByDesc('id');
             },
             'consents.consentType',
             'consents.consentVersion',
             'consents.recordedBy',
+        ]);
+
+        Audit::forceCreate([
+            'user_id' => auth()->id(),
+            'user_type' => get_class(auth()->user()),
+            'event' => 'viewed all patient consents',
+            'auditable_type' => 'App\Models\PatientConsent',
+            'auditable_id' => null,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'old_values' => [],
+            'new_values' => [],
         ]);
 
         return inertia('PatientConsents/IndexPatientConsents', [
@@ -34,14 +51,14 @@ class PatientConsentController extends Controller
             'columns' => [
                 'id' => 'ID',
                 'consent_type.name' => 'Tipologia consenso',
-                'status'    => 'Stato',
+                'status' => 'Stato',
                 'consent_version.version' => 'Versione',
                 'acquisition_method' => 'Metodo di acquisizione',
                 'recorded_by' => 'Registrato da',
                 'pdf_path' => 'Documento',
                 'created_at' => 'Inserito il',
-                'deleted_at' => 'Cancellato il'
-            ]
+                'deleted_at' => 'Cancellato il',
+            ],
         ]);
     }
 
@@ -52,7 +69,7 @@ class PatientConsentController extends Controller
     {
         $consentTypes = ConsentType::query()
             ->where('is_active', true)
-            ->whereHas('versions', function($query){
+            ->whereHas('versions', function ($query) {
                 $query->where('is_active', true);
             })
             ->with([
@@ -73,10 +90,11 @@ class PatientConsentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StorePatientConsentRequest $request, Patient $patient, PatientConsentPdfService $service) {
+    public function store(StorePatientConsentRequest $request, Patient $patient, PatientConsentPdfService $service)
+    {
 
         $validated = $request->validated();
-        foreach($validated['consents'] as $consent){
+        foreach ($validated['consents'] as $consent) {
 
             $pdfPath = null;
             if ($consent['document'] != null) {
@@ -93,6 +111,8 @@ class PatientConsentController extends Controller
             ]);
         }
 
+        app(\App\Observers\PatientObserver::class)->created();
+
         return redirect()
             ->route('admin.patient.consents.index', $patient)
             ->with('toast', [
@@ -104,14 +124,13 @@ class PatientConsentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Patient $patient, PatientConsent $consent) {
-
-    }
+    public function show(Patient $patient, PatientConsent $consent) {}
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Patient $patient, PatientConsent $consent) {
+    public function edit(Patient $patient, PatientConsent $consent)
+    {
         $consent->load([
             'consentType',
             'consentVersion',
@@ -138,7 +157,8 @@ class PatientConsentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdatePatientConsentRequest $request, Patient $patient, PatientConsent $consent) {
+    public function update(UpdatePatientConsentRequest $request, Patient $patient, PatientConsent $consent)
+    {
         $formData = $request->validated();
 
         $pdfPath = null;
@@ -158,6 +178,8 @@ class PatientConsentController extends Controller
             'pdf_path' => $pdfPath,
         ]);
 
+        app(\App\Observers\PatientObserver::class)->updated();
+
         return redirect()
             ->route('admin.patient.consents.index', $patient)
             ->with('toast', [
@@ -169,7 +191,10 @@ class PatientConsentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Patient $patient, PatientConsent $consent) {
+    public function destroy(Patient $patient, PatientConsent $consent)
+    {
+        app(\App\Observers\PatientObserver::class)->deleted($consent);
+
         $consent->delete();
 
         return redirect()
@@ -180,14 +205,29 @@ class PatientConsentController extends Controller
             ]);
     }
 
-    public function document(Patient $patient, PatientConsent $consent){
+    public function document(Patient $patient, PatientConsent $consent)
+    {
+        $this->authorize('view', $consent);
+
         abort_unless($consent->patient_id === $patient->id, 404);
 
         abort_unless($consent->pdf_path, 404);
 
-        $filePath = storage_path('app/' . $consent->pdf_path);
+        $filePath = storage_path('app/'.$consent->pdf_path);
 
         abort_unless(File::exists($filePath), 404);
+
+        $audit = Audit::forceCreate([
+            'user_id' => auth()->id(),
+            'user_type' => get_class(auth()->user()),
+            'event' => 'viewed consent document',
+            'auditable_type' => 'App\Models\PatientConsent',
+            'auditable_id' => $consent->id,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'old_values' => [],
+            'new_values' => [],
+        ]);
 
         return response()->file($filePath);
     }

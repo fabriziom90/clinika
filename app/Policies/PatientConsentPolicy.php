@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\PatientConsent;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class PatientConsentPolicy
 {
@@ -21,7 +20,22 @@ class PatientConsentPolicy
      */
     public function view(User $user, PatientConsent $patientConsent): bool
     {
-        return $user->can('patient-consent.view');
+        if (! $user->can('patient-consent.view')) {
+            return false;
+        }
+
+        if ($user->hasRole(['superadmin', 'secretary'])) {
+            return true;
+        }
+
+        if ($user->hasRole('doctor')) {
+            return $patientConsent->patient
+                ->doctors()
+                ->whereKey($user->id)
+                ->exists();
+        }
+
+        return false;
     }
 
     /**
@@ -47,5 +61,4 @@ class PatientConsentPolicy
     {
         return $user->can('patient-consent.delete');
     }
-
 }

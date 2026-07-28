@@ -19,7 +19,7 @@ class AuditLogController extends Controller
         $query = Audit::with('user');
 
         if ($search = $request->input('search')) {
-            $query->where('action', 'like', "%$search%")
+            $query->where('event', 'like', "%$search%")
                 ->orWhere('auditable_type', 'like', "%$search%");
         }
 

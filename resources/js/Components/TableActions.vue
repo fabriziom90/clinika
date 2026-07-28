@@ -92,7 +92,7 @@ const generatePdf = () => {
                 <i class="fas fa-times"></i>
             </button>
         </template>
-        {{  console.log(actions) }}
+        
         <Link v-if="actions.edit && !editableColumns.length && (hasRole('superadmin') || hasRole('secretary'))" class="edit-button"
  :href="getActionUrl('edit')">
             <i class="fas fa-edit"></i>

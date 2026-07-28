@@ -13,7 +13,6 @@ const props = defineProps({
 
 const appointmentsStore = useAppointmentStore();
 const configStore = useConfigStore();
-console.log(configStore);
 
 const editingStatus = ref(false);
 const selectedStatus = ref("scheduled");
@@ -76,20 +75,20 @@ const generateInvoice = () => {
     <div v-if="show" class="modal fade show modal-bg" style="display: block">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-
+               
                 <div class="modal-header">
                     <h5 class="modal-title">Dettaglio appuntamento -
                         <span class="status-pill me-2" :class="{ 'cursor-default': !isAdmin}" @click="editingStatus = !editingStatus">
                             {{ item.status_label }}
                         </span>
-                        <span class="status-pill" v-if="configStore.hasPermission('appointment.store') && item.status === 'completed' && !item.invoice" @click="generateInvoice">
+                        <span class="status-pill" v-if="configStore.hasPermission('appointment.create') && item.status === 'completed' && !item.invoice" @click="generateInvoice">
                             Genera fattura
                         </span>
-                        <span v-if="configStore.hasPermission('appointment.store') && item.invoice">
+                        <span v-if="configStore.hasPermission('appointment.create') && item.invoice">
                             Visualizza fattura
                         </span>
                     </h5>
-                    <div v-if="configStore.hasPermission('appointment.store') && editingStatus" class="status-editor ms-2" >
+                    <div v-if="configStore.hasPermission('appointment.create') && editingStatus" class="status-editor ms-2" >
                         <select class="form-select py-0 my-0" v-model="selectedStatus">
                             <option value="scheduled">Prenotato</option>
                             <option value="completed">Completato</option>

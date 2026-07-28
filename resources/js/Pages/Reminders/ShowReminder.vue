@@ -45,7 +45,7 @@
                         </span>
                     </div>
                     <div class="detail-item">
-                        {{console.log(reminder)}}
+                        
                         <label>Tipologia</label>
                         <span>{{ reminder.reminder_type.name }}</span>
                     </div>

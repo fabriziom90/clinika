@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\Role;
+use Spatie\Permission\Models\Role;
 
 class RolePolicy
 {
@@ -39,4 +39,3 @@ class RolePolicy
         return $user->can('role.delete');
     }
 }
-

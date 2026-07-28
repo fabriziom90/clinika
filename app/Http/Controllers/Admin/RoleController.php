@@ -3,23 +3,23 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
-{   
+{
     public function __construct()
     {
-        $this->authorizeResource(\App\Models\Role::class, 'role');
+        $this->authorizeResource(Role::class, 'role');
     }
 
-    public function index(){
+    public function index()
+    {
         $roles = Role::with('permissions')->get();
         $permissions = Permission::all();
 
-        
         return Inertia::render('Roles/IndexRole', [
             'roles' => $roles,
             'permissions' => $permissions,
