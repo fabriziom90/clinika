@@ -95,6 +95,16 @@ class Patient extends Model implements AuditableContract
         return $this->hasMany(PatientConsent::class);
     }
 
+    public function lastAppointment()
+    {
+        return $this->hasOne(Appointment::class)->where('start_time', '<=', now())->latestOfMany('start_time');
+    }
+
+    public function nextAppointment()
+    {
+        return $this->hasOne(Appointment::class)->where('start_time', '>=', now())->oldestOfMany('start_time');
+    }
+
     public function transformAudit(array $data): array
     {
         $sensitive = [

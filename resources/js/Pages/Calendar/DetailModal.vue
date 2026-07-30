@@ -67,7 +67,7 @@ const updateStatus = () => {
 }
 
 const generateInvoice = () => {
-    router.get(route('admin.invoices.create', item.value.id));
+    router.get(route('admin.appointments.invoice.create', item.value.id));
 }
 </script>
 <template lang="">

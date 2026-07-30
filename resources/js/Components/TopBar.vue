@@ -51,17 +51,18 @@ const logout = () => {
     );
 };
 
-
 </script>
 <template lang="">
     <div class="top-bar">
         <ul class="d-flex align-items-center m-0">
             <li class="list-item">
-                <ApplicationLogo
-                    :width="'75px'"
-                    :color="'#c53238'"
-                    :fontSize="'20px'"
-                />
+                <Link :href="route('admin.dashboard')">
+                    <ApplicationLogo
+                        :width="'75px'"
+                        :color="'#c53238'"
+                        :fontSize="'20px'"
+                    />
+                </Link>
             </li>
             <li class="list-item">
                 <Link :href="route('admin.appointments.index')" :class="isRouteActive(['appointments']) ? 'active' : ''">Agenda</Link>

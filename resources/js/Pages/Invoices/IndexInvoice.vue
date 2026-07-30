@@ -147,11 +147,13 @@ const handleDelete = () => {
                                             class="btn btn-sm btn-primary">
                                             <i class="fas fa-file-pdf"></i>
                                         </a>
-                                        <Link :href="route('admin.invoices.edit', invoice.uuid)"
+                                        <Link v-if="invoice.status != 'paid'"
+                                            :href="route('admin.invoices.edit', invoice.uuid)"
                                             class="btn btn-sm btn-warning">
                                             <i class="fas fa-edit"></i>
                                         </Link>
-                                        <button class="btn btn-sm btn-danger" @click="openDeleteModal(invoice)">
+                                        <button v-if="invoice.status != 'paid'" class="btn btn-sm btn-danger"
+                                            @click="openDeleteModal(invoice)">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>

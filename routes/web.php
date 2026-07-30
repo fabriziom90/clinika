@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\ClinicRoomController;
 use App\Http\Controllers\Admin\ConsentTypeController;
 use App\Http\Controllers\Admin\ConsentVersionController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DoctorController;
 use App\Http\Controllers\Admin\DrugController;
 use App\Http\Controllers\Admin\InventoryDrugController;
@@ -47,12 +48,13 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Route::get('/dashboard', function () {
+//     return Inertia::render('Dashboard');
+// })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::resource('doctors', DoctorController::class);
         Route::resource('nurses', NurseController::class);
         Route::resource('specialties', SpecialtyController::class);
@@ -87,7 +89,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/reminders', [AppointmentReminderController::class, 'index'])->name('reminders.index');
         Route::get('/reminders/{reminder}', [AppointmentReminderController::class, 'show'])->name('reminders.show');
         Route::put('/invoices/{invoice}/change-status', [InvoiceController::class, 'changeStatus'])->name('invoices.change-status');
-        Route::get('/invoices/create/{appointment}', [InvoiceController::class, 'create'])->name('invoices.create');
+        Route::get('/invoices/create/{appointment}', [InvoiceController::class, 'create'])->name('appointments.invoice.create');
         Route::resource('invoices', InvoiceController::class);
         Route::resource('/consent-types', ConsentTypeController::class);
         Route::resource('/consent-types.consent-versions', ConsentVersionController::class);

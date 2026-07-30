@@ -8,15 +8,14 @@ enum AppointmentStatus: string
     case Issued = 'issued';
     case Completed = 'completed';
     case Cancelled = 'cancelled';
-    case NoShow = 'no_show';
 
-    public function label(): string{
+    public function label(): string
+    {
         return match ($this) {
-             self::Scheduled => "Prenotato" ,
-             self::InProgress => "In corso",
-             self::Completed => "Completato",
-             self::Cancelled => "Cancellato",
-             self::NoShow => "Assente"
+            self::Draft => 'Bozza' ,
+            self::Issued => 'Emessa',
+            self::Completed => 'Saldata',
+            self::Cancelled => 'Cancellata',
         };
     }
 }

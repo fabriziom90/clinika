@@ -35,6 +35,10 @@ hr {
     background-color: $mainRed;
 }
 
+.bg-main-red-light{
+    background-color: $mainRedHover
+}
+
 .bg-main-green {
     background-color: $mainGreen;
 }
@@ -190,4 +194,20 @@ input.form-check-inline:checked {
 .custom-switch:focus {
     border-color: $mainRed;
     box-shadow: 0 0 0 0.25rem rgba(197, 50, 56, 0.25);
+}
+
+.card-header {
+    border: 1px solid $mainRed;
+}
+
+.max-height-500 {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.list-group-flush {
+    .list-group-item {
+        border-bottom: 1px solid $mainRed;
+        padding: 20px 0px;
+    }
 }
