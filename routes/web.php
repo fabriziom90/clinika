@@ -25,6 +25,7 @@ use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SpecialtyController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -51,9 +52,19 @@ Route::get('/', function () {
 // Route::get('/dashboard', function () {
 //     return Inertia::render('Dashboard');
 // })->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/test-tenant-connection', function () {
+    $clinic = \App\Models\Clinic::findOrFail(1);
+
+    app(\App\Services\TenantDatabaseService::class)->connect($clinic);
+
+    dd(
+        DB::connection('tenant')->getDatabaseName()
+    );
+});
 
 Route::middleware(['auth'])->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
+
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::resource('doctors', DoctorController::class);
         Route::resource('nurses', NurseController::class);

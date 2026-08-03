@@ -32,7 +32,6 @@ return new class extends Migration
             // Ripristina previous_entry_id
             $table->foreignId('previous_entry_id')
                 ->nullable()
-                ->after('patient_id')
                 ->constrained('medical_entries')
                 ->nullOnDelete();
         });
