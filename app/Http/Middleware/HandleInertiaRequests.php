@@ -36,8 +36,12 @@ class HandleInertiaRequests extends Middleware
                     ? array_merge(
                         $request->user()->only('id', 'name', 'surname', 'email'),
                         [
-                            'roles' => $request->user()->getRoleNames(),
-                            'permissions' => $request->user()->getAllPermissions()->pluck('name'),
+                            'roles' => $request->user() instanceof \App\Models\User
+                                        ? $request->user()->getRoleNames()
+                                        : [],
+                            'permissions' => $request->user() instanceof \App\Models\User
+                                        ? $request->user()->getAllPermissions()->pluck('name')
+                                        : [],
                         ]
                     )
                     : null,

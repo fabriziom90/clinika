@@ -26,6 +26,7 @@ use App\Http\Controllers\Admin\SpecialtyController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Superadmin\ClinicController;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -47,6 +48,17 @@ Route::get('/', function () {
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
+});
+
+Route::middleware('tenant')->get('/tenant-test', function () {
+    $clinic = app('currentClinic');
+
+    return [
+        'clinic' => $clinic->name,
+        'database' => DB::connection('tenant')->getDatabaseName(),
+        'tables' => DB::connection('tenant')
+            ->select('SHOW TABLES'),
+    ];
 });
 
 // Route::get('/dashboard', function () {

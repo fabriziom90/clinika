@@ -30,11 +30,20 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
+        // $request->authenticate();
+
+        // $request->session()->regenerate();
+
+        // return redirect()->intended(RouteServiceProvider::HOME);
         $request->authenticate();
 
         $request->session()->regenerate();
 
-        return redirect()->intended(RouteServiceProvider::HOME);
+        if ($request->attributes->get('clinic')) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        return redirect()->route('superadmin.clinics.index');
     }
 
     /**
@@ -42,7 +51,11 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        Auth::guard('web')->logout();
+        $guard = $request->attributes->get('clinic')
+        ? 'web'
+        : 'superadmin';
+
+        Auth::guard($guard)->logout();
 
         $request->session()->invalidate();
 

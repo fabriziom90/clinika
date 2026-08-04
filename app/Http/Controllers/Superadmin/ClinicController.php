@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Superadmin;
 use App\Http\Controllers\Controller;
 use App\Models\Clinic;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class ClinicController extends Controller
@@ -17,8 +18,9 @@ class ClinicController extends Controller
         $clinics = Clinic::withTrashed()
             ->orderBy('deleted_at')
             ->orderBy('name')
-            ->paginate(20)
-            ->withQueryString();
+            ->paginate(20);
+
+        $clinics->appends(request()->query());
 
         return Inertia::render('Superadmin/Clinics/IndexClinics', [
             'clinics' => $clinics,
@@ -100,7 +102,7 @@ class ClinicController extends Controller
                 'string',
                 'max:255',
                 'alpha_dash',
-                'unique:clinics,slug,'.$clinic->id,
+                Rule::unique('central.clinics', 'slug')->ignore($clinic->id),
             ],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
@@ -110,7 +112,7 @@ class ClinicController extends Controller
             'zip_code' => ['nullable', 'string', 'max:10'],
             'vat_number' => ['nullable', 'string', 'max:50'],
             'tax_code' => ['nullable', 'string', 'max:50'],
-            'logo' => ['nullable', 'string', 'max:255'],
+            'logo_path' => ['nullable', 'string', 'max:255'],
             'database' => ['required', 'string', 'max:255'],
             'db_host' => ['required', 'string', 'max:255'],
             'db_port' => ['required', 'string', 'max:10'],
