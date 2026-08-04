@@ -24,8 +24,8 @@ use App\Http\Controllers\Admin\SecretaryController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SpecialtyController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Superadmin\ClinicController;
 use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -52,14 +52,13 @@ Route::get('/', function () {
 // Route::get('/dashboard', function () {
 //     return Inertia::render('Dashboard');
 // })->middleware(['auth', 'verified'])->name('dashboard');
-Route::get('/test-tenant-connection', function () {
-    $clinic = \App\Models\Clinic::findOrFail(1);
 
-    app(\App\Services\TenantDatabaseService::class)->connect($clinic);
+Route::middleware(['auth:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
+    Route::resource('clinics', ClinicController::class);
 
-    dd(
-        DB::connection('tenant')->getDatabaseName()
-    );
+    Route::patch('clinics/{clinic}/restore', [ClinicController::class, 'restore'])
+        ->withTrashed()
+        ->name('clinics.restore');
 });
 
 Route::middleware(['auth'])->group(function () {
