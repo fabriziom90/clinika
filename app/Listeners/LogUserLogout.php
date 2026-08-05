@@ -2,8 +2,8 @@
 
 namespace App\Listeners;
 
+use App\Models\Audit;
 use Illuminate\Auth\Events\Logout;
-use OwenIt\Auditing\Models\Audit;
 
 class LogUserLogout
 {

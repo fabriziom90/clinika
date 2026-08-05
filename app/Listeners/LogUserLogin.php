@@ -2,8 +2,8 @@
 
 namespace App\Listeners;
 
+use App\Models\Audit;
 use Illuminate\Auth\Events\Login;
-use OwenIt\Auditing\Models\Audit;
 
 class LogUserLogin
 {

@@ -5,7 +5,17 @@ import { usePage } from "@inertiajs/vue3";
 export const useConfigStore = defineStore("config", () => {
     const page = usePage();
     const user = computed(() => page.props.auth.user);
-    const hasRole = (role) => user.value?.roles?.includes(role);
+    const hasRole = (roles) => {
+        if (!user.value?.roles) {
+            return false;
+        }
+
+        if (Array.isArray(roles)) {
+            return roles.some((role) => user.value.roles.includes(role));
+        }
+
+        return user.value.roles.includes(roles);
+    };
     const hasPermission = (permission) =>
         user.value?.permissions?.includes(permission);
 

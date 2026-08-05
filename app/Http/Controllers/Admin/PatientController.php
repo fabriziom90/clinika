@@ -76,9 +76,9 @@ class PatientController extends Controller
         $consentTypes = ConsentType::query()
             ->where('is_active', true)
             ->with([
-                'versions' => function($query) {
+                'versions' => function ($query) {
                     $query->where('is_active', true)->latest('version');
-                }
+                },
             ])->get();
 
         return Inertia::render('Patients/CreatePatient', ['nationalities' => $nationalities, 'reminderTypes' => $reminderTypes, 'consentTypes' => $consentTypes]);
@@ -123,8 +123,6 @@ class PatientController extends Controller
                 $appointments = Appointment::with(['doctor.user', 'nurse.user', 'patient'])->get();
             }
 
-
-
             return Inertia::render('Calendar/IndexCalendar', [
                 'newPerson' => $newPatient,
                 'doctors' => $doctors,
@@ -132,7 +130,7 @@ class PatientController extends Controller
                 'nurses' => $nurses,
                 'nationalities' => $nationalities,
                 'appointments' => $appointments,
-                'userIsSuperadmin' => auth()->user()->hasRole('superadmin'),
+                'userIsAdmin' => auth()->user()->hasRole('admin'),
             ]);
         }
 
@@ -173,7 +171,7 @@ class PatientController extends Controller
             'patientHistories',
             'patientHistories.author',
             'appointments' => function ($q) use ($user) {
-                if (! $user->hasRole('superadmin')) {
+                if (! $user->hasRole('admin')) {
                     $q->where('doctor_id', $user->doctor->id ?? null);
                 }
 
@@ -190,7 +188,7 @@ class PatientController extends Controller
                     ]);
             },
             'medicalRecord.medicalEntries' => function ($q) use ($user) {
-                if (! $user->hasRole('superadmin')) {
+                if (! $user->hasRole('admin')) {
                     $q->where('doctor_id', $user->doctor->id ?? null);
                 }
 
@@ -216,7 +214,7 @@ class PatientController extends Controller
      */
     public function edit(Patient $patient)
     {
-        $patient->load(['reminderTypes', 'consents' => function ($query){
+        $patient->load(['reminderTypes', 'consents' => function ($query) {
             $query->latest();
         }]);
 

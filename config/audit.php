@@ -13,8 +13,8 @@ return [
     |
     */
 
-    'implementation' => OwenIt\Auditing\Models\Audit::class,
-
+    // 'implementation' => OwenIt\Auditing\Models\Audit::class,
+    'implementation' => App\Models\Audit::class,
     /*
     |--------------------------------------------------------------------------
     | User Morph prefix & Guards
@@ -27,6 +27,7 @@ return [
     'user' => [
         'morph_prefix' => 'user',
         'guards' => [
+            'superadmin',
             'web',
             'api',
         ],

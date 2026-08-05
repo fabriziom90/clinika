@@ -10,7 +10,7 @@ const props = defineProps({
     patients: Array,
     nurses: Array,
     nationalities: Array,
-    userIsSuperadmin: Boolean,
+    userIsAdmin: Boolean,
 });
 
 const appointmentsStore = useAppointmentStore();
@@ -26,7 +26,7 @@ appointmentsStore.setAppointments(props.appointments);
 
         <Calendar
             :appointments="appointments"
-            :userIsSuperadmin="userIsSuperadmin"
+            :userIsAdmin="userIsAdmin"
             :doctors="doctors"
             :nurses="nurses"
             :patients="patients"

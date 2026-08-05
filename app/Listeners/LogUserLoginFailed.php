@@ -2,8 +2,8 @@
 
 namespace App\Listeners;
 
+use App\Models\Audit;
 use Illuminate\Auth\Events\Failed;
-use OwenIt\Auditing\Models\Audit;
 
 class LogUserLoginFailed
 {
@@ -14,7 +14,11 @@ class LogUserLoginFailed
 
     public function handle(Failed $event): void
     {
-        Audit::forceCreate([
+        $connection = $event->guard === 'superadmin'
+        ? 'central'
+        : 'tenant';
+
+        Audit::on($connection)->forceCreate([
             'user_id' => null,
             'event' => 'login_failed',
             'auditable_type' => $event->user ? get_class($event->user) : null,

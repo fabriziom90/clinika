@@ -12,7 +12,7 @@ const props = defineProps({
     nurses: Array,
     nationalities: Array,
     patients: Array,
-    userIsSuperadmin: Boolean
+    userIsAdmin: Boolean
 });
 
 const detailsOpen = ref(false);
@@ -137,7 +137,7 @@ const showDetail = () => detailsOpen.value = !detailsOpen.value;
                 <div class="col-12 col-md-7">
                     <Calendar
                         :appointments="doctor.appointments"
-                        :userIsSuperadmin="userIsSuperadmin"
+                        :userIsAdmin="userIsAdmin"
                         :doctors="doctors"
                         :nurses="nurses"
                         :patients="patients"
@@ -189,9 +189,12 @@ label {
     color: $mainRed;
 }
 
-.bg-main-red{
+.bg-main-red {
     padding: 20px;
-    h3, label, hr{
+
+    h3,
+    label,
+    hr {
         color: #fff;
     }
 }
@@ -205,16 +208,16 @@ label {
     border-right: 3px solid $mainRed;
 }
 
-.circle{
+.circle {
     padding: 10px;
     background-color: #fff;
     border-radius: 50%;
-    
-    &.is-active{
+
+    &.is-active {
         color: green;
     }
 
-    &.not-active{
+    &.not-active {
         color: $mainRed;
     }
 }

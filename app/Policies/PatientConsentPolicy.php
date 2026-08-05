@@ -24,7 +24,7 @@ class PatientConsentPolicy
             return false;
         }
 
-        if ($user->hasRole(['superadmin', 'secretary'])) {
+        if ($user->hasRole(['admin', 'secretary'])) {
             return true;
         }
 

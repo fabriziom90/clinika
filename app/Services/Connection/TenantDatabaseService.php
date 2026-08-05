@@ -28,5 +28,7 @@ class TenantDatabaseService
 
         DB::purge('tenant');
 
+        Config::set('database.default', 'tenant');
+
     }
 }

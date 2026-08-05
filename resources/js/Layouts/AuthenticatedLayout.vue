@@ -16,7 +16,7 @@ const props = defineProps({
         "clinicrooms" |
         "products" |
         "drugs" |
-        "superadmin",
+        "admin",
 });
 </script>
 

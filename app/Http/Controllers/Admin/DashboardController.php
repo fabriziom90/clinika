@@ -21,7 +21,7 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->hasRole(['superadmin', 'secretary'])) {
+        if ($user->hasRole(['admin', 'secretary'])) {
             return $this->administrativeDashboard($formatter);
         }
 

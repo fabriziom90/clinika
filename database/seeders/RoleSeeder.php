@@ -13,20 +13,6 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        // $superadmin = Role::create(['name' => 'superadmin']);
-        // $doctor = Role::create(['name' => 'doctor']);
-        // $nurse = Role::create(['name' => 'nurse']);
-
-        // // Permessi base
-        // Permission::create(['name' => 'manage users']);
-        // Permission::create(['name' => 'manage patients']);
-        // Permission::create(['name' => 'manage appointments']);
-        // Permission::create(['name' => 'manage invoices']);
-
-        // // Assegno permessi ai ruoli
-        // $superadmin->givePermissionTo(Permission::all());
-        // $doctor->givePermissionTo(['manage patients', 'manage appointments']);
-        // $nurse->givePermissionTo(['manage patients']);
 
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
@@ -87,7 +73,7 @@ class RoleSeeder extends Seeder
 
         // === CREAZIONE RUOLI ===
         $roles = [
-            ['name' => 'superadmin', 'display_name' => 'Superadmin'],
+            ['name' => 'admin', 'display_name' => 'Admin'],
             ['name' => 'doctor', 'display_name' => 'Medico'],
             ['name' => 'nurse', 'display_name' => 'Infermiere'],
             ['name' => 'secretary', 'display_name' => 'Segretaria'],
@@ -119,13 +105,13 @@ class RoleSeeder extends Seeder
         }
 
         // === ASSEGNAZIONE PERMESSI AI RUOLI ===
-        $superadmin = Role::findByName('superadmin');
+        $admin = Role::findByName('admin');
         $doctor = Role::findByName('doctor');
         $nurse = Role::findByName('nurse');
         $secretary = Role::findByName('secretary');
 
-        // Superamministratore
-        $superadmin->syncPermissions(Permission::all());
+        // amministratore
+        $admin->syncPermissions(Permission::all());
 
         // Medico
         $doctor->syncPermissions([

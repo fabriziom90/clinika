@@ -73,7 +73,7 @@ Route::middleware(['auth:superadmin'])->prefix('superadmin')->name('superadmin.'
         ->name('clinics.restore');
 });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['tenant', 'auth'])->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -121,7 +121,7 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['tenant', 'auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

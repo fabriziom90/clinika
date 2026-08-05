@@ -130,6 +130,7 @@ class DoctorController extends Controller
      */
     public function show(Doctor $doctor)
     {
+
         $user = Auth::user();
 
         $doctor = Doctor::with(['user', 'nationality', 'specialty', 'appointments.service', 'appointments.patient', 'appointments.doctor', 'appointments.doctor.user', 'services'])->findOrFail($doctor->id);
@@ -139,7 +140,7 @@ class DoctorController extends Controller
         $nationalities = Nationality::all();
         $user = Auth::user();
 
-        return Inertia::render('Doctors/ShowDoctor', ['doctor' => $doctor, 'doctors' => $doctors, 'patients' => $patients, 'nurses' => $nurses, 'nationalities' => $nationalities, 'userIsSuperadmin' => $user->hasRole('superadmin')]);
+        return Inertia::render('Doctors/ShowDoctor', ['doctor' => $doctor, 'doctors' => $doctors, 'patients' => $patients, 'nurses' => $nurses, 'nationalities' => $nationalities, 'userIsAdmin' => $user->hasRole('Admin')]);
     }
 
     /**

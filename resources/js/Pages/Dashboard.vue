@@ -59,19 +59,19 @@ const props = defineProps({
                     <AppointmentsTab :appointments="appointments" />
                 </div>
                 <div class="mt-4">
-                    <DoctorsTab v-if="hasRole(['superadmin', 'secretary'])" :doctors="doctors" />
+                    <DoctorsTab v-if="hasRole('admin') || hasRole('secretary')" :doctors="doctors" />
                 </div>
                 <div class="mt-4">
                     <PatientsTab :patients="patients" />
                 </div>
             </div>
-            <div class="col-12" :class="hasRole(['superadmin', 'secretary']) ? 'col-md-3' : 'col-md-6'">
+            <div class="col-12" :class="hasRole('admin') || hasRole('secretary') ? 'col-md-3' : 'col-md-6'">
                 <div class="row gy-4">
                     <div class="col-12">
                         <RecentActivitiesTab :recentActivities="recentActivities" />
                     </div>
                     <div class="col-12">
-                        <PendingOperationsTab v-if="hasRole(['superadmin', 'secretary'])"
+                        <PendingOperationsTab v-if="hasRole('admin') || hasRole('secretary')"
                             :pendingOperations="pendingOperations" />
                     </div>
                 </div>
@@ -79,7 +79,8 @@ const props = defineProps({
             <div class="col-12 col-md-3">
                 <div class="row">
                     <div class="col-12">
-                        <InvoicesTab v-if="hasRole(['superadmin', 'secretary'])" :invoiceStats="invoiceStats"
+
+                        <InvoicesTab v-if="hasRole('admin') || hasRole('secretary')" :invoiceStats="invoiceStats"
                             :invoiceChart="invoiceChart" />
                     </div>
                 </div>

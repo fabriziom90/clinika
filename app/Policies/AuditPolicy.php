@@ -12,7 +12,7 @@ class AuditPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('superadmin');
+        return $user->hasRole('admin');
     }
 
     /**
@@ -20,7 +20,7 @@ class AuditPolicy
      */
     public function view(User $user, Audit $audit): bool
     {
-        return $user->hasRole('superadmin');
+        return $user->hasRole('admin');
     }
 
     /**
@@ -46,7 +46,7 @@ class AuditPolicy
      */
     public function delete(User $user, Audit $audit): bool
     {
-        return $user->hasRole('superadmin');
+        return $user->hasRole('admin');
     }
 
     /**

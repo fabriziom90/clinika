@@ -65,7 +65,7 @@ const logout = () => {
                 </Link>
             </li>
             <li class="list-item">
-                <Link :href="route('admin.appointments.index')" :class="isRouteActive(['appointments']) ? 'active' : ''">Agenda</Link>
+                <Link v-if="hasPermission('user.view')" :href="route('admin.appointments.index')" :class="isRouteActive(['appointments']) ? 'active' : ''">Agenda</Link>
             </li>
             <li class="list-item submenu-open" v-if="hasPermission('user.view')">
                 <a
@@ -170,7 +170,7 @@ const logout = () => {
                             <i class="fas" :class="openReminders ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                         </a>
                         <ul class="submenu right-submenu" v-show="openReminders" >
-                            <li v-if="hasRole('superadmin')">
+                            <li v-if="hasRole('admin')">
                                 <Link :href="route('admin.reminder-types.index')" :class="{active: isRouteActive(['reminder-types'])}"
                                 >Tipologie</Link>
                             </li>
@@ -205,7 +205,7 @@ const logout = () => {
                             >Ruoli</Link
                         >
                     </li>
-                    <li class="list-item" v-if="hasRole('superadmin')">
+                    <li class="list-item" v-if="hasRole('admin')">
                         <Link
                             :class="
                                 isRouteActive(['audit-logs']) ? 'active' : ''

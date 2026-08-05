@@ -13,17 +13,46 @@ class ClinicController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $clinics = Clinic::withTrashed()
+        $query = Clinic::withTrashed();
+
+        if ($request->filled('search')) {
+            $search = $request->string('search');
+
+            $query->where(function ($query) use ($search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('slug', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->status === 'active') {
+            $query->whereNull('deleted_at')
+                ->where('active', true);
+        }
+
+        if ($request->status === 'inactive') {
+            $query->whereNull('deleted_at')
+                ->where('active', false);
+        }
+
+        if ($request->status === 'deleted') {
+            $query->whereNotNull('deleted_at');
+        }
+
+        $clinics = $query
             ->orderBy('deleted_at')
             ->orderBy('name')
             ->paginate(20);
 
-        $clinics->appends(request()->query());
+        $clinics->appends($request->query());
 
         return Inertia::render('Superadmin/Clinics/IndexClinics', [
             'clinics' => $clinics,
+            'filters' => [
+                'search' => $request->search,
+                'status' => $request->status,
+            ],
         ]);
     }
 

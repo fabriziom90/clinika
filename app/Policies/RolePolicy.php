@@ -9,7 +9,7 @@ class RolePolicy
 {
     public function before(User $user, $ability)
     {
-        if ($user->hasRole('superadmin')) {
+        if ($user->hasRole('admin')) {
             return true;
         }
     }

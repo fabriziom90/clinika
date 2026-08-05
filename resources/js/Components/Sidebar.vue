@@ -25,7 +25,7 @@ const currentMenu = computed(() => {
 
     if (!section) return [];
 
-    if (props.userRole === "superadmin") {
+    if (props.userRole === "admin") {
         return section;
     }
 
@@ -84,6 +84,9 @@ const isRouteActive = (routeName) => currentRouteName.value === routeName;
     width: 250px;
     background-color: $mainRed;
     color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 
     .button-profile {
         display: flex;
@@ -101,9 +104,9 @@ const isRouteActive = (routeName) => currentRouteName.value === routeName;
         }
     }
 
-    #top-sidebar {
-        height: calc(100% - 130px);
-    }
+    // #top-sidebar {
+    //     height: calc(100% - 130px);
+    // }
 
     h3 {
         margin: 20px 10px;
