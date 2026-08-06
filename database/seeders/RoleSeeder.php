@@ -30,6 +30,7 @@ class RoleSeeder extends Seeder
             'clinic-room' => 'Stanze Poliambulatorio',
             'product' => 'Prodotti sanitari',
             'drug' => 'Medicinali',
+            'inventory-drug' => 'Medicinali stanza',
             'inventory-product' => 'Prodotti stanza',
             'medical-record' => 'Cartella clinica',
             'medical-entry' => 'Voce cartella clinica',

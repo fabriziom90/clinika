@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use OwenIt\Auditing\Models\Audit as AuditModel;
 
-class Audit extends Model
+class Audit extends AuditModel
 {
     protected $casts = [
         'old_values' => 'json',

@@ -20,7 +20,7 @@ const props = defineProps({
     patients: Array,
     nurses: Array,
     nationalities: Array,
-    userIsAdmin: Boolean,
+    userCanCreateAppointment: Boolean,
 });
 
 const configStore = useConfigStore();
@@ -121,7 +121,7 @@ watch(
 
 // click on empty cell in calendar to get date and time and show modal for new appointment insertion
 const handleCellClick = (clickedTime) => {
-    if (!props.userIsAdmin) return;
+    if (!props.userCanCreateAppointment) return;
 
     if (isInteractingWithEvent.value) return;
 

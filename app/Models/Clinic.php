@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Clinic extends Model
 {
@@ -13,6 +14,7 @@ class Clinic extends Model
     protected $connection = 'central';
 
     protected $fillable = [
+        'uuid',
         'name',
         'slug',
         'email',
@@ -50,5 +52,12 @@ class Clinic extends Model
     {
         return $this->belongsToMany(User::class)
             ->withTimestamps();
+    }
+
+    protected static function booted()
+    {
+        static::creating(function (Clinic $clinic) {
+            $clinic->uuid ??= (string) Str::uuid();
+        });
     }
 }
