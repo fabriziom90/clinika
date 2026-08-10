@@ -45,7 +45,6 @@ const resendEmail = (admin) => {
         </div>
 
         <div class="card mt-4">
-
             <div class="card-body">
 
                 <div v-if="admins.length" class="table-responsive">
@@ -59,7 +58,6 @@ const resendEmail = (admin) => {
                                 <th>Nome</th>
                                 <th>Cognome</th>
                                 <th>Email</th>
-                                <th>Username</th>
                                 <th>Inserito il</th>
                                 <th class="text-end">Azioni</th>
                             </tr>
@@ -90,10 +88,6 @@ const resendEmail = (admin) => {
                                 </td>
 
                                 <td>
-                                    {{ admin.username }}
-                                </td>
-
-                                <td>
                                     {{ admin.created_at }}
                                 </td>
 
@@ -101,20 +95,28 @@ const resendEmail = (admin) => {
 
                                     <div class="d-flex justify-content-end gap-2">
 
+                                        <Link :href="route('superadmin.admins.show', {
+                                            clinic: admin.clinic_id,
+                                            admin: admin.id,
+                                        })" class="btn btn-sm btn-info" title="Dettagli">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </Link>
+
                                         <Link :href="route('superadmin.admins.edit', {
                                             clinic: admin.clinic_id,
                                             admin: admin.id,
-                                        })" class="btn btn-sm btn-primary">
-                                            Modifica
+                                        })" class="btn btn-sm btn-primary" title="Modifica">
+                                            <i class="fa-solid fa-pen"></i>
                                         </Link>
 
-                                        <button type="button" class="btn btn-sm btn-warning"
+                                        <button type="button" class="btn btn-sm btn-warning" title="Reinvia email"
                                             @click="resendEmail(admin)">
-                                            Reinvia email
+                                            <i class="fa-solid fa-envelope"></i>
                                         </button>
 
-                                        <button type="button" class="btn btn-sm btn-danger" @click="deleteAdmin(admin)">
-                                            Elimina
+                                        <button type="button" class="btn btn-sm btn-danger" title="Elimina"
+                                            @click="deleteAdmin(admin)">
+                                            <i class="fa-solid fa-trash"></i>
                                         </button>
 
                                     </div>
@@ -142,9 +144,7 @@ const resendEmail = (admin) => {
                 </div>
 
             </div>
-
         </div>
 
     </AuthenticatedLayout>
-
 </template>

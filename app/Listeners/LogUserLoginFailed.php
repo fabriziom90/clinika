@@ -2,8 +2,8 @@
 
 namespace App\Listeners;
 
-use App\Models\Audit;
 use Illuminate\Auth\Events\Failed;
+use Illuminate\Support\Facades\DB;
 
 class LogUserLoginFailed
 {
@@ -18,17 +18,17 @@ class LogUserLoginFailed
         ? 'central'
         : 'tenant';
 
-        Audit::on($connection)->forceCreate([
+        DB::connection($connection)->table('audits')->insert([
             'user_id' => null,
             'event' => 'login_failed',
             'auditable_type' => $event->user ? get_class($event->user) : null,
             'auditable_id' => $event->user?->id,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
-            'old_values' => [
+            'old_values' => json_encode([
                 'email' => $event->credentials['email'] ?? null,
-            ],
-            'new_values' => [],
+            ]),
+            'new_values' => json_encode([]),
         ]);
     }
 }

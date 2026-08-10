@@ -172,6 +172,7 @@ class AdminController extends Controller
     public function edit(int $clinic, int $admin)
     {
         $clinic = Clinic::on('central')->findOrFail($clinic);
+        $clinics = Clinic::on('central')->get();
 
         $this->tenantDatabaseService->connect($clinic);
 
@@ -186,6 +187,7 @@ class AdminController extends Controller
                 'surname' => $admin->surname,
                 'email' => $admin->email,
             ],
+            'clinics' => $clinics,
         ]);
     }
 
@@ -221,10 +223,7 @@ class AdminController extends Controller
         ]);
 
         return redirect()
-            ->route('superadmin.admins.show', [
-                'clinic' => $clinic->id,
-                'admin' => $user->id,
-            ])
+            ->route('superadmin.admins.index')
             ->with([
                 'toast' => [
                     'type' => 'success',
