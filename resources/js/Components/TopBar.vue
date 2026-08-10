@@ -7,6 +7,10 @@ import { router } from "@inertiajs/vue3";
 
 const { user, hasPermission, canAny, hasRole } = useConfigStore()
 
+const props = defineProps({
+    section: String
+})
+
 const openReminders = ref(false);
 const openWarehouse = ref(false);
 const openAdministration = ref(false);
@@ -56,7 +60,7 @@ const logout = () => {
     <div class="top-bar">
         <ul class="d-flex align-items-center m-0">
             <li class="list-item">
-                <Link :href="route('admin.dashboard')">
+                <Link :href="route(props.section === 'superadmin' ? 'superadmin.dashboard' : 'admin.dashboard')">
                     <ApplicationLogo
                         :width="'75px'"
                         :color="'#c53238'"

@@ -26,6 +26,7 @@ use App\Http\Controllers\Admin\SpecialtyController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Superadmin\AdminController;
 use App\Http\Controllers\Superadmin\ClinicController;
+use App\Http\Controllers\Superadmin\DashboardController as SuperadminDashboardController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -68,6 +69,7 @@ Route::middleware('tenant')->get('/tenant-test', function () {
 
 Route::middleware(['auth:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
     Route::resource('clinics', ClinicController::class);
+    Route::get('/dashboard', [SuperadminDashboardController::class, 'index'])->name('dashboard');
     Route::get('admins', [AdminController::class, 'index'])->name('admins.index');
     Route::get('admins/create', [AdminController::class, 'create'])->name('admins.create');
     Route::post('admins', [AdminController::class, 'store'])->name('admins.store');
