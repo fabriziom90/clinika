@@ -118,6 +118,9 @@ class NurseController extends Controller
                 'token' => Hash::make($token),
                 'created_at' => now(),
             ]);
+
+        app(\App\Observers\NurseObserver::class)->created($nurse);
+
         Mail::to($newUser->email)->send(new PersonSetPasswordMail($newUser, $clinic, $token));
 
         return redirect()->route('admin.nurses.index')->with([
@@ -134,6 +137,8 @@ class NurseController extends Controller
     public function show(Nurse $nurse)
     {
         $nurse = Nurse::with(['user', 'nationality'])->findOrFail($nurse->id);
+
+        app(\App\Observers\NurseObserver::class)->viewed($nurse);
 
         return Inertia::render('Nurses/ShowNurse', ['nurse' => $nurse]);
     }
@@ -176,6 +181,8 @@ class NurseController extends Controller
             'nationality_id' => $form_data['nationality_id'],
         ]);
 
+        app(\App\Observers\NurseObserver::class)->updated($nurse);
+
         return redirect()->route('admin.nurses.index')->with([
             'toast' => [
                 'type' => 'success',
@@ -192,6 +199,8 @@ class NurseController extends Controller
         $nurse->user()->delete();
 
         $nurse->delete();
+
+        app(\App\Observers\NurseObserver::class)->deleted($nurse);
 
         return redirect()->route('admin.nurses.index')->with([
             'toast' => [

@@ -141,6 +141,8 @@ class DoctorController extends Controller
 
         Mail::to($newUser->email)->send(new PersonSetPasswordMail($newUser, $clinic, $token));
 
+        app(\App\Observers\DoctorObserver::class)->created($doctor);
+
         return redirect()->route('admin.doctors.index')->with([
             'toast' => [
                 'type' => 'success',
@@ -163,6 +165,8 @@ class DoctorController extends Controller
         $nurses = Nurse::all();
         $nationalities = Nationality::all();
         $user = Auth::user();
+
+        app(\App\Observers\DoctorObserver::class)->viewed($doctor);
 
         return Inertia::render('Doctors/ShowDoctor', ['doctor' => $doctor, 'doctors' => $doctors, 'patients' => $patients, 'nurses' => $nurses, 'nationalities' => $nationalities, 'userIsAdmin' => $user->hasRole('Admin')]);
     }
@@ -234,6 +238,8 @@ class DoctorController extends Controller
 
         $doctor->services()->sync($servicesSync);
 
+        app(\App\Observers\DoctorObserver::class)->updated($doctor);
+
         return redirect()->route('admin.doctors.index')->with([
             'toast' => [
                 'type' => 'success',
@@ -250,6 +256,8 @@ class DoctorController extends Controller
         $doctor->user()->delete();
 
         $doctor->delete();
+
+        app(\App\Observers\DoctorObserver::class)->deleted($doctor);
 
         return redirect()->route('admin.doctors.index')->with([
             'toast' => [
@@ -286,6 +294,8 @@ class DoctorController extends Controller
             ]);
 
         Mail::to($user->email)->send(new PersonSetPasswordMail($user, $clinic, $token));
+
+        app(\App\Observers\DoctorObserver::class)->sendResetEmail($doctor);
 
         return back()->with('toast', [
             'type' => 'success',
