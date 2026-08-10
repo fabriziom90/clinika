@@ -16,7 +16,8 @@ const props = defineProps({
         "clinicrooms" |
         "products" |
         "drugs" |
-        "admin",
+        "admin" |
+        "superadmin"
 });
 </script>
 
@@ -24,7 +25,8 @@ const props = defineProps({
     <div class="vw-100 vh-100">
         <TopBar />
         <main>
-            <Sidebar :current-section="props.section" :userRole="$page.props.auth.user.roles[0] || ''" />
+            <Sidebar :current-section="props.section"
+                :userRole="$page.props.auth.user.is_superadmin ? 'superadmin' : ($page.props.auth.user.roles[0] || '')" />
             <div class="main-content">
                 <slot />
             </div>

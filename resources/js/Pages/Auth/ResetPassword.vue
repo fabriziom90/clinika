@@ -4,10 +4,6 @@ import { Head, useForm } from "@inertiajs/vue3";
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 
 const props = defineProps({
-    email: {
-        type: String,
-        required: true,
-    },
     token: {
         type: String,
         required: true,
@@ -16,7 +12,6 @@ const props = defineProps({
 
 const form = useForm({
     token: props.token,
-    email: props.email,
     password: "",
     password_confirmation: "",
 });
@@ -30,73 +25,34 @@ const submit = () => {
 
 <template>
     <GuestLayout>
+
         <Head title="Reset Password" />
-        <div
-            class="vh-100 vw-100 d-flex justify-content-center align-items-center"
-        >
+        <div class="vh-100 vw-100 d-flex justify-content-center align-items-center">
             <div class="container">
                 <div class="row">
                     <div class="col-12">
-                        <div
-                            class="d-flex justify-content-center align-items-center"
-                        >
+                        <div class="d-flex justify-content-center align-items-center">
                             <form @submit.prevent="submit" class="form-login">
                                 <a href="/">
                                     <ApplicationLogo />
                                 </a>
-                                <div class="form-group mt-3">
-                                    <label for="email" class="form-label"
-                                        >Email</label
-                                    >
 
-                                    <input
-                                        id="email"
-                                        type="email"
-                                        class="form-control"
-                                        v-model="form.email"
-                                        required
-                                        autofocus
-                                        autocomplete="username"
-                                    />
+                                <div class="form-group mt-3">
+                                    <label for="password" class="form-label">Password</label>
+
+                                    <input id="password" type="password" class="form-control" v-model="form.password"
+                                        required autocomplete="new-password" />
                                 </div>
 
                                 <div class="form-group mt-3">
-                                    <label for="password" class="form-label"
-                                        >Password</label
-                                    >
+                                    <label for="password_confirmation" class="form-label">Conferma password</label>
 
-                                    <input
-                                        id="password"
-                                        type="password"
-                                        class="form-control"
-                                        v-model="form.password"
-                                        required
-                                        autocomplete="new-password"
-                                    />
-                                </div>
-
-                                <div class="form-group mt-3">
-                                    <label
-                                        for="password_confirmation"
-                                        class="form-label"
-                                        >Conferma password</label
-                                    >
-
-                                    <input
-                                        id="password_confirmation"
-                                        type="password"
-                                        class="form-control"
-                                        v-model="form.password_confirmation"
-                                        required
-                                        autocomplete="new-password"
-                                    />
+                                    <input id="password_confirmation" type="password" class="form-control"
+                                        v-model="form.password_confirmation" required autocomplete="new-password" />
                                 </div>
 
                                 <div class="flex items-center justify-end mt-4">
-                                    <button
-                                        class="main-button"
-                                        :disabled="form.processing"
-                                    >
+                                    <button class="main-button" :disabled="form.processing">
                                         Reset Password
                                     </button>
                                 </div>
@@ -111,6 +67,7 @@ const submit = () => {
 <style lang="scss" scoped>
 @use "../../../scss/app.scss";
 @use "../../../scss/_partials/variables" as *;
+
 .form-login {
     max-width: 450px;
     border: 1px solid $mainGrey;

@@ -4,7 +4,6 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 
 const form = useForm({
     name: "",
-    slug: "",
     email: "",
     phone: "",
     address: "",
@@ -13,7 +12,7 @@ const form = useForm({
     zip_code: "",
     vat_number: "",
     tax_code: "",
-    logo: "",
+    logo_path: null,
     database: "",
     db_host: "127.0.0.1",
     db_port: "3306",
@@ -23,7 +22,9 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route("superadmin.clinics.store"));
+    form.post(route("superadmin.clinics.store"), {
+        forceFormData: true,
+    });
 };
 </script>
 
@@ -37,7 +38,13 @@ const submit = () => {
                 <h2>Nuova clinica</h2>
             </div>
         </div>
-
+        <div v-if="Object.keys(form.errors).length" class="alert alert-danger">
+            <ul class="mb-0">
+                <li v-for="(error, field) in form.errors" :key="field">
+                    {{ error }}
+                </li>
+            </ul>
+        </div>
         <form @submit.prevent="submit">
             <div class="card mt-4">
                 <div class="card-body">
@@ -53,21 +60,25 @@ const submit = () => {
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">Slug *</label>
-                            <input v-model="form.slug" type="text" class="form-control">
-                            <div v-if="form.errors.slug" class="text-danger">
-                                {{ form.errors.slug }}
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
                             <label class="form-label">Email</label>
                             <input v-model="form.email" type="email" class="form-control">
+                            <div v-if="form.errors.email" class="text-danger">
+                                {{ form.errors.email }}
+                            </div>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label">Telefono</label>
                             <input v-model="form.phone" type="text" class="form-control">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Logo</label>
+                            <input type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp"
+                                @change="form.logo_path = $event.target.files[0]">
+                            <div v-if="form.errors.logo_path" class="text-danger">
+                                {{ form.errors.logo_path }}
+                            </div>
                         </div>
 
                         <div class="col-12">
@@ -99,11 +110,6 @@ const submit = () => {
                             <label class="form-label">Codice fiscale</label>
                             <input v-model="form.tax_code" type="text" class="form-control">
                         </div>
-
-                        <div class="col-12">
-                            <label class="form-label">Logo</label>
-                            <input v-model="form.logo" type="text" class="form-control">
-                        </div>
                     </div>
                 </div>
             </div>
@@ -116,26 +122,41 @@ const submit = () => {
                         <div class="col-md-6">
                             <label class="form-label">Database *</label>
                             <input v-model="form.database" type="text" class="form-control">
+                            <div v-if="form.errors.database" class="text-danger">
+                                {{ form.errors.database }}
+                            </div>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label">Host *</label>
                             <input v-model="form.db_host" type="text" class="form-control">
+                            <div v-if="form.errors.db_host" class="text-danger">
+                                {{ form.errors.db_host }}
+                            </div>
                         </div>
 
                         <div class="col-md-4">
                             <label class="form-label">Port *</label>
                             <input v-model="form.db_port" type="text" class="form-control">
+                            <div v-if="form.errors.db_port" class="text-danger">
+                                {{ form.errors.db_port }}
+                            </div>
                         </div>
 
                         <div class="col-md-4">
                             <label class="form-label">Username *</label>
                             <input v-model="form.db_username" type="text" class="form-control">
+                            <div v-if="form.errors.db_username" class="text-danger">
+                                {{ form.errors.db_username }}
+                            </div>
                         </div>
 
                         <div class="col-md-4">
                             <label class="form-label">Password</label>
                             <input v-model="form.db_password" type="password" class="form-control">
+                            <div v-if="form.errors.db_password" class="text-danger">
+                                {{ form.errors.db_password }}
+                            </div>
                         </div>
                     </div>
                 </div>

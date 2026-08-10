@@ -31,4 +31,13 @@ class TenantDatabaseService
         Config::set('database.default', 'tenant');
 
     }
+
+    public function createDatabase(Clinic $clinic): void
+    {
+        $database = str_replace('`', '``', $clinic->database);
+
+        DB::connection('central')->statement(
+            "CREATE DATABASE IF NOT EXISTS `{$database}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+        );
+    }
 }

@@ -25,7 +25,7 @@ class Clinic extends Model
         'zip_code',
         'vat_number',
         'tax_code',
-        'logo',
+        'logo_path',
         'database',
         'db_host',
         'db_port',

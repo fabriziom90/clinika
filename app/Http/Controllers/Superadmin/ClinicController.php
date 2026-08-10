@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Superadmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Clinic;
+use App\Services\Connection\TenantDatabaseService;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class ClinicController extends Controller
@@ -67,11 +70,10 @@ class ClinicController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, TenantDatabaseService $tenantDatabaseService)
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'string', 'max:255', 'alpha_dash', 'unique:clinics,slug'],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
             'address' => ['nullable', 'string', 'max:255'],
@@ -80,7 +82,7 @@ class ClinicController extends Controller
             'zip_code' => ['nullable', 'string', 'max:10'],
             'vat_number' => ['nullable', 'string', 'max:50'],
             'tax_code' => ['nullable', 'string', 'max:50'],
-            'logo' => ['nullable', 'string', 'max:255'],
+            'logo_path' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'database' => ['required', 'string', 'max:255'],
             'db_host' => ['required', 'string', 'max:255'],
             'db_port' => ['required', 'string', 'max:10'],
@@ -89,14 +91,56 @@ class ClinicController extends Controller
             'active' => ['boolean'],
         ]);
 
-        Clinic::create($validated);
+        $validated['db_password'] = $validated['db_password'] ?? '';
 
-        return redirect()
-            ->route('superadmin.clinics.index')
-            ->with('toast', [
-                'type' => 'success',
-                'message' => 'Clinica creata correttamente.',
+        try {
+            $slug = Str::slug($validated['name']);
+
+            $baseSlug = $slug;
+            $counter = 2;
+
+            while (Clinic::where('slug', $slug)->exists()) {
+                $slug = $baseSlug.'-'.$counter++;
+            }
+
+            if ($request->hasFile('logo_path')) {
+                $validated['logo_path'] = $request->file('logo_path')->store('clinics/logos', 'public');
+            }
+
+            $validated['slug'] = $slug;
+
+            $clinic = Clinic::create($validated);
+
+            $tenantDatabaseService->createDatabase($clinic);
+
+            $exitCode = Artisan::call('migrate:tenant', [
+                'clinic_id' => $clinic->id,
             ]);
+
+            if ($exitCode !== 0) {
+                throw new \RuntimeException('Impossibile eseguire le migration del database tenant.');
+            }
+
+            return redirect()
+                ->route('superadmin.clinics.index')
+                ->with('toast', [
+                    'type' => 'success',
+                    'message' => 'Clinica e database creati correttamente.',
+                ]);
+
+        } catch (\Throwable $e) {
+            report($e);
+
+            if (isset($clinic)) {
+                $clinic->forceDelete();
+            }
+
+            return back()
+                ->withErrors([
+                    'error' => 'Impossibile creare la clinica: '.$e->getMessage(),
+                ])
+                ->withInput();
+        }
     }
 
     /**
@@ -126,13 +170,6 @@ class ClinicController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'slug' => [
-                'required',
-                'string',
-                'max:255',
-                'alpha_dash',
-                Rule::unique('central.clinics', 'slug')->ignore($clinic->id),
-            ],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
             'address' => ['nullable', 'string', 'max:255'],
@@ -141,7 +178,7 @@ class ClinicController extends Controller
             'zip_code' => ['nullable', 'string', 'max:10'],
             'vat_number' => ['nullable', 'string', 'max:50'],
             'tax_code' => ['nullable', 'string', 'max:50'],
-            'logo_path' => ['nullable', 'string', 'max:255'],
+            'logo_path' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'database' => ['required', 'string', 'max:255'],
             'db_host' => ['required', 'string', 'max:255'],
             'db_port' => ['required', 'string', 'max:10'],
@@ -150,18 +187,40 @@ class ClinicController extends Controller
             'active' => ['boolean'],
         ]);
 
-        if (blank($validated['db_password'] ?? null)) {
-            unset($validated['db_password']);
+        try {
+            $slug = Str::slug($validated['name']);
+            $baseSlug = $slug;
+            $counter = 2;
+
+            while (Clinic::where('slug', $slug)->where('id', '!=', $clinic->id)->exists()) {
+                $slug = $baseSlug.'-'.$counter++;
+            }
+
+            $validated['slug'] = $slug;
+
+            if ($request->hasFile('logo_path')) {
+
+                if ($clinic->logo_path && Storage::disk('public')->exists($clinic->logo_path)) {
+                    Storage::disk('public')->delete($clinic->logo_path);
+                }
+
+                $validated['logo_path'] = $request->file('logo_path')->store('clinics/logos', 'public');
+            } else {
+                unset($validated['logo_path']);
+            }
+
+            if (blank($validated['db_password'] ?? null)) {
+                unset($validated['db_password']);
+            }
+
+            $clinic->update($validated);
+
+            return redirect()->route('superadmin.clinics.index')->with('toast', ['type' => 'success', 'message' => 'Clinica aggiornata correttamente.']);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()->withErrors(['error' => 'Impossibile aggiornare la clinica: '.$e->getMessage()])->withInput();
         }
-
-        $clinic->update($validated);
-
-        return redirect()
-            ->route('superadmin.clinics.index')
-            ->with('toast', [
-                'type' => 'success',
-                'message' => 'Clinica aggiornata correttamente.',
-            ]);
     }
 
     /**

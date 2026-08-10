@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\SecretaryController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SpecialtyController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Superadmin\AdminController;
 use App\Http\Controllers\Superadmin\ClinicController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\DB;
@@ -67,6 +68,17 @@ Route::middleware('tenant')->get('/tenant-test', function () {
 
 Route::middleware(['auth:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
     Route::resource('clinics', ClinicController::class);
+    Route::get('admins', [AdminController::class, 'index'])->name('admins.index');
+    Route::get('admins/create', [AdminController::class, 'create'])->name('admins.create');
+    Route::post('admins', [AdminController::class, 'store'])->name('admins.store');
+
+    Route::get('clinics/{clinic}/admins/{admin}', [AdminController::class, 'show'])->name('admins.show');
+    Route::get('clinics/{clinic}/admins/{admin}/edit', [AdminController::class, 'edit'])->name('admins.edit');
+    Route::put('clinics/{clinic}/admins/{admin}', [AdminController::class, 'update'])->name('admins.update');
+    Route::delete('clinics/{clinic}/admins/{admin}', [AdminController::class, 'destroy'])->name('admins.destroy');
+
+    Route::post('clinics/{clinic}/admins/{admin}/send-reset-email', [AdminController::class, 'sendResetEmail'])
+        ->name('admins.send-reset-email');
 
     Route::patch('clinics/{clinic}/restore', [ClinicController::class, 'restore'])
         ->withTrashed()

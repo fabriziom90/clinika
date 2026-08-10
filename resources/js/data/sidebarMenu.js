@@ -276,5 +276,28 @@ export const sidebarMenus = {
             ]
         },
     ],
+    superadmin: [
+        {
+            id: "superadmin",
+            title: "Superadmin",
+            roles: ["superadmin"],
+            path: "/",
+            icon: "fas fa-user-tie",
+            links: [
+                {
+                    name: "Lista cliniche",
+                    route: "superadmin.clinics.index",
+                    path: "/",
+                    icon: "fas fa-list"
+                },
+                {
+                    name: "Lista amministratori",
+                    route: "superadmin.admins.index",
+                    path: "/",
+                    icon: "fas fa-list"
+                }
+            ]
+        }
+    ],
     admin: [],
 };

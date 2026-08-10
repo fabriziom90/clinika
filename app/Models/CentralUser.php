@@ -15,7 +15,7 @@ class CentralUser extends Authenticatable
     protected $table = 'users';
 
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password', 'is_superadmin',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -25,6 +25,7 @@ class CentralUser extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_superadmin' => 'boolean',
         ];
     }
 }

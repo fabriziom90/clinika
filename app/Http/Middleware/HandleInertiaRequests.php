@@ -35,7 +35,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => fn () => $request->user()
                     ? array_merge(
-                        $request->user()->only('id', 'name', 'surname', 'email'),
+                        $request->user()->only('id', 'name', 'surname', 'email', 'is_superadmin'),
                         [
                             'roles' => $request->user() instanceof \App\Models\User
                                         ? $request->user()->getRoleNames()
