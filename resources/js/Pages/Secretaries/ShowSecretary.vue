@@ -9,7 +9,7 @@ import { ref } from "vue";
 const props = defineProps({
     secretary: Object,
     nationalities: Array,
-    userIsSuperadmin: Boolean
+    userIsAdmin: Boolean
 });
 
 

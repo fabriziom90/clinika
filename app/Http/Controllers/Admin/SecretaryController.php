@@ -6,13 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSecretaryRequest;
 use App\Http\Requests\UpdateSecretaryRequest;
 use App\Mail\PersonSetPasswordMail;
+use App\Models\Clinic;
 use App\Models\Nationality;
 use App\Models\Secretary;
 use App\Models\User;
 use App\Services\EmployeeCodeGeneratorService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -70,6 +72,14 @@ class SecretaryController extends Controller
     public function store(StoreSecretaryRequest $request, EmployeeCodeGeneratorService $codeGenerator)
     {
         $form_data = $request->validated();
+
+        $clinicSlug = $request->getHost();
+        $clinicSlug = explode('.', $clinicSlug)[0];
+
+        $clinic = Clinic::on('central')
+            ->where('slug', $clinicSlug)
+            ->firstOrFail();
+
         $password = Str::random(12);
         $user = [
             'name' => $form_data['name'],
@@ -97,8 +107,21 @@ class SecretaryController extends Controller
             'zip_code' => $form_data['zip_code'],
         ]);
 
-        $token = Password::createToken($newUser);
-        Mail::to($newUser->email)->send(new PersonSetPasswordMail($newUser, $token));
+        $token = Str::random(64);
+
+        DB::connection('tenant')
+            ->table('password_reset_tokens')
+            ->where('user_id', $newUser->id)
+            ->delete();
+
+        DB::connection('tenant')
+            ->table('password_reset_tokens')
+            ->insert([
+                'user_id' => $newUser->id,
+                'token' => Hash::make($token),
+                'created_at' => now(),
+            ]);
+        Mail::to($newUser->email)->send(new PersonSetPasswordMail($newUser, $clinic, $token));
 
         app(\App\Observers\SecretaryObserver::class)->created($secretary);
 
@@ -193,14 +216,38 @@ class SecretaryController extends Controller
         ]);
     }
 
-    public function sendResetEmail($id)
+    public function sendResetEmail(Request $request, int $id)
     {
         $secretary = Secretary::findOrFail($id);
         $user = $secretary->user;
 
-        $token = Password::createToken($user);
+        $clinicSlug = explode('.', $request->getHost())[0];
 
-        Mail::to($user->email)->send(new PersonSetPasswordMail($user, $token));
+        $clinic = Clinic::on('central')
+            ->where('slug', $clinicSlug)
+            ->firstOrFail();
+
+        DB::connection('tenant')
+            ->table('password_reset_tokens')
+            ->where('email', $user->email)
+            ->delete();
+
+        $token = Str::random(64);
+
+        DB::connection('tenant')
+            ->table('password_reset_tokens')
+            ->where('user_id', $user->id)
+            ->delete();
+
+        DB::connection('tenant')
+            ->table('password_reset_tokens')
+            ->insert([
+                'user_id' => $user->id,
+                'token' => Hash::make($token),
+                'created_at' => now(),
+            ]);
+
+        Mail::to($user->email)->send(new PersonSetPasswordMail($user, $clinic, $token));
 
         app(\App\Observers\SecretaryObserver::class)->sendResetEmail($secretary);
 

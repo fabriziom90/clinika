@@ -23,7 +23,9 @@ class InvoicePdfService
             'invoice' => $invoice,
         ]);
 
-        $directory = 'invoices/'.$invoice->year;
+        $clinic = app('currentClinic');
+
+        $directory = 'invoices/'.$clinic->uuid.'/'.$invoice->year;
 
         if (! Storage::exists($directory)) {
             Storage::makeDirectory($directory);

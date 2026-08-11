@@ -35,7 +35,7 @@ const types = ref([
 
 // Permessi lato frontend
 const canCreateAppointment = computed(() => user.value?.roles?.includes('doctor'));
-const canDeleteAppointment = computed(() => user.value?.roles?.includes('superadmin'));
+const canDeleteAppointment = computed(() => user.value?.roles?.includes('admin'));
 
 // Funzioni per Card
 const canEditAppointment = (appointment) => {

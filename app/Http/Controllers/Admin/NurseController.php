@@ -5,18 +5,20 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreNurseRequest;
 use App\Http\Requests\UpdateNurseRequest;
-use App\Models\Nurse;
-use App\Models\Nationality;
-use App\Models\User;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Mail;
 use App\Mail\PersonSetPasswordMail;
+use App\Models\Clinic;
+use App\Models\Nationality;
+use App\Models\Nurse;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class NurseController extends Controller
-{   
+{
     public function __construct()
     {
         $this->authorizeResource(\App\Models\Nurse::class, 'nurse');
@@ -28,7 +30,7 @@ class NurseController extends Controller
     public function index()
     {
         $nurses = Nurse::with('user')->get();
-        
+
         $nurses = $nurses->map(function ($nurse) {
             return [
                 'id' => $nurse->id,
@@ -39,17 +41,17 @@ class NurseController extends Controller
                 'created_at' => $nurse->created_at->format('d/m/Y'),
             ];
         });
-        
+
         return Inertia::render('Nurses/IndexNurses', [
-            'nurses' => $nurses, 
+            'nurses' => $nurses,
             'columns' => [
-                'id'    => 'ID',
-                'name'  => 'Nome',
-                'surname'   => 'Cognome',
-                'email'     => 'Email',
-                'phone'     => 'Telefono',
-                'created_at'    => 'Inserito il'
-            ]
+                'id' => 'ID',
+                'name' => 'Nome',
+                'surname' => 'Cognome',
+                'email' => 'Email',
+                'phone' => 'Telefono',
+                'created_at' => 'Inserito il',
+            ],
         ]);
     }
 
@@ -59,6 +61,7 @@ class NurseController extends Controller
     public function create()
     {
         $nationalities = Nationality::all();
+
         return Inertia::render('Nurses/CreateNurse', ['nationalities' => $nationalities]);
     }
 
@@ -68,18 +71,25 @@ class NurseController extends Controller
     public function store(StoreNurseRequest $request)
     {
         $form_data = $request->validated();
-        
+
+        $clinicSlug = $request->getHost();
+        $clinicSlug = explode('.', $clinicSlug)[0];
+
+        $clinic = Clinic::on('central')
+            ->where('slug', $clinicSlug)
+            ->firstOrFail();
+
         $password = Str::random(12);
         $user = [
             'name' => $form_data['name'],
             'surname' => $form_data['surname'],
-            'email'   => $form_data['email'],
-            'password' => Hash::make($password)
+            'email' => $form_data['email'],
+            'password' => Hash::make($password),
         ];
-        
+
         $newUser = User::create($user);
         $newUser->assignRole('nurse');
-        
+
         $nurse = Nurse::create([
             'user_id' => $newUser->id,
             'personal_code' => $form_data['personal_code'],
@@ -91,18 +101,34 @@ class NurseController extends Controller
             'phone' => $form_data['phone'],
             'genre' => $form_data['genre'],
             'pec' => $form_data['pec'] ?? null,
-            'nationality_id'    => $form_data['nationality_id']
+            'nationality_id' => $form_data['nationality_id'],
         ]);
 
-        $token = Password::createToken($newUser);
-        Mail::to($newUser->email)->send(new PersonSetPasswordMail($newUser, $token));
+        $token = Str::random(64);
+
+        DB::connection('tenant')
+            ->table('password_reset_tokens')
+            ->where('user_id', $newUser->id)
+            ->delete();
+
+        DB::connection('tenant')
+            ->table('password_reset_tokens')
+            ->insert([
+                'user_id' => $newUser->id,
+                'token' => Hash::make($token),
+                'created_at' => now(),
+            ]);
+
+        app(\App\Observers\NurseObserver::class)->created($nurse);
+
+        Mail::to($newUser->email)->send(new PersonSetPasswordMail($newUser, $clinic, $token));
 
         return redirect()->route('admin.nurses.index')->with([
-                'toast' => [
-                    'type' => 'success',
-                    'message' => "Infermiere creato con successo."
-                ]
-            ]);
+            'toast' => [
+                'type' => 'success',
+                'message' => 'Infermiere creato con successo.',
+            ],
+        ]);
     }
 
     /**
@@ -111,7 +137,9 @@ class NurseController extends Controller
     public function show(Nurse $nurse)
     {
         $nurse = Nurse::with(['user', 'nationality'])->findOrFail($nurse->id);
-        dd($nurse);
+
+        app(\App\Observers\NurseObserver::class)->viewed($nurse);
+
         return Inertia::render('Nurses/ShowNurse', ['nurse' => $nurse]);
     }
 
@@ -132,11 +160,11 @@ class NurseController extends Controller
     public function update(UpdateNurseRequest $request, Nurse $nurse)
     {
         $form_data = $request->validated();
-        
+
         $nurse->user->update([
             'name' => $form_data['name'],
             'surname' => $form_data['surname'],
-            'email'     => $form_data['email']
+            'email' => $form_data['email'],
         ]);
 
         $nurse->update([
@@ -150,15 +178,17 @@ class NurseController extends Controller
             'phone' => $form_data['phone'],
             'genre' => $form_data['genre'],
             'pec' => $form_data['pec'] ?? null,
-            'nationality_id'    => $form_data['nationality_id']
+            'nationality_id' => $form_data['nationality_id'],
         ]);
 
+        app(\App\Observers\NurseObserver::class)->updated($nurse);
+
         return redirect()->route('admin.nurses.index')->with([
-                'toast' => [
-                    'type' => 'success',
-                    'message' => 'Infermiere aggiornato con successo'
-                ]
-            ]);
+            'toast' => [
+                'type' => 'success',
+                'message' => 'Infermiere aggiornato con successo',
+            ],
+        ]);
     }
 
     /**
@@ -170,26 +200,47 @@ class NurseController extends Controller
 
         $nurse->delete();
 
+        app(\App\Observers\NurseObserver::class)->deleted($nurse);
+
         return redirect()->route('admin.nurses.index')->with([
             'toast' => [
-                    'type' => 'success',
-                    'message' => 'Infermiere cancellato correttamente'
-            ]
+                'type' => 'success',
+                'message' => 'Infermiere cancellato correttamente',
+            ],
         ]);
     }
 
-    public function sendResetEmail($id)
+    public function sendResetEmail(Request $request, int $id)
     {
         $nurse = Nurse::findOrFail($id);
         $user = $nurse->user;
 
-        $token = Password::createToken($user);
-    
-        Mail::to($user->email)->send(new PersonSetPasswordMail($user, $token));
+        $clinicSlug = explode('.', $request->getHost())[0];
+
+        $clinic = Clinic::on('central')
+            ->where('slug', $clinicSlug)
+            ->firstOrFail();
+
+        $token = Str::random(64);
+
+        DB::connection('tenant')
+            ->table('password_reset_tokens')
+            ->where('user_id', $user->id)
+            ->delete();
+
+        DB::connection('tenant')
+            ->table('password_reset_tokens')
+            ->insert([
+                'user_id' => $user->id,
+                'token' => Hash::make($token),
+                'created_at' => now(),
+            ]);
+
+        Mail::to($user->email)->send(new PersonSetPasswordMail($user, $clinic, $token));
 
         return back()->with(['toast', [
             'type' => 'success',
-            'message' => 'Email di impostazione password inviata con successo'
+            'message' => 'Email di impostazione password inviata con successo',
         ]]);
     }
 }

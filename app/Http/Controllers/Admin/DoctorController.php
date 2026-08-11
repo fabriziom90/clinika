@@ -6,16 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDoctorRequest;
 use App\Http\Requests\UpdateDoctorRequest;
 use App\Mail\PersonSetPasswordMail;
+use App\Models\Clinic;
 use App\Models\Doctor;
 use App\Models\Nationality;
 use App\Models\Nurse;
 use App\Models\Patient;
 use App\Models\Specialty;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -75,17 +77,25 @@ class DoctorController extends Controller
     {
         $form_data = $request->validated();
 
+        $clinicSlug = explode('.', $request->getHost())[0];
+
+        $clinic = Clinic::on('central')
+            ->where('slug', $clinicSlug)
+            ->firstOrFail();
+
         $servicesSync = [];
         $password = Str::random(12);
-        $user = [
+
+        $newUser = User::create([
             'name' => $form_data['name'],
             'surname' => $form_data['surname'],
             'email' => $form_data['email'],
             'password' => Hash::make($password),
-        ];
+        ]);
 
-        $newUser = User::create($user);
         $newUser->assignRole('doctor');
+
+        $newUser->refresh();
 
         $doctor = Doctor::create([
             'user_id' => $newUser->id,
@@ -114,8 +124,24 @@ class DoctorController extends Controller
 
         $doctor->services()->sync($servicesSync);
 
-        $token = Password::createToken($newUser);
-        Mail::to($newUser->email)->send(new PersonSetPasswordMail($newUser, $token));
+        $token = Str::random(64);
+
+        DB::connection('tenant')
+            ->table('password_reset_tokens')
+            ->where('user_id', $newUser->id)
+            ->delete();
+
+        DB::connection('tenant')
+            ->table('password_reset_tokens')
+            ->insert([
+                'user_id' => $newUser->id,
+                'token' => Hash::make($token),
+                'created_at' => now(),
+            ]);
+
+        Mail::to($newUser->email)->send(new PersonSetPasswordMail($newUser, $clinic, $token));
+
+        app(\App\Observers\DoctorObserver::class)->created($doctor);
 
         return redirect()->route('admin.doctors.index')->with([
             'toast' => [
@@ -130,6 +156,7 @@ class DoctorController extends Controller
      */
     public function show(Doctor $doctor)
     {
+
         $user = Auth::user();
 
         $doctor = Doctor::with(['user', 'nationality', 'specialty', 'appointments.service', 'appointments.patient', 'appointments.doctor', 'appointments.doctor.user', 'services'])->findOrFail($doctor->id);
@@ -139,7 +166,9 @@ class DoctorController extends Controller
         $nationalities = Nationality::all();
         $user = Auth::user();
 
-        return Inertia::render('Doctors/ShowDoctor', ['doctor' => $doctor, 'doctors' => $doctors, 'patients' => $patients, 'nurses' => $nurses, 'nationalities' => $nationalities, 'userIsSuperadmin' => $user->hasRole('superadmin')]);
+        app(\App\Observers\DoctorObserver::class)->viewed($doctor);
+
+        return Inertia::render('Doctors/ShowDoctor', ['doctor' => $doctor, 'doctors' => $doctors, 'patients' => $patients, 'nurses' => $nurses, 'nationalities' => $nationalities, 'userIsAdmin' => $user->hasRole('Admin')]);
     }
 
     /**
@@ -209,6 +238,8 @@ class DoctorController extends Controller
 
         $doctor->services()->sync($servicesSync);
 
+        app(\App\Observers\DoctorObserver::class)->updated($doctor);
+
         return redirect()->route('admin.doctors.index')->with([
             'toast' => [
                 'type' => 'success',
@@ -226,6 +257,8 @@ class DoctorController extends Controller
 
         $doctor->delete();
 
+        app(\App\Observers\DoctorObserver::class)->deleted($doctor);
+
         return redirect()->route('admin.doctors.index')->with([
             'toast' => [
                 'type' => 'success',
@@ -234,18 +267,39 @@ class DoctorController extends Controller
         ]);
     }
 
-    public function sendResetEmail($id)
+    public function sendResetEmail(Request $request, int $id)
     {
         $doctor = Doctor::findOrFail($id);
         $user = $doctor->user;
 
-        $token = Password::createToken($user);
+        $clinicSlug = explode('.', $request->getHost())[0];
 
-        Mail::to($user->email)->send(new PersonSetPasswordMail($user, $token));
+        $clinic = Clinic::on('central')
+            ->where('slug', $clinicSlug)
+            ->firstOrFail();
 
-        return back()->with(['toast', [
+        $token = Str::random(64);
+
+        DB::connection('tenant')
+            ->table('password_reset_tokens')
+            ->where('user_id', $user->id)
+            ->delete();
+
+        DB::connection('tenant')
+            ->table('password_reset_tokens')
+            ->insert([
+                'user_id' => $user->id,
+                'token' => Hash::make($token),
+                'created_at' => now(),
+            ]);
+
+        Mail::to($user->email)->send(new PersonSetPasswordMail($user, $clinic, $token));
+
+        app(\App\Observers\DoctorObserver::class)->sendResetEmail($doctor);
+
+        return back()->with('toast', [
             'type' => 'success',
             'message' => 'Email di impostazione password inviata con successo',
-        ]]);
+        ]);
     }
 }

@@ -36,7 +36,7 @@ const formatHour = (date) => {
     return `${hours}:${minutes}`;
 };
 
-const isAdmin = computed(() => configStore.user.roles.includes("superadmin"));
+const isAdmin = computed(() => configStore.user.roles.includes("admin"));
 
 const getLabel = (status) => {
     const labels = {
@@ -108,7 +108,7 @@ const generateInvoice = () => {
                 </div>
                 <div class="modal-body">
                     <h3>
-                        <span v-if="configStore.user.roles[0] === 'superadmin'">{{item.doctor.user.name}} {{item.doctor.user.surname}}</span>
+                        <span v-if="configStore.user.roles[0] === 'admin'">{{item.doctor.user.name}} {{item.doctor.user.surname}}</span>
                         <span v-else>{{ item.service?.name }} - {{ item.service?.code}}</span>
                     </h3>
                     <div class="infos">

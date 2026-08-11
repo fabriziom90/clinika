@@ -7,6 +7,10 @@ import { router } from "@inertiajs/vue3";
 
 const { user, hasPermission, canAny, hasRole } = useConfigStore()
 
+const props = defineProps({
+    section: String
+})
+
 const openReminders = ref(false);
 const openWarehouse = ref(false);
 const openAdministration = ref(false);
@@ -56,7 +60,7 @@ const logout = () => {
     <div class="top-bar">
         <ul class="d-flex align-items-center m-0">
             <li class="list-item">
-                <Link :href="route('admin.dashboard')">
+                <Link :href="route(props.section === 'superadmin' ? 'superadmin.dashboard' : 'admin.dashboard')">
                     <ApplicationLogo
                         :width="'75px'"
                         :color="'#c53238'"
@@ -65,7 +69,7 @@ const logout = () => {
                 </Link>
             </li>
             <li class="list-item">
-                <Link :href="route('admin.appointments.index')" :class="isRouteActive(['appointments']) ? 'active' : ''">Agenda</Link>
+                <Link v-if="hasPermission('user.view')" :href="route('admin.appointments.index')" :class="isRouteActive(['appointments']) ? 'active' : ''">Agenda</Link>
             </li>
             <li class="list-item submenu-open" v-if="hasPermission('user.view')">
                 <a
@@ -170,7 +174,7 @@ const logout = () => {
                             <i class="fas" :class="openReminders ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                         </a>
                         <ul class="submenu right-submenu" v-show="openReminders" >
-                            <li v-if="hasRole('superadmin')">
+                            <li v-if="hasRole('admin')">
                                 <Link :href="route('admin.reminder-types.index')" :class="{active: isRouteActive(['reminder-types'])}"
                                 >Tipologie</Link>
                             </li>
@@ -205,7 +209,7 @@ const logout = () => {
                             >Ruoli</Link
                         >
                     </li>
-                    <li class="list-item" v-if="hasRole('superadmin')">
+                    <li class="list-item" v-if="hasRole('admin')">
                         <Link
                             :class="
                                 isRouteActive(['audit-logs']) ? 'active' : ''

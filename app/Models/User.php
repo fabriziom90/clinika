@@ -15,6 +15,8 @@ class User extends Authenticatable implements AuditableContract
 {
     use Auditable, HasApiTokens, HasFactory, HasRoles, Notifiable;
 
+    protected $connection = 'tenant';
+
     /**
      * The attributes that are mass assignable.
      *

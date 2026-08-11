@@ -24,7 +24,11 @@ use App\Http\Controllers\Admin\SecretaryController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SpecialtyController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Superadmin\AdminController;
+use App\Http\Controllers\Superadmin\ClinicController;
+use App\Http\Controllers\Superadmin\DashboardController as SuperadminDashboardController;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -48,12 +52,44 @@ Route::get('/', function () {
     ]);
 });
 
+Route::middleware('tenant')->get('/tenant-test', function () {
+    $clinic = app('currentClinic');
+
+    return [
+        'clinic' => $clinic->name,
+        'database' => DB::connection('tenant')->getDatabaseName(),
+        'tables' => DB::connection('tenant')
+            ->select('SHOW TABLES'),
+    ];
+});
+
 // Route::get('/dashboard', function () {
 //     return Inertia::render('Dashboard');
 // })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
+    Route::resource('clinics', ClinicController::class);
+    Route::get('/dashboard', [SuperadminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('admins', [AdminController::class, 'index'])->name('admins.index');
+    Route::get('admins/create', [AdminController::class, 'create'])->name('admins.create');
+    Route::post('admins', [AdminController::class, 'store'])->name('admins.store');
+
+    Route::get('clinics/{clinic}/admins/{admin}', [AdminController::class, 'show'])->name('admins.show');
+    Route::get('clinics/{clinic}/admins/{admin}/edit', [AdminController::class, 'edit'])->name('admins.edit');
+    Route::put('clinics/{clinic}/admins/{admin}', [AdminController::class, 'update'])->name('admins.update');
+    Route::delete('clinics/{clinic}/admins/{admin}', [AdminController::class, 'destroy'])->name('admins.destroy');
+
+    Route::post('clinics/{clinic}/admins/{admin}/send-reset-email', [AdminController::class, 'sendResetEmail'])
+        ->name('admins.send-reset-email');
+
+    Route::patch('clinics/{clinic}/restore', [ClinicController::class, 'restore'])
+        ->withTrashed()
+        ->name('clinics.restore');
+});
+
+Route::middleware(['tenant', 'auth'])->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
+
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::resource('doctors', DoctorController::class);
         Route::resource('nurses', NurseController::class);
@@ -99,7 +135,7 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['tenant', 'auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

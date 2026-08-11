@@ -26,9 +26,9 @@ const submit = () => {
             loading.value = false;
             form.reset("password");
         },
-        onError: (errors) => {
+        onError: (error) => {
             error.value =
-                errors.username || errors.password || "Credenziali non valide.";
+                error.username || error.password || "Credenziali non valide.";
         },
         onSuccess: () => {
             console.log("Login avvenuto");
@@ -38,50 +38,30 @@ const submit = () => {
 </script>
 
 <template>
+
     <Head title="Log in" />
     <div class="vh-100 vw-100 d-flex justify-content-center align-items-center">
         <div class="container">
             <div class="row">
                 <div class="col-12">
-                    <div
-                        class="d-flex justify-content-center align-items-center"
-                    >
+                    <div class="d-flex justify-content-center align-items-center">
                         <form @submit.prevent="submit" class="form-login">
                             <a href="/">
                                 <ApplicationLogo />
                             </a>
-                            <div
-                                v-if="status"
-                                class="mb-4 font-medium text-sm text-green-600"
-                            >
+                            <div v-if="status" class="mb-4 font-medium text-sm text-green-600">
                                 {{ status }}
                             </div>
                             <div class="form-group mt-3">
-                                <label class="form-label" for="email"
-                                    >Email</label
-                                >
-                                <input
-                                    class="form-control"
-                                    v-model="form.email"
-                                    type="email"
-                                    id="email"
-                                    placeholder="Inserisci email"
-                                    required
-                                />
+                                <label class="form-label" for="email">Email</label>
+                                <input class="form-control" v-model="form.email" type="email" id="email"
+                                    placeholder="Inserisci email" required />
                             </div>
 
                             <div class="form-group mt-3">
-                                <label class="form-label" for="password"
-                                    >Password</label
-                                >
-                                <input
-                                    class="form-control"
-                                    v-model="form.password"
-                                    type="password"
-                                    id="password"
-                                    placeholder="Inserisci password"
-                                    required
-                                />
+                                <label class="form-label" for="password">Password</label>
+                                <input class="form-control" v-model="form.password" type="password" id="password"
+                                    placeholder="Inserisci password" required />
                             </div>
 
                             <div class="form-group mt-3">
@@ -101,6 +81,7 @@ const submit = () => {
 
 <style lang="scss" scoped>
 @use "../../../scss/_partials/variables" as *;
+
 .form-login {
     max-width: 450px;
     border: 1px solid $mainGrey;

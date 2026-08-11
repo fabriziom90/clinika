@@ -92,13 +92,14 @@ const generatePdf = () => {
                 <i class="fas fa-times"></i>
             </button>
         </template>
-        
-        <Link v-if="actions.edit && !editableColumns.length && (hasRole('superadmin') || hasRole('secretary'))" class="edit-button"
- :href="getActionUrl('edit')">
+
+        <Link v-if="actions.edit && !editableColumns.length && (hasRole('admin') || hasRole('secretary'))"
+            class="edit-button" :href="getActionUrl('edit')">
             <i class="fas fa-edit"></i>
         </Link>
 
-        <Link v-if="actions.versions" class="btn-blue" :href="route('admin.consent-types.consent-versions.index', item.id)" title="Gestisci versioni">
+        <Link v-if="actions.versions" class="btn-blue"
+            :href="route('admin.consent-types.consent-versions.index', item.id)" title="Gestisci versioni">
             <i class="fas fa-clock-rotate-left"></i>
         </Link>
 
@@ -106,7 +107,8 @@ const generatePdf = () => {
             <i class="fas fa-file-pdf"></i>
         </button>
 
-        <Link v-if="actions.showConsenses" class="btn-dark" :href="route('admin.patient.consents.index', item.id)" title="Consensi paziente">
+        <Link v-if="actions.showConsenses" class="btn-dark" :href="route('admin.patient.consents.index', item.id)"
+            title="Consensi paziente">
             <i class="fas fa-user-shield"></i>
         </Link>
 
@@ -114,7 +116,7 @@ const generatePdf = () => {
             <i class="fas fa-envelope"></i>
         </button>
 
-        <button v-if="hasRole('superadmin') || hasRole('secretary')" class="delete-button" @click="$emit('delete', item)">
+        <button v-if="hasRole('admin') || hasRole('secretary')" class="delete-button" @click="$emit('delete', item)">
             <i class="fas fa-trash"></i>
         </button>
     </td>

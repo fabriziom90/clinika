@@ -11,14 +11,14 @@ class MedicalEntryPolicy
      * Create a new policy instance.
      * VIEW
      * Can only see if:
-     * - superadmin
+     * - admin
      * - doctor who has appointments with that patient
      * - doctor who created the entry
      * - nurse assigned to an appointment for that patient
      */
     public function view(User $user, MedicalEntry $entry): bool
     {
-        if ($user->hasRole('superadmin')) {
+        if ($user->hasRole('admin')) {
             return true;
         }
 
@@ -58,7 +58,7 @@ class MedicalEntryPolicy
      * Chi può modificare entry (versioning: meglio creare nuova entry)
      */
     public function update(User $user, MedicalEntry $entry): bool
-    {   
+    {
         return $user->doctor && $entry->doctor_id === $user->doctor->id;
     }
 
@@ -67,6 +67,6 @@ class MedicalEntryPolicy
      */
     public function delete(User $user, MedicalEntry $entry): bool
     {
-        return $user->hasRole('superadmin');
+        return $user->hasRole('admin');
     }
 }

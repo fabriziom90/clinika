@@ -50,7 +50,7 @@ class AppointmentController extends Controller
 
         return inertia('Calendar/IndexCalendar', [
             'appointments' => $appointments,
-            'userIsSuperadmin' => $user->hasRole('superadmin'),
+            'userCanCreateAppointment' => $user->can('appointment.create'),
             'doctors' => $doctors,
             'nurses' => $nurses,
             'patients' => $patients,

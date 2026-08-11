@@ -60,6 +60,6 @@ class MedicalRecordPolicy
 
     public function delete(User $user, MedicalRecord $medicalRecord): bool
     {
-        return $user->hasRole('superadmin');
+        return $user->hasRole('admin');
     }
 }

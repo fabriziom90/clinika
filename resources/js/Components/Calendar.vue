@@ -20,7 +20,7 @@ const props = defineProps({
     patients: Array,
     nurses: Array,
     nationalities: Array,
-    userIsSuperadmin: Boolean,
+    userCanCreateAppointment: Boolean,
 });
 
 const configStore = useConfigStore();
@@ -84,7 +84,7 @@ const calendarEvents = computed(() => {
         start: isoToLocalDate(appointment.start_time),
         end: isoToLocalDate(appointment.end_time),
         title:
-            configStore.user.roles[0] === "superadmin"
+            configStore.user.roles[0] === "admin"
                 ? `${appointment.doctor.user.name} ${appointment.doctor.user.surname}`
                 : appointment.service?.name,
     }));
@@ -121,7 +121,7 @@ watch(
 
 // click on empty cell in calendar to get date and time and show modal for new appointment insertion
 const handleCellClick = (clickedTime) => {
-    if (!props.userIsSuperadmin) return;
+    if (!props.userCanCreateAppointment) return;
 
     if (isInteractingWithEvent.value) return;
 

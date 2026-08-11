@@ -3,7 +3,7 @@ export const sidebarMenus = {
         {
             id: "dashboard-section",
             title: "Dashboard",
-            roles: ["superadmin", "doctor", "nurse", "secretary"],
+            roles: ["admin", "doctor", "nurse", "secretary"],
             icon: "fas fa-home",
         },
     ],
@@ -11,7 +11,7 @@ export const sidebarMenus = {
         {
             id: "patients-section",
             title: "Gestione Pazienti",
-            roles: ["superadmin", "doctor", "nurse", "secretary"],
+            roles: ["admin", "doctor", "nurse", "secretary"],
             icon: "fas fa-user-injured",
             links: [
                 {
@@ -24,7 +24,7 @@ export const sidebarMenus = {
                     name: "Nuovo Paziente",
                     route: "admin.patients.create",
                     path: "/create",
-                    roles: ["superadmin"],
+                    roles: ["admin"],
                     icon: "fas fa-plus",
                 },
             ],
@@ -34,7 +34,7 @@ export const sidebarMenus = {
         {
             id: "doctors-section",
             title: "Gestione Dottori",
-            roles: ["superadmin", "secretary"],
+            roles: ["admin", "secretary"],
             icon: "fas fa-user-doctor",
             links: [
                 {
@@ -56,7 +56,7 @@ export const sidebarMenus = {
         {
             id: "nurses-section",
             title: "Gestione Infermieri",
-            roles: ["superadmin", "secretary"],
+            roles: ["admin", "secretary"],
             icon: "fas fa-user-nurse",
             links: [
                 {
@@ -78,7 +78,7 @@ export const sidebarMenus = {
         {
             id: "secretaries-section",
             title: "Gestione Segretarie",
-            roles: ["superadmin", "secretary"],
+            roles: ["admin", "secretary"],
             icon: "fas fa-hospital-user",
             links: [
                 {
@@ -100,7 +100,7 @@ export const sidebarMenus = {
         {
             id: "specialties-section",
             title: "Gestione Specializzazioni",
-            roles: ["superadmin", "secretary"],
+            roles: ["admin", "secretary"],
             path: "/",
             icon: "fas fa-book-medical",
             links: [
@@ -123,7 +123,7 @@ export const sidebarMenus = {
         {
             id: "roles-section",
             title: "Gestione Ruoli",
-            roles: ["superadmin"],
+            roles: ["admin"],
             path: "/",
             icon: "fas fa-user-shield",
         },
@@ -132,7 +132,7 @@ export const sidebarMenus = {
         {
             id: "calendar-section",
             title: "Gestione Agenda",
-            roles: ["superadmin", "doctors", "nurses", "secretary"],
+            roles: ["admin", "doctors", "nurses", "secretary"],
             path: "/",
             icon: "fas fa-calendar",
         },
@@ -141,7 +141,7 @@ export const sidebarMenus = {
         {
             id: "clinicrooms-section",
             title: "Gestione Stanze",
-            roles: ["superadmin", "secretary"],
+            roles: ["admin", "secretary"],
             path: "/",
             icon: "fas fa-hospital",
         },
@@ -150,7 +150,7 @@ export const sidebarMenus = {
         {
             id: "products-section",
             title: "Gestione Prodotti medici",
-            roles: ["superadmin", "secretary"],
+            roles: ["admin", "secretary"],
             path: "/",
             icon: "fas fa-syringe",
         },
@@ -159,7 +159,7 @@ export const sidebarMenus = {
         {
             id: "drugs-section",
             title: "Gestione Medicinali",
-            roles: ["superadmin", "secretary"],
+            roles: ["admin", "secretary"],
             path: "/",
             icon: "fas fa-pills",
         },
@@ -168,7 +168,7 @@ export const sidebarMenus = {
         {
             id: "logs-section",
             title: "Logs di sistema",
-            roles: ["superadmin"],
+            roles: ["admin"],
             path: "/",
             icon: "fas fa-clipboard-list",
         },
@@ -177,7 +177,7 @@ export const sidebarMenus = {
         {
             id: "reminder-types",
             title: "Tipologie di promemoria",
-            roles: ["superadmin", "secretary"],
+            roles: ["admin", "secretary"],
             path: "/",
             icon: "fas fa-alarm-clock",
             links: [
@@ -200,7 +200,7 @@ export const sidebarMenus = {
         {
             id: "reminders",
             title: "Logs Promemoria",
-            roles: ["superadmin", "secretary"],
+            roles: ["admin", "secretary"],
             path: "/",
             icon: "fas fa-clipboard-list",
             links: [
@@ -217,7 +217,7 @@ export const sidebarMenus = {
         {
             id: "invoices",
             title: "Fatture",
-            roles: ["superadmin", "secretary"],
+            roles: ["admin", "secretary"],
             path: "/",
             icon: "fas fa-money-check-dollar",
             links: [
@@ -234,7 +234,7 @@ export const sidebarMenus = {
         {
             id: "consenttypes",
             title: "Tipologie consenso",
-            roles: ["superadmin", "secretary"],
+            roles: ["admin", "secretary"],
             path: "/",
             icon: "fas fa-file-shield",
             links: [
@@ -257,7 +257,7 @@ export const sidebarMenus = {
         {
             id: "consentversions",
             title: "Versioni tipologia consenso",
-            roles: ["superadmin", "secretary"],
+            roles: ["admin", "secretary"],
             path: "/",
             icon: "fas fa-copy",
             links: [
@@ -276,5 +276,28 @@ export const sidebarMenus = {
             ]
         },
     ],
-    superadmin: [],
+    superadmin: [
+        {
+            id: "superadmin",
+            title: "Superadmin",
+            roles: ["superadmin"],
+            path: "/",
+            icon: "fas fa-user-tie",
+            links: [
+                {
+                    name: "Lista cliniche",
+                    route: "superadmin.clinics.index",
+                    path: "/",
+                    icon: "fas fa-list"
+                },
+                {
+                    name: "Lista amministratori",
+                    route: "superadmin.admins.index",
+                    path: "/",
+                    icon: "fas fa-list"
+                }
+            ]
+        }
+    ],
+    admin: [],
 };

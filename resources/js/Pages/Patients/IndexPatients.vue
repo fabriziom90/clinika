@@ -26,7 +26,7 @@ const { user, hasPermission, hasRole } = useConfigStore()
             </div>
         </div>
         <Table
-            v-if="hasRole('superadmin') || hasRole('secretary')"
+            v-if="hasRole('admin') || hasRole('secretary')"
             :items="patients"
             :columns="columns"
             baseRoute="admin.patients"
