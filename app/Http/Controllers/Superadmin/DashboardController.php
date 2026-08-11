@@ -72,6 +72,18 @@ class DashboardController extends Controller
                 ? trim($user->name.' '.$user->surname)
                 : 'Sistema';
 
+            $entity = match ($audit->auditable_type) {
+                \App\Models\User::class => 'Utente',
+                \App\Models\Doctor::class => 'Dottore',
+                \App\Models\Nurse::class => 'Infermiere',
+                \App\Models\Secretary::class => 'Segretaria',
+                \App\Models\Patient::class => 'Paziente',
+                \App\Models\Invoice::class => 'Fattura',
+                \App\Models\Appointment::class => 'Appuntamento',
+                \App\Models\Clinic::class => 'Clinica',
+                default => 'Elemento',
+            };
+
             $type = match ($audit->event) {
                 'created' => 'created',
                 'updated' => 'updated',
@@ -91,20 +103,52 @@ class DashboardController extends Controller
             };
 
             $title = match ($audit->event) {
-                'created' => 'Elemento creato',
-                'updated' => 'Elemento modificato',
-                'deleted' => 'Elemento eliminato',
+                'created' => "{$entity} creato",
+                'updated' => "{$entity} modificato",
+                'deleted' => "{$entity} eliminato",
                 'login' => 'Accesso effettuato',
                 'login_failed' => 'Tentativo di accesso fallito',
                 default => ucfirst($audit->event),
             };
+
+            $subjectName = null;
+
+            if ($audit->auditable_type === \App\Models\Doctor::class) {
+                $subject = \App\Models\Doctor::find($audit->auditable_id);
+                $subjectName = $subject?->user
+                    ? trim($subject->user->name.' '.$subject->user->surname)
+                    : null;
+            } elseif ($audit->auditable_type === \App\Models\Nurse::class) {
+                $subject = \App\Models\Nurse::find($audit->auditable_id);
+                $subjectName = $subject?->user
+                    ? trim($subject->user->name.' '.$subject->user->surname)
+                    : null;
+            } elseif ($audit->auditable_type === \App\Models\Secretary::class) {
+                $subject = \App\Models\Secretary::find($audit->auditable_id);
+                $subjectName = $subject?->user
+                    ? trim($subject->user->name.' '.$subject->user->surname)
+                    : null;
+            } elseif ($audit->auditable_type === \App\Models\Patient::class) {
+                $subject = \App\Models\Patient::find($audit->auditable_id);
+
+                if ($subject) {
+                    $subjectName = trim($subject->name.' '.$subject->surname);
+                }
+            } elseif ($audit->auditable_type === \App\Models\User::class) {
+                $subject = \App\Models\User::find($audit->auditable_id);
+
+                if ($subject) {
+                    $subjectName = trim($subject->name.' '.$subject->surname);
+                }
+            }
 
             return [
                 'id' => $audit->id,
                 'type' => $type,
                 'icon' => $icon,
                 'title' => $title,
-                'description' => $userName,
+                'subject' => $subjectName,
+                'user' => $userName,
                 'created_at' => $audit->created_at,
             ];
         })->values();

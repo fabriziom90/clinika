@@ -274,13 +274,15 @@ const props = defineProps({
 
                                 <div>
                                     <div>
-                                        <strong>
-                                            {{ activity.title }}
-                                        </strong>
+                                        <strong>{{ activity.title }}</strong>
+                                    </div>
+
+                                    <div v-if="activity.subject" class="small">
+                                        {{ activity.subject }}
                                     </div>
 
                                     <div class="small text-muted">
-                                        {{ activity.description }}
+                                        da {{ activity.user }}
                                     </div>
                                 </div>
                             </div>

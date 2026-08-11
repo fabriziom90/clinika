@@ -43,7 +43,7 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        return redirect()->route('superadmin.clinics.index');
+        return redirect()->route('superadmin.dashboard');
     }
 
     /**
