@@ -66,7 +66,7 @@ class ClinicRoomController extends Controller
     {
 
         $clinicRoomProducts = InventoryProduct::where('room_id', $clinicRoom->id)->with('product')->get();
-        // dd($clinicRoomProducts);
+
         $clinicRoomDrugs = InventoryDrug::where('room_id', $clinicRoom->id)->with('drug')->get();
         $products = Product::all();
         $drugs = Drug::all();

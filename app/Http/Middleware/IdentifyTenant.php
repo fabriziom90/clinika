@@ -17,10 +17,15 @@ class IdentifyTenant
 
     public function handle(Request $request, Closure $next): Response
     {
+
         $clinic = $this->tenantResolver->resolve($request);
 
         if (! $clinic) {
             return $next($request);
+        }
+
+        if ($clinic->trashed() || ! $clinic->active) {
+            abort(403, 'La clinica non è più attiva.');
         }
 
         $this->tenantDatabaseService->connect($clinic);

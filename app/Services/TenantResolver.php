@@ -19,8 +19,9 @@ class TenantResolver
 
         $subdomain = $parts[0];
 
-        return Clinic::where('slug', $subdomain)
-            ->where('active', true)
+        return Clinic::on('central')
+            ->withTrashed()
+            ->where('slug', $subdomain)
             ->first();
     }
 }
