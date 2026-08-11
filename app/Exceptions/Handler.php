@@ -59,8 +59,45 @@ class Handler extends ExceptionHandler
                 'message' => 'Pagina non trovata.',
             ])->toResponse($request)->setStatusCode(404);
         }
-        // }
+        // 419 - Page Expired
+        if ($exception instanceof \Symfony\Component\HttpKernel\Exception\HttpException &&
+            $exception->getStatusCode() === 419) {
 
-        return parent::render($request, $exception);
+            return Inertia::render('Errors/419', [
+                'status' => 419,
+                'message' => 'La sessione è scaduta o la richiesta non è più valida.',
+            ])->toResponse($request)->setStatusCode(419);
+        }
+
+        // 429 - Too Many Requests
+        if ($exception instanceof \Symfony\Component\HttpKernel\Exception\HttpException &&
+            $exception->getStatusCode() === 429) {
+
+            return Inertia::render('Errors/429', [
+                'status' => 429,
+                'message' => 'Hai effettuato troppe richieste in un breve periodo di tempo.',
+            ])->toResponse($request)->setStatusCode(429);
+        }
+
+        // 503 - Service Unavailable
+        if ($exception instanceof \Symfony\Component\HttpKernel\Exception\HttpException &&
+            $exception->getStatusCode() === 503) {
+
+            return Inertia::render('Errors/503', [
+                'status' => 503,
+                'message' => 'Clinika non è momentaneamente disponibile.',
+            ])->toResponse($request)->setStatusCode(503);
+        }
+
+        // 500 - Internal Server Error
+        if (app()->environment('local')) {
+            return parent::render($request, $exception);
+        }
+
+        return Inertia::render('Errors/500', [
+            'status' => 500,
+            'message' => 'Si è verificato un errore durante l\'elaborazione della richiesta.',
+        ])->toResponse($request)->setStatusCode(500);
+
     }
 }
