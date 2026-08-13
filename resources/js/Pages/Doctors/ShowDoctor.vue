@@ -12,7 +12,8 @@ const props = defineProps({
     nurses: Array,
     nationalities: Array,
     patients: Array,
-    userIsAdmin: Boolean
+    userIsAdmin: Boolean,
+    userCanCreateAppointment: Boolean
 });
 
 const detailsOpen = ref(false);
@@ -137,7 +138,7 @@ const showDetail = () => detailsOpen.value = !detailsOpen.value;
                 <div class="col-12 col-md-7">
                     <Calendar
                         :appointments="doctor.appointments"
-                        :userIsAdmin="userIsAdmin"
+                        :userCanCreateAppointment="userCanCreateAppointment"
                         :doctors="doctors"
                         :nurses="nurses"
                         :patients="patients"

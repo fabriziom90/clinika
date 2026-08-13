@@ -15,10 +15,29 @@ class CentralUser extends Authenticatable
     protected $table = 'users';
 
     protected $fillable = [
-        'name', 'email', 'password', 'is_superadmin',
+        'name', 'email', 'email_hash', 'password', 'is_superadmin',
     ];
 
     protected $hidden = ['password', 'remember_token'];
+
+    protected $casts = [
+        'name' => 'encrypted',
+        'email' => 'encrypted',
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (CentralUser $user) {
+            if ($user->isDirty('email') && $user->email) {
+                $user->email_hash = hash(
+                    'sha256',
+                    mb_strtolower(trim($user->email))
+                );
+            }
+        });
+    }
 
     protected function casts(): array
     {

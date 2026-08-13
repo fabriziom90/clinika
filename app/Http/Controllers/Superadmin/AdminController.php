@@ -93,7 +93,7 @@ class AdminController extends Controller
 
         $this->tenantDatabaseService->connect($clinic);
 
-        if (User::where('email', $formData['email'])->exists()) {
+        if (User::where('email_hash', hash('sha256', mb_strtolower(trim($formData['email']))))->exists()) {
             return back()
                 ->withErrors([
                     'email' => 'Esiste già un utente con questo indirizzo email nella clinica selezionata.',
@@ -205,7 +205,7 @@ class AdminController extends Controller
         $user = User::role('admin')->findOrFail($admin);
 
         if (
-            User::where('email', $formData['email'])
+            User::where('email_hash', hash('sha256', mb_strtolower(trim($formData['email']))))
                 ->where('id', '!=', $user->id)
                 ->exists()
         ) {

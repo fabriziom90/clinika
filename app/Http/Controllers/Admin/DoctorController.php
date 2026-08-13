@@ -107,6 +107,7 @@ class DoctorController extends Controller
             'address' => $form_data['address'],
             'phone' => $form_data['phone'],
             'genre' => $form_data['genre'],
+            'cap' => $form_data['zip_code'],
             'pec' => $form_data['pec'] ?? null,
             'specialty_id' => $form_data['specialty_id'],
             'nationality_id' => $form_data['nationality_id'],
@@ -168,7 +169,7 @@ class DoctorController extends Controller
 
         app(\App\Observers\DoctorObserver::class)->viewed($doctor);
 
-        return Inertia::render('Doctors/ShowDoctor', ['doctor' => $doctor, 'doctors' => $doctors, 'patients' => $patients, 'nurses' => $nurses, 'nationalities' => $nationalities, 'userIsAdmin' => $user->hasRole('Admin')]);
+        return Inertia::render('Doctors/ShowDoctor', ['doctor' => $doctor, 'doctors' => $doctors, 'patients' => $patients, 'nurses' => $nurses, 'nationalities' => $nationalities, 'userIsAdmin' => $user->hasRole('Admin'), 'userCanCreateAppointment' => $user->can('appointment.create')]);
     }
 
     /**
@@ -221,6 +222,7 @@ class DoctorController extends Controller
             'address' => $form_data['address'],
             'phone' => $form_data['phone'],
             'genre' => $form_data['genre'],
+            'cap' => $form_data['zip_code'],
             'pec' => $form_data['pec'] ?? null,
             'specialty_id' => $form_data['specialty_id'],
             'nationality_id' => $form_data['nationality_id'],

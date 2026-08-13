@@ -32,7 +32,7 @@ const { user, hasPermission, hasRole } = useConfigStore()
             baseRoute="admin.patients"
             :editableColumns="[]"
         />
-        <PatientSearch v-else-if="hasRole('doctor')" />
+        <PatientSearch v-else />
     </AuthenticatedLayout>
 </template>
 <style lang="scss" scoped>

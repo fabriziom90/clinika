@@ -28,6 +28,7 @@ class User extends Authenticatable implements AuditableContract
         'username',
         'password',
         'email',
+        'email_hash',
     ];
 
     protected $dontKeep = ['password', 'email', 'remember_token'];
@@ -48,6 +49,9 @@ class User extends Authenticatable implements AuditableContract
      * @var array<string, string>
      */
     protected $casts = [
+        'name' => 'encrypted',
+        'surname' => 'encrypted',
+        'email' => 'encrypted',
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
@@ -62,6 +66,18 @@ class User extends Authenticatable implements AuditableContract
         }
 
         return $data;
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (User $user) {
+            if ($user->isDirty('email') && $user->email) {
+                $user->email_hash = hash(
+                    'sha256',
+                    mb_strtolower(trim($user->email))
+                );
+            }
+        });
     }
 
     public function doctor()

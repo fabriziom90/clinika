@@ -17,6 +17,8 @@ const props = defineProps({
     appointments: Array,
     doctor: Object,
     doctors: Array,
+    nurse: Object,
+    nurses: Array,
     patients: Array,
     nurses: Array,
     nationalities: Array,
@@ -72,14 +74,14 @@ const formAppointment = useForm({
 });
 
 onMounted(() => {
-    appointmentsStore.setAppointments(props.appointments);
+    appointmentsStore.setAppointments(props.appointments ?? []);
 
 });
 
 // computed property to show events in calendar
 const calendarEvents = computed(() => {
 
-    return appointmentsStore.items.map((appointment) => ({
+    return (appointmentsStore.items ?? []).map((appointment) => ({
         id: appointment.id,
         start: isoToLocalDate(appointment.start_time),
         end: isoToLocalDate(appointment.end_time),

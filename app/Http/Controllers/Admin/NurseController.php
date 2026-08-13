@@ -80,14 +80,13 @@ class NurseController extends Controller
             ->firstOrFail();
 
         $password = Str::random(12);
-        $user = [
+
+        $newUser = User::create([
             'name' => $form_data['name'],
             'surname' => $form_data['surname'],
             'email' => $form_data['email'],
             'password' => Hash::make($password),
-        ];
-
-        $newUser = User::create($user);
+        ]);
         $newUser->assignRole('nurse');
 
         $nurse = Nurse::create([
@@ -101,6 +100,7 @@ class NurseController extends Controller
             'phone' => $form_data['phone'],
             'genre' => $form_data['genre'],
             'pec' => $form_data['pec'] ?? null,
+            'cap' => $form_data['zip_code'],
             'nationality_id' => $form_data['nationality_id'],
         ]);
 
@@ -136,7 +136,13 @@ class NurseController extends Controller
      */
     public function show(Nurse $nurse)
     {
-        $nurse = Nurse::with(['user', 'nationality'])->findOrFail($nurse->id);
+        $nurse = Nurse::with([
+            'user',
+            'nationality',
+            'appointments.service',
+            'appointments.patient',
+            'appointments.doctor.user',
+        ])->findOrFail($nurse->id);
 
         app(\App\Observers\NurseObserver::class)->viewed($nurse);
 
@@ -178,6 +184,7 @@ class NurseController extends Controller
             'phone' => $form_data['phone'],
             'genre' => $form_data['genre'],
             'pec' => $form_data['pec'] ?? null,
+            'cap' => $form_data['zip_code'],
             'nationality_id' => $form_data['nationality_id'],
         ]);
 

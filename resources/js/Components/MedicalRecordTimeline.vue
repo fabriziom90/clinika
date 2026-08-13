@@ -35,8 +35,6 @@ const appointments = ref([...props.patient.appointments]);
         :patient="patient" :user="user" />
     </div>
 
-    <!-- Modal per creare/modificare entry -->
-
   </div>
 </template>
 

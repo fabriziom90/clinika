@@ -81,14 +81,13 @@ class SecretaryController extends Controller
             ->firstOrFail();
 
         $password = Str::random(12);
-        $user = [
+
+        $newUser = User::create([
             'name' => $form_data['name'],
             'surname' => $form_data['surname'],
             'email' => $form_data['email'],
             'password' => Hash::make($password),
-        ];
-
-        $newUser = User::create($user);
+        ]);
         $newUser->assignRole('secretary');
 
         $employeeCode = $codeGenerator->generate(Secretary::class);
@@ -140,7 +139,7 @@ class SecretaryController extends Controller
     {
         $secretary->load('user', 'nationality');
 
-        app(\App\Observers\SecretaryObserver::class)->show($secretary);
+        app(\App\Observers\SecretaryObserver::class)->viewed($secretary);
 
         return Inertia::render('Secretaries/ShowSecretary', [
             'secretary' => $secretary,

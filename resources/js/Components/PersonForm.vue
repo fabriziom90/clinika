@@ -55,6 +55,7 @@ const form = useForm({
 });
 
 onMounted(() => {
+
     if (!props.person) return;
     const person = props.person;
 
@@ -82,7 +83,7 @@ onMounted(() => {
     form.birthday = person.birthday ?? "";
     form.birth_city = person.birth_city ?? "";
     form.city = person.city ?? "";
-    form.zip_code = person.zip_code ?? "";
+    form.zip_code = person.zip_code ?? (person.cap ?? "");
     form.address = person.address ?? "";
     form.nationality_id = person.nationality_id ?? "";
     form.personal_code = person.personal_code ?? "";
@@ -96,6 +97,8 @@ onMounted(() => {
     if (props.formType === 'patient') {
         form.reminder_types = person.reminder_types ? person.reminder_types.map(reminder => reminder.id) : []
     }
+
+    console.log(form);
 });
 
 // filter functions

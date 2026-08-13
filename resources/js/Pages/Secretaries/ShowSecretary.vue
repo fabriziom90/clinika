@@ -16,7 +16,7 @@ const props = defineProps({
 </script>
 <template lang="">
     <Head title="Dettaglio segretaria"></Head>
-    <AuthenticatedLayout section="doctors">
+    <AuthenticatedLayout section="secretaries">
         <div class="container-fluid">
             <div class="row gy-5">
                 <div class="col-12">

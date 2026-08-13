@@ -3,30 +3,19 @@ import { Head, Link } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { formatDate } from "@/utilities/formatDateFunction";
 import Calendar from "@/Components/Calendar.vue";
+
 const props = defineProps({
+    appointments: Array,
+    doctor: Object,
     nurse: Object,
+    doctors: Array,
+    patients: Array,
+    nurses: Array,
+    nationalities: Array,
+    userCanCreateAppointment: Boolean,
 });
 
-const appointments = [
-    {
-        title: "Visita Mario Rossi",
-        start: "2025-02-10 10:00",
-        end: "2025-02-10 10:30",
-        color: "#4CAF50",
-    },
-    {
-        title: "Controllo diabetico",
-        start: "2025-02-12",
-    },
-];
 
-const handleEventClick = (event) => {
-    console.log("Hai cliccato l’appuntamento:", event);
-};
-
-const handleDateClick = (date) => {
-    console.log("Hai cliccato la data:", date);
-};
 </script>
 <template lang="">
     <Head title="Dettaglio infermiere"></Head>
@@ -139,9 +128,10 @@ const handleDateClick = (date) => {
                 </div>
                 <div class="col-12 col-md-8">
                     <Calendar
-                        :events="appointments"
-                        @event-click="handleEventClick"
-                        @date-click="handleDateClick"
+                        :appointments="nurse.appointments"
+                        :nurse="nurse"
+                        :nurses="[nurse]"
+                        :userCanCreateAppointment="false"
                     />
                 </div>
             </div>

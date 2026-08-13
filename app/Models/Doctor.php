@@ -10,7 +10,7 @@ class Doctor extends Model implements AuditableContract
 {
     use Auditable;
 
-    protected $dontKeep = ['personal_code', 'vat', 'birthday', 'birth_city', 'city', 'address', 'phone', 'genre', 'pec'];
+    protected $dontKeep = ['personal_code', 'vat', 'birthday', 'birth_city', 'city', 'address', 'cap', 'phone', 'genre', 'pec'];
 
     protected $fillable = [
         'user_id',
@@ -23,8 +23,23 @@ class Doctor extends Model implements AuditableContract
         'address',
         'phone',
         'pec',
+        'cap',
         'genre',
         'nationality_id',
+    ];
+
+    protected $casts = [
+        'personal_code' => 'encrypted',
+        'vat' => 'encrypted',
+        'birthday' => 'encrypted',
+        'birth_city' => 'encrypted',
+        'city' => 'encrypted',
+        'address' => 'encrypted',
+        'cap' => 'encrypted',
+        'province' => 'encrypted',
+        'phone' => 'encrypted',
+        'pec' => 'encrypted',
+        'genre' => 'encrypted',
     ];
 
     public function user()

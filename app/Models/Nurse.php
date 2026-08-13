@@ -22,8 +22,22 @@ class Nurse extends Model implements AuditableContract
         'address',
         'phone',
         'pec',
+        'cap',
         'genre',
         'nationality_id',
+    ];
+
+    protected $casts = [
+        'personal_code' => 'encrypted',
+        'vat' => 'encrypted',
+        'birthday' => 'encrypted',
+        'birth_city' => 'encrypted',
+        'city' => 'encrypted',
+        'address' => 'encrypted',
+        'cap' => 'encrypted',
+        'phone' => 'encrypted',
+        'pec' => 'encrypted',
+        'genre' => 'encrypted',
     ];
 
     public function user()

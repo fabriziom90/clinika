@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class UpdateDoctorRequest extends FormRequest
 {
@@ -22,17 +21,21 @@ class UpdateDoctorRequest extends FormRequest
             'city' => 'required|string|max:30',
             'address' => 'required|string|max:70',
             'phone' => 'required|string|max:15',
-            'email' => [
-                'required',
-                'string',
-                'max:70',
-                Rule::unique('users', 'email')->ignore($this->route('doctor')->user_id),
-            ],
+            function ($attribute, $value, $fail) {
+                $emailHash = hash('sha256', mb_strtolower(trim($value)));
+
+                if (\App\Models\User::where('email_hash', $emailHash)
+                    ->where('id', '!=', $this->route('doctor')->user_id)
+                    ->exists()) {
+                    $fail('È già presente un utente con questo indirizzo email');
+                }
+            },
             'genre' => 'required',
             'pec' => 'required',
             'specialty_id' => 'required',
             'nationality_id' => 'required',
             'services' => 'required|array',
+            'zip_code' => 'required|string|max:7',
         ];
     }
 
@@ -45,6 +48,8 @@ class UpdateDoctorRequest extends FormRequest
             'personal_code.size' => 'Il codice fiscale deve essere di :size caratteri',
             'vat.required' => 'La partita iva è obbligatoria',
             'vat.size' => 'La partita iva deve essere di :size caratteri',
+            'zip_code.required' => 'Il CAP è obbligatorio',
+            'zip_code.max' => 'Il CAP deve essere al massimo di :max caratteri',
             'birthday.required' => 'La data di nascita è obbligatorio',
             'birthday.date' => 'La data di nascita deve essere in un formato valido',
             'birth_city.required' => 'La città di nascita è obbligatoria',
@@ -57,7 +62,6 @@ class UpdateDoctorRequest extends FormRequest
             'phone.max' => 'Il numero di telefono deve essere al massimo di :max caratteri',
             'email.required' => 'L\'indirizzo email p obbligatorio',
             'email.max' => 'L\'indirizzo email deve essere al massimo di :max caratteri',
-            'email.unique' => 'E\' già presente un utente con questo indirizzo email',
             'genre.required' => 'Il genere dell\'utente è obbligatorio',
             'pec.required' => 'La pec è obbligatoria',
             'nationality_id' => 'La nazionalità è obbligatoria',

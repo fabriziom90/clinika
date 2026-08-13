@@ -58,7 +58,10 @@ class DoctorObserver
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
             'old_values' => [],
-            'new_values' => $doctor->toArray(),
+            'new_values' => [
+                'id' => $doctor->id,
+                'user_id' => $doctor->user_id,
+            ],
         ]);
     }
 

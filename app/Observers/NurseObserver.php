@@ -58,7 +58,10 @@ class NurseObserver
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
             'old_values' => [],
-            'new_values' => $nurse->toArray(),
+            'new_values' => [
+                'id' => $nurse->id,
+                'user_id' => $nurse->user_id,
+            ],
         ]);
     }
 

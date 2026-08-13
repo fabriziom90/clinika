@@ -45,8 +45,18 @@ class LoginRequest extends FormRequest
             ? 'web'
             : 'superadmin';
 
+        $emailHash = hash(
+            'sha256',
+            mb_strtolower(trim($this->string('email')))
+        );
+
+        $credentials = [
+            'email_hash' => $emailHash,
+            'password' => $this->string('password'),
+        ];
+
         if (! Auth::guard($guard)->attempt(
-            $this->only('email', 'password'),
+            $credentials,
             $this->boolean('remember')
         )) {
             RateLimiter::hit($this->throttleKey());

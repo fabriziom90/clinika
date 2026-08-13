@@ -31,9 +31,20 @@ class StoreNurseRequest extends FormRequest
             'city' => 'required|string|max:30',
             'address' => 'required|string|max:70',
             'phone' => 'required|string|max:15',
-            'email' => 'required|string|max:70',
+            'email' => [
+                'required',
+                'string',
+                'max:70',
+                function ($attribute, $value, $fail) {
+                    $emailHash = hash('sha256', mb_strtolower(trim($value)));
+
+                    if (\App\Models\User::where('email_hash', $emailHash)->exists()) {
+                        $fail('È già presente un utente con questo indirizzo email');
+                    }
+                }, ],
             'genre' => 'required',
             'nationality_id' => 'required',
+            'pec' => 'required|string|max:70',
         ];
     }
 
@@ -60,6 +71,8 @@ class StoreNurseRequest extends FormRequest
             'email.max' => 'L\'indirizzo email deve essere al massimo di :max caratteri',
             'genre.required' => 'Il genere dell\'utente è obbligatorio',
             'nationality_id' => 'La nazionalità è obbligatoria',
+            'pec.required' => 'La PEC è obbligatoria',
+            'pec.max' => 'La PEC deve essere al massimo di :max caratteri',
         ];
     }
 }

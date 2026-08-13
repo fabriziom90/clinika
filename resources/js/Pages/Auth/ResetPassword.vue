@@ -18,7 +18,15 @@ const form = useForm({
 
 const submit = () => {
     form.post(route("password.store"), {
-        onFinish: () => form.reset("password", "password_confirmation"),
+        onError: (errors) => {
+            console.log("Reset password errors:", errors);
+        },
+        onSuccess: () => {
+            console.log("Password modificata");
+        },
+        onFinish: () => {
+            form.reset("password", "password_confirmation");
+        },
     });
 };
 </script>
@@ -42,15 +50,25 @@ const submit = () => {
 
                                     <input id="password" type="password" class="form-control" v-model="form.password"
                                         required autocomplete="new-password" />
+                                    <div v-if="form.errors.password" class="text-danger">
+                                        {{ form.errors.password }}
+                                    </div>
                                 </div>
+
 
                                 <div class="form-group mt-3">
                                     <label for="password_confirmation" class="form-label">Conferma password</label>
 
                                     <input id="password_confirmation" type="password" class="form-control"
                                         v-model="form.password_confirmation" required autocomplete="new-password" />
+                                    <div v-if="form.errors.password_confirmation" class="text-danger small mt-1">
+                                        {{ form.errors.password_confirmation }}
+                                    </div>
                                 </div>
 
+                                <div v-if="form.errors.token" class="text-danger">
+                                    {{ form.errors.token }}
+                                </div>
                                 <div class="flex items-center justify-end mt-4">
                                     <button class="main-button" :disabled="form.processing">
                                         Reset Password
