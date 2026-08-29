@@ -55,7 +55,9 @@ class AuthenticatedSessionController extends Controller
         ? 'web'
         : 'superadmin';
 
+        $before = Auth::guard($guard)->check();
         Auth::guard($guard)->logout();
+        $after = Auth::guard($guard)->check();
 
         $request->session()->invalidate();
 

@@ -8,11 +8,9 @@ use Spatie\Permission\Models\Role;
 
 class RoleSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
+        $guard = 'web';
 
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
@@ -54,39 +52,21 @@ class RoleSeeder extends Seeder
         ];
 
         // === CREAZIONE PERMESSI ===
-        $permissions = [];
-
         foreach ($entities as $entityKey => $entityLabel) {
             foreach ($actions as $actionKey => $actionLabel) {
-                $permissions[] = [
-                    'name' => "{$entityKey}.{$actionKey}",
-                    'display_name' => "{$actionLabel} {$entityLabel}",
-                ];
+                Permission::updateOrCreate(
+                    [
+                        'name' => "{$entityKey}.{$actionKey}",
+                        'guard_name' => $guard,
+                    ],
+                    [
+                        'display_name' => "{$actionLabel} {$entityLabel}",
+                    ]
+                );
             }
         }
 
-        foreach ($permissions as $perm) {
-            Permission::updateOrCreate(
-                ['name' => $perm['name']],
-                ['display_name' => $perm['display_name']]
-            );
-        }
-
-        // === CREAZIONE RUOLI ===
-        $roles = [
-            ['name' => 'admin', 'display_name' => 'Admin'],
-            ['name' => 'doctor', 'display_name' => 'Medico'],
-            ['name' => 'nurse', 'display_name' => 'Infermiere'],
-            ['name' => 'secretary', 'display_name' => 'Segretaria'],
-        ];
-
-        foreach ($roles as $role) {
-            Role::updateOrCreate(
-                ['name' => $role['name']],
-                ['display_name' => $role['display_name']]
-            );
-        }
-
+        // === PERMESSI EXTRA ===
         $extraPermissions = [
             [
                 'name' => 'invoices.change-status',
@@ -100,21 +80,48 @@ class RoleSeeder extends Seeder
 
         foreach ($extraPermissions as $permission) {
             Permission::updateOrCreate(
-                ['name' => $permission['name']],
-                ['display_name' => $permission['display_name']]
+                [
+                    'name' => $permission['name'],
+                    'guard_name' => $guard,
+                ],
+                [
+                    'display_name' => $permission['display_name'],
+                ]
             );
         }
 
-        // === ASSEGNAZIONE PERMESSI AI RUOLI ===
-        $admin = Role::findByName('admin');
-        $doctor = Role::findByName('doctor');
-        $nurse = Role::findByName('nurse');
-        $secretary = Role::findByName('secretary');
+        // === CREAZIONE RUOLI ===
+        $roles = [
+            ['name' => 'admin', 'display_name' => 'Admin'],
+            ['name' => 'doctor', 'display_name' => 'Medico'],
+            ['name' => 'nurse', 'display_name' => 'Infermiere'],
+            ['name' => 'secretary', 'display_name' => 'Segretaria'],
+        ];
 
-        // amministratore
-        $admin->syncPermissions(Permission::all());
+        foreach ($roles as $role) {
+            Role::updateOrCreate(
+                [
+                    'name' => $role['name'],
+                    'guard_name' => $guard,
+                ],
+                [
+                    'display_name' => $role['display_name'],
+                ]
+            );
+        }
 
-        // Medico
+        // === RECUPERO RUOLI ===
+        $admin = Role::findByName('admin', $guard);
+        $doctor = Role::findByName('doctor', $guard);
+        $nurse = Role::findByName('nurse', $guard);
+        $secretary = Role::findByName('secretary', $guard);
+
+        // === AMMINISTRATORE ===
+        $admin->syncPermissions(
+            Permission::where('guard_name', $guard)->get()
+        );
+
+        // === MEDICO ===
         $doctor->syncPermissions([
             'patient.view',
             'appointment.view',
@@ -124,13 +131,10 @@ class RoleSeeder extends Seeder
             'medical-entry.view',
             'medical-entry.create',
             'medical-entry.update',
-
             'medical-attachment.create',
             'medical-attachment.view',
-
             'prescription.create',
             'prescription.view',
-
             'vital-parameter.create',
             'vital-parameter.view',
             'patient-health-history.create',
@@ -138,11 +142,12 @@ class RoleSeeder extends Seeder
             'patient-health-history.update',
         ]);
 
-        // Segretaria
-        $allPermissions = Permission::pluck('name')->toArray();
+        // === SEGRETARIA ===
+        $allPermissions = Permission::where('guard_name', $guard)
+            ->pluck('name')
+            ->toArray();
 
-        // permessi da escludere
-        $excludedPermissions = Permission::whereIn('name', [
+        $excludedPermissions = [
             'medical-record.create',
             'medical-record.update',
             'medical-record.delete',
@@ -171,14 +176,15 @@ class RoleSeeder extends Seeder
             'audit-logs.create',
             'audit-logs.update',
             'audit-logs.delete',
-        ])->pluck('name')->toArray();
+        ];
 
-        // differenza
-        $permissions = array_values(array_diff($allPermissions, $excludedPermissions));
+        $secretaryPermissions = array_values(
+            array_diff($allPermissions, $excludedPermissions)
+        );
 
-        $secretary->syncPermissions($permissions);
+        $secretary->syncPermissions($secretaryPermissions);
 
-        // Infermiere
+        // === INFERMIERE ===
         $nurse->syncPermissions([
             'patient.view',
             'appointment.view',
@@ -192,5 +198,6 @@ class RoleSeeder extends Seeder
             'patient-health-history.view',
         ]);
 
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
     }
 }

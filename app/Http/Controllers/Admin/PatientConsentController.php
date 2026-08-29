@@ -111,7 +111,7 @@ class PatientConsentController extends Controller
             ]);
         }
 
-        app(\App\Observers\PatientObserver::class)->created();
+        app(\App\Observers\PatientConsentObserver::class)->created();
 
         return redirect()
             ->route('admin.patient.consents.index', $patient)
@@ -165,7 +165,6 @@ class PatientConsentController extends Controller
         if ($request->hasFile('document')) {
             $pdfPath = $request->file('document')->store(
                 'patient-consents',
-                'public'
             );
         }
 
@@ -178,7 +177,7 @@ class PatientConsentController extends Controller
             'pdf_path' => $pdfPath,
         ]);
 
-        app(\App\Observers\PatientObserver::class)->updated();
+        app(\App\Observers\PatientConsentObserver::class)->created();
 
         return redirect()
             ->route('admin.patient.consents.index', $patient)

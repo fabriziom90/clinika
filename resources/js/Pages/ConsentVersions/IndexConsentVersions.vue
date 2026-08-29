@@ -1,20 +1,20 @@
 <script setup>
-    import { Head, Link } from '@inertiajs/vue3';
-    import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-    import Table from '@/Components/Table.vue';
-    import { usePage } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import Table from '@/Components/Table.vue';
+import { usePage } from '@inertiajs/vue3';
 
-    const page = usePage();
+const page = usePage();
 
-    const props = defineProps({
-        consentType: Object,
-        consentVersions: Array,
-        columns: Object
-    })
+const props = defineProps({
+    consentType: Object,
+    consentVersions: Array,
+    columns: Object
+})
 </script>
 <template lang="">
     <Head :title="`Versioni ${consentType.name}`" />
-    <AuthenticatedLayout section="consentversions">
+    <AuthenticatedLayout section="consenttypes">
         <div class="row">
 
             <div class="col-12">
@@ -38,6 +38,4 @@
         </div>
     </AuthenticatedLayout>
 </template>
-<style lang="scss" scoped>
-
-</style>
+<style lang="scss" scoped></style>

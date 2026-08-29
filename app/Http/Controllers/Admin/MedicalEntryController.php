@@ -14,6 +14,11 @@ use OwenIt\Auditing\Models\Audit;
 
 class MedicalEntryController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(\App\Models\MedicalEntry::class, 'medical-entry');
+    }
+
     /**
      * Display a listing of the resource.
      */

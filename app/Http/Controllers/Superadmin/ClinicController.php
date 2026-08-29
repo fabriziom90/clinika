@@ -108,6 +108,7 @@ class ClinicController extends Controller
             }
 
             $validated['slug'] = $slug;
+            $validated['database'] = 'clinika_'.$validated['database'];
 
             $clinic = Clinic::create($validated);
 
@@ -120,6 +121,36 @@ class ClinicController extends Controller
             if ($exitCode !== 0) {
                 throw new \RuntimeException('Impossibile eseguire le migration del database tenant.');
             }
+
+            Artisan::call('db:seed', [
+                '--class' => 'RoleSeeder',
+                '--database' => 'tenant',
+                '--force' => true,
+            ]);
+
+            Artisan::call('db:seed', [
+                '--class' => 'NationalitySeeder',
+                '--database' => 'tenant',
+                '--force' => true,
+            ]);
+
+            Artisan::call('db:seed', [
+                '--class' => 'ReminderTypeSeeder',
+                '--database' => 'tenant',
+                '--force' => true,
+            ]);
+
+            Artisan::call('db:seed', [
+                '--class' => 'ConsentTypeSeeder',
+                '--database' => 'tenant',
+                '--force' => true,
+            ]);
+
+            Artisan::call('db:seed', [
+                '--class' => 'SpecialtySeeder',
+                '--database' => 'tenant',
+                '--force' => true,
+            ]);
 
             return redirect()
                 ->route('superadmin.clinics.index')

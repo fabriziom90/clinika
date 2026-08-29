@@ -77,7 +77,7 @@ const generatePdf = () => {
         <Link v-if="actions.show" class="show-button" :href="getActionUrl('show')">
             <i class="fas fa-eye"></i>
         </Link>
-
+        <!-- Inline editing -->
         <template v-if="editableColumns.length && editingItem !== item.id">
             <button class="edit-button" @click="$emit('startEdit', item)">
                 <i class="fas fa-edit"></i>

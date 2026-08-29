@@ -81,5 +81,15 @@ export const tableConfig = {
                 consent: item.id
             })
         }
-    }
+    },
+    "admin.specialties": {
+        actions: {
+            show: false,
+            edit: true,
+            delete: true,
+        },
+        routes: {
+            edit: "admin.specialties.edit",
+        },
+    },
 };

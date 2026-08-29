@@ -65,7 +65,7 @@ const isRouteActive = (routeName) => currentRouteName.value === routeName;
         </div>
 
         <div id="bottom-sidebar">
-            <Link :href="route('profile.show')" class="button-profile">
+            <Link :href="route('profile.edit')" class="button-profile">
                 <i class="fas fa-user fa-2xl me-3"></i>
                 Benvenuto<br />
                 {{ page.props.auth.user.name }}<br />

@@ -15,20 +15,20 @@ const form = useForm({
 });
 
 const loading = ref(false);
-const error = ref(null);
+const errorMessage = ref("");
 
 const submit = () => {
     loading.value = true;
-    error.value = null;
+
 
     form.post("/login", {
         onFinish: () => {
             loading.value = false;
             form.reset("password");
         },
-        onError: (error) => {
-            error.value =
-                error.username || error.password || "Credenziali non valide.";
+        onError: (errors) => {
+            console.log(errors);
+            errorMessage.value = errors.email || "Credenziali non valide.";
         },
         onSuccess: () => {
             console.log("Login avvenuto");
@@ -70,7 +70,7 @@ const submit = () => {
                                 </button>
                             </div>
 
-                            <p v-if="error" class="error">{{ error }}</p>
+                            <p v-if="errorMessage != ''" class="error">{{ errorMessage }}</p>
                         </form>
                     </div>
                 </div>

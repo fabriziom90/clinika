@@ -21,15 +21,20 @@ class UpdateDoctorRequest extends FormRequest
             'city' => 'required|string|max:30',
             'address' => 'required|string|max:70',
             'phone' => 'required|string|max:15',
-            function ($attribute, $value, $fail) {
-                $emailHash = hash('sha256', mb_strtolower(trim($value)));
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    $emailHash = hash('sha256', mb_strtolower(trim($value)));
 
-                if (\App\Models\User::where('email_hash', $emailHash)
-                    ->where('id', '!=', $this->route('doctor')->user_id)
-                    ->exists()) {
-                    $fail('È già presente un utente con questo indirizzo email');
-                }
-            },
+                    if (\App\Models\User::where('email_hash', $emailHash)
+                        ->where('id', '!=', $this->route('doctor')->user_id)
+                        ->exists()) {
+                        $fail('È già presente un utente con questo indirizzo email');
+                    }
+                },
+            ],
             'genre' => 'required',
             'pec' => 'required',
             'specialty_id' => 'required',
