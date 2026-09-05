@@ -51,7 +51,7 @@ class MedicalEntryPolicy
      */
     public function create(User $user): bool
     {
-        return $user->doctor;
+        return $user->doctor !== null;
     }
 
     /**
@@ -59,7 +59,7 @@ class MedicalEntryPolicy
      */
     public function update(User $user, MedicalEntry $entry): bool
     {
-        return $user->doctor && $entry->doctor_id === $user->doctor->id;
+        return $user->doctor !== null && $entry->doctor_id === $user->doctor->id;
     }
 
     /**

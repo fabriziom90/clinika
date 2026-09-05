@@ -31,10 +31,12 @@ class Patient extends Model implements AuditableContract
         'surname' => 'encrypted',
         'personal_code' => 'encrypted',
         'birth_city' => 'encrypted',
+        'birthday' => 'encrypted',
         'city' => 'encrypted',
         'address' => 'encrypted',
         'phone' => 'encrypted',
         'email' => 'encrypted',
+        'genre' => 'encrypted',
         'zip_code' => 'encrypted',
 
     ];

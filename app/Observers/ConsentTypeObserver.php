@@ -2,10 +2,9 @@
 
 namespace App\Observers;
 
+use App\Models\Audit;
 use App\Models\ConsentType;
 use Illuminate\Support\Facades\Auth;
-use OwenIt\Auditing\Models\Audit;
-
 
 class ConsentTypeObserver
 {

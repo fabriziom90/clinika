@@ -62,7 +62,9 @@ class NurseController extends Controller
     {
         $nationalities = Nationality::all();
 
-        return Inertia::render('Nurses/CreateNurse', ['nationalities' => $nationalities]);
+        return Inertia::render('Nurses/CreateNurse', [
+            'nationalities' => $nationalities,
+        ]);
     }
 
     /**
@@ -72,8 +74,7 @@ class NurseController extends Controller
     {
         $form_data = $request->validated();
 
-        $clinicSlug = $request->getHost();
-        $clinicSlug = explode('.', $clinicSlug)[0];
+        $clinicSlug = explode('.', $request->getHost())[0];
 
         $clinic = Clinic::on('central')
             ->where('slug', $clinicSlug)
@@ -87,6 +88,7 @@ class NurseController extends Controller
             'email' => $form_data['email'],
             'password' => Hash::make($password),
         ]);
+
         $newUser->assignRole('nurse');
 
         $nurse = Nurse::create([
@@ -119,9 +121,9 @@ class NurseController extends Controller
                 'created_at' => now(),
             ]);
 
-        app(\App\Observers\NurseObserver::class)->created($nurse);
-
-        Mail::to($newUser->email)->send(new PersonSetPasswordMail($newUser, $clinic, $token));
+        Mail::to($newUser->email)->send(
+            new PersonSetPasswordMail($newUser, $clinic, $token)
+        );
 
         return redirect()->route('admin.nurses.index')->with([
             'toast' => [
@@ -144,9 +146,9 @@ class NurseController extends Controller
             'appointments.doctor.user',
         ])->findOrFail($nurse->id);
 
-        app(\App\Observers\NurseObserver::class)->viewed($nurse);
-
-        return Inertia::render('Nurses/ShowNurse', ['nurse' => $nurse]);
+        return Inertia::render('Nurses/ShowNurse', [
+            'nurse' => $nurse,
+        ]);
     }
 
     /**
@@ -155,9 +157,13 @@ class NurseController extends Controller
     public function edit(Nurse $nurse)
     {
         $nurse->load('user');
+
         $nationalities = Nationality::all();
 
-        return Inertia::render('Nurses/EditNurse', ['nurse' => $nurse, 'nationalities' => $nationalities]);
+        return Inertia::render('Nurses/EditNurse', [
+            'nurse' => $nurse,
+            'nationalities' => $nationalities,
+        ]);
     }
 
     /**
@@ -188,8 +194,6 @@ class NurseController extends Controller
             'nationality_id' => $form_data['nationality_id'],
         ]);
 
-        app(\App\Observers\NurseObserver::class)->updated($nurse);
-
         return redirect()->route('admin.nurses.index')->with([
             'toast' => [
                 'type' => 'success',
@@ -207,8 +211,6 @@ class NurseController extends Controller
 
         $nurse->delete();
 
-        app(\App\Observers\NurseObserver::class)->deleted($nurse);
-
         return redirect()->route('admin.nurses.index')->with([
             'toast' => [
                 'type' => 'success',
@@ -220,6 +222,9 @@ class NurseController extends Controller
     public function sendResetEmail(Request $request, int $id)
     {
         $nurse = Nurse::findOrFail($id);
+
+        $this->authorize('update', $nurse);
+
         $user = $nurse->user;
 
         $clinicSlug = explode('.', $request->getHost())[0];
@@ -243,11 +248,15 @@ class NurseController extends Controller
                 'created_at' => now(),
             ]);
 
-        Mail::to($user->email)->send(new PersonSetPasswordMail($user, $clinic, $token));
+        Mail::to($user->email)->send(
+            new PersonSetPasswordMail($user, $clinic, $token)
+        );
 
-        return back()->with(['toast', [
-            'type' => 'success',
-            'message' => 'Email di impostazione password inviata con successo',
-        ]]);
+        return back()->with([
+            'toast' => [
+                'type' => 'success',
+                'message' => 'Email di impostazione password inviata con successo',
+            ],
+        ]);
     }
 }

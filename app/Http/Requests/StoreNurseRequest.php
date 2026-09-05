@@ -45,6 +45,7 @@ class StoreNurseRequest extends FormRequest
             'genre' => 'required',
             'nationality_id' => 'required',
             'pec' => 'required|string|max:70',
+            'zip_code' => 'required|string|max:5',
         ];
     }
 
@@ -73,6 +74,9 @@ class StoreNurseRequest extends FormRequest
             'nationality_id' => 'La nazionalità è obbligatoria',
             'pec.required' => 'La PEC è obbligatoria',
             'pec.max' => 'La PEC deve essere al massimo di :max caratteri',
+            'zip_code.required' => 'Il cap è obbligatorio',
+            'zip_code.string' => 'Il cap deve essere una stringa valida',
+            'zip_code.max' => 'Il cap deve essere al massimo di :max caratteri',
         ];
     }
 }

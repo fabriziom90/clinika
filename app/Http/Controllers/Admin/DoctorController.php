@@ -272,6 +272,9 @@ class DoctorController extends Controller
     public function sendResetEmail(Request $request, int $id)
     {
         $doctor = Doctor::findOrFail($id);
+
+        $this->authorize('update', $doctor);
+
         $user = $doctor->user;
 
         $clinicSlug = explode('.', $request->getHost())[0];

@@ -464,6 +464,7 @@ class InvoiceController extends Controller
 
     public function changeStatus(ChangeInvoiceStatusRequest $request, Invoice $invoice, InvoicePdfService $pdfService)
     {
+        $this->authorize('changeStatus', $invoice);
 
         $allowedTransitions = [
             'draft' => ['issued', 'cancelled'],

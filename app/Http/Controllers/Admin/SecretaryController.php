@@ -218,6 +218,9 @@ class SecretaryController extends Controller
     public function sendResetEmail(Request $request, int $id)
     {
         $secretary = Secretary::findOrFail($id);
+
+        $this->authorize('update', $secretary);
+
         $user = $secretary->user;
 
         $clinicSlug = explode('.', $request->getHost())[0];
@@ -228,15 +231,10 @@ class SecretaryController extends Controller
 
         DB::connection('tenant')
             ->table('password_reset_tokens')
-            ->where('email', $user->email)
+            ->where('user_id', $user->id)
             ->delete();
 
         $token = Str::random(64);
-
-        DB::connection('tenant')
-            ->table('password_reset_tokens')
-            ->where('user_id', $user->id)
-            ->delete();
 
         DB::connection('tenant')
             ->table('password_reset_tokens')

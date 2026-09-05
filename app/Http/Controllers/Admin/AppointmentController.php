@@ -17,10 +17,10 @@ use Illuminate\Validation\Rules\Enum;
 
 class AppointmentController extends Controller
 {
-    // public function __construct()
-    // {
-    //     $this->authorizeResource(\App\Models\Appointment::class, 'appointment');
-    // }
+    public function __construct()
+    {
+        $this->authorizeResource(\App\Models\Appointment::class, 'appointment');
+    }
 
     /**
      * Display a listing of the resource.
@@ -162,10 +162,7 @@ class AppointmentController extends Controller
 
     public function updateStatus(Request $request, Appointment $appointment)
     {
-        abort_unless(
-            auth()->user()->can('appointment.change-status'),
-            403
-        );
+        $this->authorize('changeStatus', $appointment);
 
         $validated = $request->validate([
             'status' => ['required', new Enum(AppointmentStatus::class)],

@@ -21,27 +21,27 @@ return new class extends Migration
             $table->string('slug')->unique();
 
             // contacts
-            $table->string('email')->nullable();
-            $table->string('phone')->nullable();
+            $table->text('email')->nullable();
+            $table->text('phone')->nullable();
 
             // address
-            $table->string('address')->nullable();
-            $table->string('city')->nullable();
-            $table->string('province')->nullable();
-            $table->string('zip_code')->nullable();
+            $table->text('address')->nullable();
+            $table->text('city')->nullable();
+            $table->text('province')->nullable();
+            $table->text('zip_code')->nullable();
 
             // vat data
-            $table->string('vat_number')->nullable();
-            $table->string('tax_code')->nullable();
+            $table->text('vat_number')->nullable();
+            $table->text('tax_code')->nullable();
 
             // logo
-            $table->string('logo_path')->nullable();
+            $table->text('logo_path')->nullable();
 
             // database tenant
             $table->string('database');
             $table->string('db_host');
             $table->string('db_port')->default('3306');
-            $table->string('db_username');
+            $table->text('db_username');
             $table->text('db_password');
 
             // state

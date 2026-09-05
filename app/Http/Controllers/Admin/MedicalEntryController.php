@@ -16,7 +16,7 @@ class MedicalEntryController extends Controller
 {
     public function __construct()
     {
-        $this->authorizeResource(\App\Models\MedicalEntry::class, 'medical-entry');
+        $this->authorizeResource(\App\Models\MedicalEntry::class, 'medical_entry');
     }
 
     /**

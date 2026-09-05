@@ -13,6 +13,11 @@ use OwenIt\Auditing\Models\Audit;
 
 class ConsentTypeController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(\App\Models\ConsentType::class, 'consentType');
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -34,13 +39,13 @@ class ConsentTypeController extends Controller
             [
                 'consentTypes' => ConsentType::all(),
                 'columns' => [
-                    'id'  => 'ID',
-                    'code'  => 'Codice',
-                    'name'  => 'Nome',
+                    'id' => 'ID',
+                    'code' => 'Codice',
+                    'name' => 'Nome',
                     'acquisition_method' => 'Metodo acquisizione',
                     'is_required' => 'Obbligatorio',
-                    'is_active' => 'Attivo'
-                ]
+                    'is_active' => 'Attivo',
+                ],
             ]);
     }
 
@@ -65,17 +70,17 @@ class ConsentTypeController extends Controller
             'description' => $form_data['description'],
             'acquisition_method' => $form_data['acquisition_method'],
             'is_active' => $form_data['is_active'],
-            'is_required' => $form_data['is_required']
+            'is_required' => $form_data['is_required'],
         ]);
 
         app(\App\Observers\ConsentTypeObserver::class)->created($consentType);
 
         return redirect()
-        ->route('admin.consent-types.index')
-        ->with('toast', [
-            'type' => 'success',
-            'message' => 'Tipologia consenso creata correttamente.',
-        ]);
+            ->route('admin.consent-types.index')
+            ->with('toast', [
+                'type' => 'success',
+                'message' => 'Tipologia consenso creata correttamente.',
+            ]);
     }
 
     /**
@@ -84,6 +89,7 @@ class ConsentTypeController extends Controller
     public function show(ConsentType $consentType)
     {
         app(\App\Observers\ConsentTypeObserver::class)->viewed($consentType);
+
         return Inertia::render('ConsentTypes/ShowConsentType', ['consentType' => $consentType]);
     }
 
@@ -109,7 +115,7 @@ class ConsentTypeController extends Controller
             'acquisition_method' => $form_data['acquisition_method'],
             'description' => $form_data['description'],
             'is_active' => $form_data['is_active'],
-            'is_required' => $form_data['is_required']
+            'is_required' => $form_data['is_required'],
         ]);
 
         app(\App\Observers\ConsentTypeObserver::class)->updated($consentType);
