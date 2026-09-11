@@ -18,24 +18,24 @@ class PatientConsentPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, PatientConsent $patientConsent): bool
+    public function view(User $user): bool
     {
-        if (! $user->can('patient-consent.view')) {
-            return false;
-        }
+        // if (! $user->can('patient-consent.view')) {
+        //     return false;
+        // }
 
-        if ($user->hasRole(['admin', 'secretary'])) {
-            return true;
-        }
+        // if ($user->hasRole(['admin', 'secretary'])) {
+        //     return true;
+        // }
 
-        if ($user->hasRole('doctor')) {
-            return $patientConsent->patient
-                ->doctors()
-                ->whereKey($user->id)
-                ->exists();
-        }
+        // if ($user->doctor) {
+        //     return $user->doctor->appointments()
+        //         ->where('patient_id', $patientConsent->patient_id)
+        //         ->exists();
+        // }
 
-        return false;
+        // return false;
+        return $user->can('patient-consent.view');
     }
 
     /**

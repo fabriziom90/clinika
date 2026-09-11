@@ -3,13 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StorePatientHealtHistoryRequest;
-use App\Http\Requests\UpdatePatientHealtHistoryRequest;
+use App\Http\Requests\StorePatientHealthHistoryRequest;
+use App\Http\Requests\UpdatePatientHealthHistoryRequest;
 use App\Models\PatientHealthHistory;
-use App\Models\PatientHealtHistory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use OwenIt\Auditing\Audit;
+use OwenIt\Auditing\Models\Audit;
 
 class PatientHealthHistoryController extends Controller
 {
@@ -32,8 +31,9 @@ class PatientHealthHistoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StorePatientHealtHistoryRequest $request)
+    public function store(StorePatientHealthHistoryRequest $request)
     {
+        $this->authorize('create', \App\Models\PatientHealthHistory::class);
         $data = $request->validated();
 
         $userId = Auth::id();
@@ -89,7 +89,7 @@ class PatientHealthHistoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(PatientHealtHistory $patientHealtHistory)
+    public function show(PatientHealthHistory $patientHealtHistory)
     {
         //
     }
@@ -97,7 +97,7 @@ class PatientHealthHistoryController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(PatientHealtHistory $patientHealtHistory)
+    public function edit(PatientHealthHistory $patientHealthHistory)
     {
         //
     }
@@ -105,7 +105,7 @@ class PatientHealthHistoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdatePatientHealtHistoryRequest $request, PatientHealtHistory $patientHealtHistory)
+    public function update(UpdatePatientHealthHistoryRequest $request, PatientHealthHistory $patientHealthHistory)
     {
         //
     }
@@ -113,7 +113,7 @@ class PatientHealthHistoryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(PatientHealtHistory $patientHealtHistory)
+    public function destroy(PatientHealthHistory $patientHealtHistory)
     {
         //
     }
@@ -123,7 +123,7 @@ class PatientHealthHistoryController extends Controller
         $last = PatientHealthHistory::where('patient_id', $patientId)->orderByDesc('id')->first();
 
         if (! $last) {
-            return 01;
+            return '01';
         }
 
         return str_pad(((int) $last->version) + 1, 2, '0', STR_PAD_LEFT);

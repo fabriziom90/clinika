@@ -29,6 +29,9 @@ class RoleController extends Controller
     public function togglePermission(Request $request)
     {
         $role = Role::findById($request->role_id);
+
+        $this->authorize('update', $role);
+
         $permission = Permission::findById($request->permission_id);
 
         if ($role->hasPermissionTo($permission->name)) {

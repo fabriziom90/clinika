@@ -15,6 +15,11 @@ use OwenIt\Auditing\Models\Audit;
 
 class ConsentVersionController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(\App\Models\ConsentVersion::class, 'consentVersion');
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -35,14 +40,14 @@ class ConsentVersionController extends Controller
         ]);
 
         return Inertia::render('ConsentVersions/IndexConsentVersions', [
-            'consentType'     => $consentType,
+            'consentType' => $consentType,
             'consentVersions' => $consentVersions,
-            'columns'   => [
+            'columns' => [
                 'id' => 'ID',
                 'consent-type.name' => 'Tipologia',
                 'version' => 'Versione',
-                'is_active' => 'Attiva'
-            ]
+                'is_active' => 'Attiva',
+            ],
         ]);
     }
 
@@ -52,7 +57,7 @@ class ConsentVersionController extends Controller
     public function create(ConsentType $consentType)
     {
         return Inertia::render('ConsentVersions/CreateConsentVersion', [
-            'consentType' => $consentType
+            'consentType' => $consentType,
         ]);
     }
 
@@ -95,7 +100,7 @@ class ConsentVersionController extends Controller
 
         return Inertia::render('ConsentVersions/ShowConsentVersion', [
             'consentType' => $consentType,
-            'consentVersion' => $consentVersion
+            'consentVersion' => $consentVersion,
         ]);
     }
 
@@ -139,7 +144,10 @@ class ConsentVersionController extends Controller
             ]);
     }
 
-    public function generatePdf(ConsentType $consentType, ConsentVersion $consentVersion) {
+    public function generatePdf(ConsentType $consentType, ConsentVersion $consentVersion)
+    {
+        $this->authorize('view', $consentVersion);
+
         abort_unless($consentVersion->consent_type_id === $consentType->id, 404);
 
         app(\App\Observers\ConsentVersionObserver::class)->viewed($consentVersion);
@@ -153,7 +161,7 @@ class ConsentVersionController extends Controller
         );
 
         return $pdf->stream(
-            'consenso-' .Str::slug($consentVersion->consentType->name) .'-versione-' .$consentVersion->version .'.pdf'
+            'consenso-'.Str::slug($consentVersion->consentType->name).'-versione-'.$consentVersion->version.'.pdf'
         );
     }
 }

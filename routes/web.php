@@ -55,7 +55,7 @@ Route::get('/', function () {
 //     return Inertia::render('Dashboard');
 // })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware(['auth:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
+Route::middleware(['auth:superadmin', 'superadmin.verified'])->prefix('superadmin')->name('superadmin.')->group(function () {
     Route::resource('clinics', ClinicController::class);
     Route::get('/dashboard', [SuperadminDashboardController::class, 'index'])->name('dashboard');
     Route::get('admins', [AdminController::class, 'index'])->name('admins.index');

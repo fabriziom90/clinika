@@ -7,73 +7,15 @@ use App\Models\MedicalEntry;
 use App\Models\MedicalEntryVersion;
 use App\Models\Patient;
 use App\Models\VitalParameter;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
-use Tests\TestCase;
+use Tests\TenantTestCase;
 
-class VitalParameterTest extends TestCase
+class VitalParameterTest extends TenantTestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        Config::set('database.default', 'tenant');
-
-        Config::set('database.connections.tenant', [
-            'driver' => 'mysql',
-            'host' => '127.0.0.1',
-            'port' => '3306',
-            'database' => 'clinika_test_tenant',
-            'username' => 'root',
-            'password' => '',
-            'unix_socket' => '',
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => '',
-            'prefix_indexes' => true,
-            'strict' => true,
-            'engine' => null,
-        ]);
-
-        DB::purge('tenant');
-        DB::reconnect('tenant');
-    }
-
-    private function createPatient(): Patient
-    {
-        return Patient::create([
-            'name' => 'Mario',
-            'surname' => 'Rossi',
-            'personal_code' => 'RSSMRA80A01H501Z',
-            'birthday' => '1980-01-01',
-            'birth_city' => 'Roma',
-            'city' => 'Roma',
-            'address' => 'Via Roma 1',
-            'phone' => '3331234567',
-            'email' => 'mario.rossi@example.com',
-            'genre' => 'M',
-            'zip_code' => '00100',
-        ]);
-    }
-
-    private function createDoctor(): Doctor
-    {
-        return Doctor::create([
-            'personal_code' => 'RSSMRA70A01H501Z',
-            'vat' => '12345678901',
-            'birthday' => '1970-01-01',
-            'birth_city' => 'Roma',
-            'city' => 'Roma',
-            'address' => 'Via Medica 1',
-            'phone' => '3339876543',
-            'genre' => 'M',
-        ]);
-    }
-
     private function createMedicalEntry(): MedicalEntry
     {
-        $patient = $this->createPatient();
-        $doctor = $this->createDoctor();
+        $patient = Patient::factory()->create();
+        $doctor = Doctor::factory()->create();
 
         return MedicalEntry::create([
             'medical_record_id' => $patient->medicalRecord->id,

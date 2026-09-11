@@ -6,6 +6,8 @@
 /storage/*.key
 /vendor
 .env
+.env.testing
+SuperadminSeeder
 .env.backup
 .env.production
 .phpunit.result.cache

@@ -97,7 +97,7 @@ class PatientConsentController extends Controller
         foreach ($validated['consents'] as $consent) {
 
             $pdfPath = null;
-            if ($consent['document'] != null) {
+            if (($consent['document'] ?? null) != null) {
                 $pdfPath = $service->store($consent['document']);
             }
 
@@ -192,7 +192,7 @@ class PatientConsentController extends Controller
      */
     public function destroy(Patient $patient, PatientConsent $consent)
     {
-        app(\App\Observers\PatientObserver::class)->deleted($consent);
+        app(\App\Observers\PatientObserver::class)->deleted($patient);
 
         $consent->delete();
 

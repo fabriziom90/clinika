@@ -4,62 +4,20 @@ namespace Tests\Feature\Tenant;
 
 use App\Enums\AppointmentStatus;
 use App\Models\Appointment;
+use App\Models\Doctor;
 use App\Models\MedicalEntry;
 use App\Models\MedicalEntryVersion;
 use App\Models\Patient;
 use App\Models\Prescription;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
-use Tests\TestCase;
+use Tests\TenantTestCase;
 
-class PrescriptionTest extends TestCase
+class PrescriptionTest extends TenantTestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        Config::set('database.default', 'tenant');
-
-        Config::set('database.connections.tenant', [
-            'driver' => 'mysql',
-            'host' => '127.0.0.1',
-            'port' => '3306',
-            'database' => 'clinika_test_tenant',
-            'username' => 'root',
-            'password' => '',
-            'unix_socket' => '',
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => '',
-            'prefix_indexes' => true,
-            'strict' => true,
-            'engine' => null,
-        ]);
-
-        DB::purge('tenant');
-        DB::reconnect('tenant');
-    }
-
-    private function createPatient(): Patient
-    {
-        return Patient::create([
-            'name' => 'Mario',
-            'surname' => 'Rossi',
-            'personal_code' => 'RSSMRA80A01H501Z',
-            'birthday' => '1980-01-01',
-            'birth_city' => 'Roma',
-            'city' => 'Roma',
-            'address' => 'Via Roma 1',
-            'phone' => '3331234567',
-            'email' => 'mario.rossi@example.com',
-            'genre' => 'M',
-            'zip_code' => '00100',
-        ]);
-    }
-
     private function createVersion(): MedicalEntryVersion
     {
-        $patient = $this->createPatient();
+        $patient = Patient::factory()->create();
+        $doctor = Doctor::factory()->create();
 
         $appointment = new Appointment([
             'patient_id' => $patient->id,
@@ -75,7 +33,7 @@ class PrescriptionTest extends TestCase
         $medicalEntry = MedicalEntry::create([
             'medical_record_id' => $patient->medicalRecord->id,
             'appointment_id' => $appointment->id,
-            'doctor_id' => 1,
+            'doctor_id' => $doctor->id,
         ]);
 
         return MedicalEntryVersion::create([

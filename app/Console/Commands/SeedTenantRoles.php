@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class SeedTenantRoles extends Command
 {
-    protected $signature = 'tenant:seed-roles {clinic : ID o slug della clinica}';
+    protected $signature = 'tenant:seed-roles {clinic : ID o slug della clinica} {--db-name : Usa l\'argomento come nome del database tenant}';
 
     protected $description = 'Esegue il RoleSeeder esclusivamente sul database del tenant specificato';
 
@@ -17,39 +17,63 @@ class SeedTenantRoles extends Command
     {
         $identifier = $this->argument('clinic');
 
-        $clinic = Clinic::query()
-            ->where('id', $identifier)
-            ->orWhere('slug', $identifier)
-            ->first();
+        if ($this->option('db-name')) {
+            config([
+                'database.connections.tenant.host' => env('DB_HOST', '127.0.0.1'),
+                'database.connections.tenant.port' => env('DB_PORT', '3306'),
+                'database.connections.tenant.database' => $identifier,
+                'database.connections.tenant.username' => env('DB_USERNAME'),
+                'database.connections.tenant.password' => env('DB_PASSWORD'),
+            ]);
 
-        if (! $clinic) {
-            $this->error("Clinica [{$identifier}] non trovata.");
+            DB::purge('tenant');
+            DB::reconnect('tenant');
+            DB::setDefaultConnection('tenant');
 
-            return self::FAILURE;
+            $this->info("Database: {$identifier}");
+        } else {
+            $clinic = Clinic::query()
+                ->where('id', $identifier)
+                ->orWhere('slug', $identifier)
+                ->first();
+
+            if (! $clinic) {
+                $this->error("Clinica [{$identifier}] non trovata.");
+
+                return self::FAILURE;
+            }
+
+            $this->info("Clinica: {$clinic->name}");
+            $this->info("Database: {$clinic->database}");
+
+            if (! $this->confirm('Eseguire RoleSeeder su questo database?')) {
+                $this->info('Operazione annullata.');
+
+                return self::SUCCESS;
+            }
+
+            $tenantDatabaseService->connect($clinic);
+
+            DB::setDefaultConnection('tenant');
+
+            $this->info('Connessione tenant configurata.');
         }
 
-        $this->info("Clinica: {$clinic->name}");
-        $this->info("Database: {$clinic->database}");
-
-        if (! $this->confirm('Eseguire RoleSeeder su questo database?')) {
+        if (! $this->option('db-name') && ! $this->confirm('Eseguire RoleSeeder su questo database?')) {
             $this->info('Operazione annullata.');
 
             return self::SUCCESS;
         }
 
-        $tenantDatabaseService->connect($clinic);
-
-        DB::setDefaultConnection('tenant');
-
-        $this->info('Connessione tenant configurata.');
         $this->info('Eseguo RoleSeeder...');
 
         $this->call('db:seed', [
             '--class' => 'Database\\Seeders\\RoleSeeder',
+            '--database' => 'tenant',
             '--force' => true,
         ]);
 
-        $this->info("RoleSeeder completato per {$clinic->name}.");
+        $this->info('RoleSeeder completato.');
 
         return self::SUCCESS;
     }

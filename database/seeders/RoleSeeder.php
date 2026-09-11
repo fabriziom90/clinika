@@ -140,6 +140,7 @@ class RoleSeeder extends Seeder
             'patient-health-history.create',
             'patient-health-history.view',
             'patient-health-history.update',
+            'patient-consent.view',
         ]);
 
         // === SEGRETARIA ===
@@ -176,6 +177,11 @@ class RoleSeeder extends Seeder
             'audit-logs.create',
             'audit-logs.update',
             'audit-logs.delete',
+
+            'role.view',
+            'role.create',
+            'role.update',
+            'role.delete',
         ];
 
         $secretaryPermissions = array_values(

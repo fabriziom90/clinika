@@ -29,6 +29,7 @@ class AuthServiceProvider extends ServiceProvider
         \App\Models\ConsentType::class => \App\Policies\ConsentTypePolicy::class,
         \App\Models\ConsentVersion::class => \App\Policies\ConsentVersionPolicy::class,
         \App\Models\PatientConsent::class => \App\Policies\PatientConsentPolicy::class,
+        \App\Models\PatientHealthHistory::class => \App\Policies\PatientHealthHistoryPolicy::class,
         \OwenIt\Auditing\Models\Audit::class => \App\Policies\AuditPolicy::class,
     ];
 

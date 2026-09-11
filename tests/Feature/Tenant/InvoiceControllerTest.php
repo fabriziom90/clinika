@@ -376,6 +376,37 @@ class InvoiceControllerTest extends TestCase
             );
     }
 
+    public function test_user_with_change_status_permission_can_mark_issued_invoice_as_paid(): void
+    {
+        $clinic = $this->createClinic();
+        $user = $this->createUser();
+        $user->givePermissionTo('invoices.change-status');
+        $invoice = $this->createInvoice();
+        $this->actingAs($user)->put($this->invoiceStatusUrl($clinic, $invoice), ['status' => 'issued'])->assertRedirect();
+        $invoice->refresh();
+        $this->assertSame('issued', $invoice->status);
+        $this->actingAs($user)->put($this->invoiceStatusUrl($clinic, $invoice), ['status' => 'paid'])->assertRedirect();
+        $invoice->refresh();
+        $this->assertSame('paid', $invoice->status);
+    }
+
+    public function test_paid_invoice_cannot_change_status(): void
+    {
+        $clinic = $this->createClinic();
+        $user = $this->createUser();
+        $user->givePermissionTo('invoices.change-status');
+        $invoice = $this->createInvoice();
+        $this->actingAs($user)->put($this->invoiceStatusUrl($clinic, $invoice), ['status' => 'issued'])->assertRedirect();
+        $invoice->refresh();
+        $this->assertSame('issued', $invoice->status);
+        $this->actingAs($user)->put($this->invoiceStatusUrl($clinic, $invoice), ['status' => 'paid'])->assertRedirect();
+        $invoice->refresh();
+        $this->assertSame('paid', $invoice->status);
+        $this->actingAs($user)->put($this->invoiceStatusUrl($clinic, $invoice), ['status' => 'issued'])->assertRedirect();
+        $invoice->refresh();
+        $this->assertSame('paid', $invoice->status);
+    }
+
     private function url(Clinic $clinic, string $path): string
     {
         return "http://{$clinic->slug}.clinika.test{$path}";
