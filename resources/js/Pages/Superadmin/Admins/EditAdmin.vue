@@ -101,7 +101,7 @@ const submit = () => {
                     Annulla
                 </Link>
 
-                <button type="submit" class="main-button" :disabled="form.processing">
+                <button type="submit" class="main-button" v-loading data-loading-text="Salvataggio in corso">
                     Salva modifiche
                 </button>
             </div>

@@ -45,32 +45,26 @@ const save = () => {
 </script>
 
 <template>
-    <div  class="modal fade show modal-bg" style="display: block">
+    <div class="modal fade show modal-bg" style="display: block">
         <div id="modal-add-service" class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5>Nuove prestazioni sanitarie</h5>
-                    <button
-                        type="button"
-                        class="btn-close"
-                        @click="$emit('close')"
-                    ></button>
+                    <button type="button" class="btn-close" @click="$emit('close')"></button>
                 </div>
                 <div class="modal-body">
-                    <div
-                        v-for="(service, index) in servicesForm.services"
-                        :key="index"
-                        class="p-3 mb-3"
-                    >
+                    <div v-for="(service, index) in servicesForm.services" :key="index" class="p-3 mb-3">
                         <div class="row gy-2">
                             <div class="col-md-4">
                                 <input class="form-control" placeholder="Nome" v-model="service.name" />
                             </div>
                             <div class="col-md-3">
-                                <input class="form-control" type="number" placeholder="Durata" v-model="service.default_duration" />
+                                <input class="form-control" type="number" placeholder="Durata"
+                                    v-model="service.default_duration" />
                             </div>
                             <div class="col-md-3">
-                                <input class="form-control" type="number" placeholder="Prezzo" v-model="service.default_price" />
+                                <input class="form-control" type="number" placeholder="Prezzo"
+                                    v-model="service.default_price" />
                             </div>
                             <div class="col-md-2">
                                 <select class="form-select" v-model="service.active">
@@ -80,12 +74,8 @@ const save = () => {
                             </div>
                         </div>
 
-                        <button
-                            v-if="servicesForm.services.length > 1"
-                            class="btn btn-sm btn-danger mt-2"
-                            @click="removeRow(index)"
-                            type="button"
-                        >
+                        <button v-if="servicesForm.services.length > 1" class="btn btn-sm btn-danger mt-2"
+                            @click="removeRow(index)" type="button">
                             Rimuovi
                         </button>
                     </div>
@@ -98,19 +88,20 @@ const save = () => {
                         <button class="secondary-button" @click="$emit('close')" type="button">
                             Annulla
                         </button>
-                        <button class="main-button" @click="save" type="button">
+                        <button class="main-button" @click="save" type="button" v-loading
+                            data-loading-text="Salvataggio in corso">
                             Salva prestazioni
                         </button>
                     </div>
                 </div>
-        
+
             </div>
         </div>
     </div>
 </template>
 
 <style lang="css" scoped>
-    #modal-add-service{
-        max-width: 800px;
-    }
+#modal-add-service {
+    max-width: 800px;
+}
 </style>

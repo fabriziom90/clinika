@@ -306,7 +306,7 @@ const submit = () => {
                     Annulla
                 </Link>
 
-                <button class="main-button" @click="submit">
+                <button class="main-button" @click="submit" v-loading data-loading-text="Salvataggio in corso">
                     Salva
                 </button>
             </div>

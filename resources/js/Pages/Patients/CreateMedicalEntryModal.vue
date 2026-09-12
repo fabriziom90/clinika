@@ -281,8 +281,8 @@ const saveEntry = () => {
                     <button class="secondary-button" @click="$emit('close')" :disabled="saving">
                         Annulla
                     </button>
-                    <button class="main-button" @click="saveEntry" :disabled="saving">
-                        {{ saving ? "Salvando..." : "Salva visita" }}
+                    <button class="main-button" @click="saveEntry" v-loading data-loading-text="Salvataggio in corso">
+                        Salva
                     </button>
                 </div>
 

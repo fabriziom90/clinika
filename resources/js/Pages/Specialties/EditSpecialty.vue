@@ -35,13 +35,14 @@ const handleSubmitForm = () => {
 
 const onServicesSaved = (newServices) => {
     newServices.forEach(s => props.services.push(s))
-    
+
     showServiceModal.value = false
 }
 </script>
 
 
 <template>
+
     <Head title="Crea specializzazione" />
 
     <AuthenticatedLayout section="specialties">
@@ -52,30 +53,22 @@ const onServicesSaved = (newServices) => {
 
                 <div class="col-md-4">
                     <label class="form-label">Nome specializzazione</label>
-                    <input class="form-control" v-model="form.name" placeholder="Nome" :class="{ 'is-invalid': form.errors.name }"/>
+                    <input class="form-control" v-model="form.name" placeholder="Nome"
+                        :class="{ 'is-invalid': form.errors.name }" />
                     <span v-if="form.errors.name" class="text-danger">
-                        {{form.errors.name}}
+                        {{ form.errors.name }}
                     </span>
                 </div>
 
                 <div class="col-md-4">
                     <label class="form-label">Prestazione sanitaria</label>
-                    <Multiselect
-                        v-model="selectedServices"
-                        :options="services"
-                        :multiple="true"
-                        :searchable="true"
-                        track-by="id"
-                        label="name"
-                        placeholder="Seleziona una o più prestazioni"
+                    <Multiselect v-model="selectedServices" :options="services" :multiple="true" :searchable="true"
+                        track-by="id" label="name" placeholder="Seleziona una o più prestazioni"
                         select-label="Premi invio per selezionare"
-                        select-group-label="Premi invio per selezionare il gruppo"
-                        selected-label="Selezionato"
+                        select-group-label="Premi invio per selezionare il gruppo" selected-label="Selezionato"
                         deselect-label="Premi invio per rimuovere"
                         deselect-group-label="Premi invio per rimuovere il gruppo"
-                        no-options="Nessuna prestazione disponibile"
-                        no-result="Nessun risultato trovato"
-                    />
+                        no-options="Nessuna prestazione disponibile" no-result="Nessun risultato trovato" />
                     <small class="text-muted d-block mt-1">
                         Non trovi la prestazione?
                         <a class="text-red" href="#" @click.prevent="showServiceModal = true">
@@ -85,32 +78,28 @@ const onServicesSaved = (newServices) => {
                 </div>
 
                 <div class="col-12">
-                    <button class="main-button" type="submit">
+                    <button class="main-button" type="submit" v-loading data-loading-text="Salvataggio in corso">
                         Salva specializzazione
                     </button>
                 </div>
             </div>
         </form>
 
-        <ServiceModal
-            v-if="showServiceModal"
-            @close="showServiceModal = false"
-            @saved="onServicesSaved"
-        />
+        <ServiceModal v-if="showServiceModal" @close="showServiceModal = false" @saved="onServicesSaved" />
     </AuthenticatedLayout>
 </template>
 
 <style lang="scss">
-    @use '../../../scss/app.scss';
-    @use '../../../scss/_partials/variables' as *;
+@use '../../../scss/app.scss';
+@use '../../../scss/_partials/variables' as *;
 
-    .text-red{
-        color: $mainRed;
-    }
+.text-red {
+    color: $mainRed;
+}
 
-    .multiselect__tag, .multiselect__option--highlight, .multiselect__option--highlight::after{
-        background-color: $mainRed !important;
-    }
-
-    
+.multiselect__tag,
+.multiselect__option--highlight,
+.multiselect__option--highlight::after {
+    background-color: $mainRed !important;
+}
 </style>

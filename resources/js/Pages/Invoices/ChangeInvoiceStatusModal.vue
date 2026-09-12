@@ -99,7 +99,8 @@ const changeStatus = (invoice, status) => {
                         Annulla
                     </button>
 
-                    <button class="main-button" @click="changeStatus">
+                    <button class="main-button" @click="changeStatus" v-loading
+                        data-loading-text="Salvataggio in corso">
                         Salva
                     </button>
 

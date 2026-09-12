@@ -42,7 +42,7 @@ const handleSubmitProductForm = () => {
         onSuccess: (page) => {
             // aggiorna la tabella con i nuovi dati passati dal controller
             localInventoryProducts.value = page.props.inventoryProducts;
-            
+
             formProduct.product_id = "";
             formProduct.expiry_date = "";
             formProduct.units = "";
@@ -76,8 +76,8 @@ const handleSubmitDrugForm = () => {
 };
 
 const openModal = (currentType) => {
-  isModalOpen.value = true;
-  type.value = currentType;
+    isModalOpen.value = true;
+    type.value = currentType;
 };
 </script>
 
@@ -144,7 +144,7 @@ const openModal = (currentType) => {
                     />
                 </div>
                 <div>
-                    <button type="submit" class="btn-negative">Salva</button>
+                    <button type="submit" class="btn-negative" v-loading data-loading-text="Salvataggio in corso">Salva</button>
                 </div>
             </form>
         </div>
@@ -191,7 +191,7 @@ const openModal = (currentType) => {
                     />
                 </div>
                 <div>
-                    <button type="submit" class="btn-negative">Salva</button>
+                    <button type="submit" class="btn-negative" v-loading data-loading-text="Salvataggio in corso">Salva</button>
                 </div>
             </form>
         </div>

@@ -638,12 +638,8 @@ const handleSubmitForm = () => {
         </div>
         <div class="row mt-4">
             <div class="col-12 col-md-4">
-                <button type="submit" class="main-button">
-                    <span v-if="onSaving">
-                        Salvataggio in corso...
-                        <i class="fa-solid fa-spinner fa-spin ms-2"></i>
-                    </span>
-                    <span v-else>Salva </span>
+                <button type="submit" class="main-button" v-loading data-loading-text="Salvataggio in corso">
+                    Salva
                 </button>
             </div>
         </div>

@@ -78,7 +78,7 @@ const checkExpirationDate = (day) => {
   const expiration = new Date(day);
   expiration.setHours(0, 0, 0, 0);
   const diffDays = (expiration - today) / (1000 * 60 * 60 * 24);
-  
+
   return diffDays < 15;
 };
 
@@ -129,7 +129,7 @@ const handleSubmit = () => {
 
 const openModal = (item) => {
   actualDrug.value = item;
-  
+
   showDeleteModal.value = true;
 };
 
@@ -139,7 +139,7 @@ const closeModal = () => {
 };
 
 const confirmDelete = () => {
-    closeModal();
+  closeModal();
 };
 </script>
 
@@ -156,36 +156,20 @@ const confirmDelete = () => {
         <form @submit.prevent="handleSubmit" class="bg-main p-4">
           <div class="row gy-3 mt-2">
             <div class="col-12 col-md-4">
-              <Multiselect
-                v-model="form.drug"
-                :options="drugs.map(p => ({ label: p.name, value: p.id }))"
-                placeholder="Cerca..."
-                searchable
-                clearable
-                noOptionsText="Nessun risultato"
-              />
+              <Multiselect v-model="form.drug" :options="drugs.map(p => ({ label: p.name, value: p.id }))"
+                placeholder="Cerca..." searchable clearable noOptionsText="Nessun risultato" />
             </div>
 
             <div class="col-12 col-md-4">
-              <input
-                type="number"
-                min="0"
-                class="form-control"
-                placeholder="Inserisci quantità"
-                v-model="form.units"
-              />
+              <input type="number" min="0" class="form-control" placeholder="Inserisci quantità" v-model="form.units" />
             </div>
 
             <div class="col-12 col-md-4">
-              <input
-                type="date"
-                class="form-control"
-                v-model="form.expirationDate"
-              />
+              <input type="date" class="form-control" v-model="form.expirationDate" />
             </div>
 
             <div class="col-12">
-              <button type="submit" class="btn btn-white">
+              <button type="submit" class="btn btn-white" v-loading data-loading-text="Salvataggio in corso">
                 Salva
               </button>
             </div>
@@ -196,28 +180,16 @@ const confirmDelete = () => {
       <!-- FILTER + EXPORT -->
       <div class="row mt-4">
         <div class="col-8">
-          <input
-            type="text"
-            class="form-control"
-            placeholder="Filtra..."
-            v-model="search"
-          />
+          <input type="text" class="form-control" placeholder="Filtra..." v-model="search" />
         </div>
         <div class="col-4">
-          <ExportToPdfButton
-            :title="`Inventario medicinali ${page.props.clinicRoom.name}`"
-            :columns="pdfColumns"
-            :rows="pdfRows"
-            :filename="`inventario_medicinali_${page.props.clinicRoom.name}.pdf`"
-          />
+          <ExportToPdfButton :title="`Inventario medicinali ${page.props.clinicRoom.name}`" :columns="pdfColumns"
+            :rows="pdfRows" :filename="`inventario_medicinali_${page.props.clinicRoom.name}.pdf`" />
         </div>
       </div>
 
       <!-- TABELLA -->
-      <table
-        v-if="filteredDrugs.length"
-        class="table table-striped mt-4"
-      >
+      <table v-if="filteredDrugs.length" class="table table-striped mt-4">
         <thead>
           <tr>
             <th>Nome</th>
@@ -239,25 +211,14 @@ const confirmDelete = () => {
             <!-- QUANTITÀ EDIT INLINE -->
             <td>
               <div class="d-flex align-items-center justify-content-between">
-                <span
-                  v-if="!editDrugQuantity || actualDrug !== ip.id"
-                  :class="ip.units <= 1 ? 'text-danger fw-bold' : ''"
-                >
+                <span v-if="!editDrugQuantity || actualDrug !== ip.id"
+                  :class="ip.units <= 1 ? 'text-danger fw-bold' : ''">
                   {{ ip.units }}
                 </span>
 
-                <input
-                  v-else
-                  type="number"
-                  class="form-control me-2"
-                  v-model="editQuantity"
-                  min="0"
-                />
+                <input v-else type="number" class="form-control me-2" v-model="editQuantity" min="0" />
 
-                <button
-                  class="btn btn-warning btn-sm"
-                  @click="onEditDrugQuantity(editDrugQuantity, ip.id, ip.units)"
-                >
+                <button class="btn btn-warning btn-sm" @click="onEditDrugQuantity(editDrugQuantity, ip.id, ip.units)">
                   <i class="fas fa-edit"></i>
                 </button>
               </div>
@@ -266,30 +227,19 @@ const confirmDelete = () => {
             <!-- SCADENZA EDIT INLINE + WARNING -->
             <td>
               <div class="d-flex align-items-center justify-content-between">
-                <span
-                  v-if="!editDrugExpirationDate || actualDrug !== ip.id"
-                  :class="checkExpirationDate(ip.expiry_date)
-                    ? 'text-danger fw-bold'
-                    : ''"
-                >
+                <span v-if="!editDrugExpirationDate || actualDrug !== ip.id" :class="checkExpirationDate(ip.expiry_date)
+                  ? 'text-danger fw-bold'
+                  : ''">
                   {{ formatDate(ip.expiry_date) }}
                 </span>
 
-                <input
-                  v-else
-                  type="date"
-                  class="form-control me-2"
-                  v-model="editExpirationDate"
-                />
+                <input v-else type="date" class="form-control me-2" v-model="editExpirationDate" />
 
-                <button
-                  class="btn btn-warning btn-sm"
-                  @click="onEditDrugExpirationDate(
-                    editDrugExpirationDate,
-                    ip.id,
-                    ip.expirationDate
-                  )"
-                >
+                <button class="btn btn-warning btn-sm" @click="onEditDrugExpirationDate(
+                  editDrugExpirationDate,
+                  ip.id,
+                  ip.expirationDate
+                )">
                   <i class="fas fa-edit"></i>
                 </button>
               </div>
@@ -305,13 +255,8 @@ const confirmDelete = () => {
     </div>
 
     <!-- MODAL DELETE -->
-    <Modal
-      :show="showDeleteModal"
-      :item="actualDrug"
-      :baseRoute="`admin.inventory-drugs`"
-      @close="closeModal"
-      @deleted="confirmDelete"
-    />
+    <Modal :show="showDeleteModal" :item="actualDrug" :baseRoute="`admin.inventory-drugs`" @close="closeModal"
+      @deleted="confirmDelete" />
   </div>
 </template>
 
@@ -319,6 +264,7 @@ const confirmDelete = () => {
 <style lang="scss" scoped>
 @use "../../scss/_partials/variables" as *;
 @use "../../scss/app.scss" as *;
+
 .border-right-main {
   border-right: 1px solid $mainRed
 }

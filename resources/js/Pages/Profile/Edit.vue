@@ -120,12 +120,9 @@ const handleLogoChange = (event) => {
                                 </div>
 
                                 <div class="col-12">
-                                    <button type="submit" class="main-button" :disabled="profileForm.processing">
-                                        {{
-                                            profileForm.processing
-                                                ? "Salvataggio..."
-                                                : "Salva modifiche"
-                                        }}
+                                    <button type="submit" class="main-button" v-loading
+                                        data-loading-text="Salvataggio in corso">
+                                        Salva
                                     </button>
                                 </div>
                             </div>
@@ -237,12 +234,9 @@ const handleLogoChange = (event) => {
                                 </div>
 
                                 <div class="col-12">
-                                    <button type="submit" class="main-button" :disabled="profileForm.processing">
-                                        {{
-                                            profileForm.processing
-                                                ? "Salvataggio..."
-                                                : "Salva dati clinica"
-                                        }}
+                                    <button type="submit" class="main-button" v-loading
+                                        data-loading-text="Salvataggio in corso">
+                                        Salva
                                     </button>
                                 </div>
                             </div>
@@ -306,12 +300,9 @@ const handleLogoChange = (event) => {
                                 </div>
 
                                 <div class="col-12">
-                                    <button type="submit" class="main-button" :disabled="passwordForm.processing">
-                                        {{
-                                            passwordForm.processing
-                                                ? "Salvataggio..."
-                                                : "Modifica password"
-                                        }}
+                                    <button type="submit" class="main-button" v-loading
+                                        data-loading-text="Salvataggio in corso">
+                                        Salva
                                     </button>
                                 </div>
                             </div>

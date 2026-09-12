@@ -165,12 +165,8 @@ const submit = () => {
                         </div>
                     </div>
                     <div class="d-flex justify-content-end">
-                        <button type="submit" class="main-button" :disabled="form.processing">
-                            <span v-if="form.processing">
-                                Salvataggio in corso...
-                                <i class="fa-solid fa-spinner fa-spin ms-2"></i>
-                            </span>
-                            <span v-else> Salva consensi </span>
+                        <button type="submit" class="main-button" v-loading data-loading-text="Salvataggio in corso">
+                            Salva consensi
                         </button>
                     </div>
                 </form>

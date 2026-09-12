@@ -1,22 +1,22 @@
 <script setup>
-    import { Head, useForm } from '@inertiajs/vue3';
-    import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { Head, useForm } from '@inertiajs/vue3';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
-    const form = useForm({
-        name: "",
-        description: "",
-        acquisition_method: "paper",
-        is_required: true,
-        is_active: true
-    })
+const form = useForm({
+    name: "",
+    description: "",
+    acquisition_method: "paper",
+    is_required: true,
+    is_active: true
+})
 
-    const submit = () => {
-        form.post(route("admin.consent-types.store"), {
-            onError: (errors) => {
-                console.log(errors);
-            }
-        });
-    }
+const submit = () => {
+    form.post(route("admin.consent-types.store"), {
+        onError: (errors) => {
+            console.log(errors);
+        }
+    });
+}
 </script>
 <template lang="">
     <Head title="Aggiungi modulo consenso"/>
@@ -94,7 +94,7 @@
                         </div>
                     </div>
                     <div class="col-12">
-                        <button class="main-button" type="submit" :disabled="form.processing">Salva</button>
+                        <button class="main-button" type="submit" v-loading data-loading-text="Salvataggio in corso">Salva</button>
                     </div>
                 </div>
             </form>
@@ -102,5 +102,5 @@
     </AuthenticatedLayout>
 </template>
 <style lang="scss" scoped>
-    @use '../../../scss/app.scss' as *;
+@use '../../../scss/app.scss' as *;
 </style>

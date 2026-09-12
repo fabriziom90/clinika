@@ -30,20 +30,20 @@ const handleFileChange = (event) => {
 };
 
 const submit = () => {
-    
+
     form.transform((data) => ({
-            ...data,
-            _method: "PUT",
-        }))
-        .post(route("admin.patient.consents.update", {patient: props.patient.id, consent: props.patientConsent.id}), {
-        forceFormData: true,
-        onError: (errors) => {
-            const messages = Object.values(errors).flat();
-            if (messages.length) {
-                $toast.error(messages.join("\n"));
-            }
-        },
-    });
+        ...data,
+        _method: "PUT",
+    }))
+        .post(route("admin.patient.consents.update", { patient: props.patient.id, consent: props.patientConsent.id }), {
+            forceFormData: true,
+            onError: (errors) => {
+                const messages = Object.values(errors).flat();
+                if (messages.length) {
+                    $toast.error(messages.join("\n"));
+                }
+            },
+        });
 };
 </script>
 
@@ -80,7 +80,7 @@ const submit = () => {
                                 <div class="col-12 col-md-4">
                                     <label class="form-label">Stato del consenso</label>
 
-                                    <select v-model="form.status" class="form-select" >
+                                    <select v-model="form.status" class="form-select">
                                         <option value="pending">In attesa</option>
                                         <option value="accepted">Accettato</option>
                                         <option value="rejected">Rifiutato</option>
@@ -92,7 +92,7 @@ const submit = () => {
                                 <div class="col-12 col-md-4">
                                     <label class="form-label">Metodo di acquisizione</label>
                                     <div class="form-control bg-light">
-                                        {{ acquisitionMethodLabels[form.acquisition_method] ?? "Non specificato"}}
+                                        {{ acquisitionMethodLabels[form.acquisition_method] ?? "Non specificato" }}
                                     </div>
                                 </div>
 
@@ -107,13 +107,15 @@ const submit = () => {
                                 <!-- Upload documento -->
                                 <div v-if="form.acquisition_method === 'upload'" class="col-12">
                                     <label class="form-label">Documento firmato</label>
-                                    <input type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png" @change="handleFileChange"/>
+                                    <input type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png"
+                                        @change="handleFileChange" />
 
-                                    <small class="text-muted">Carica un nuovo documento firmato relativo alla versione del consenso.</small>
+                                    <small class="text-muted">Carica un nuovo documento firmato relativo alla versione
+                                        del consenso.</small>
                                 </div>
 
                                 <!-- Firma elettronica -->
-                                <div v-if=" form.acquisition_method === 'electronic_signature'" class="col-12">
+                                <div v-if="form.acquisition_method === 'electronic_signature'" class="col-12">
                                     <div class="alert alert-info mb-0">
                                         La firma elettronica sarà disponibile prossimamente.
                                     </div>
@@ -123,13 +125,8 @@ const submit = () => {
                     </div>
 
                     <div class="d-flex justify-content-end">
-                        <button type="submit" class="main-button" :disabled="form.processing">
-                            <span v-if="form.processing">
-                                Salvataggio in corso...
-                                <i class="fa-solid fa-spinner fa-spin ms-2"></i>
-                            </span>
-
-                            <span v-else>Salva consenso</span>
+                        <button type="submit" class="main-button" v-loading data-loading-text="Salvataggio in corso">
+                            Salva consenso
                         </button>
                     </div>
                 </form>

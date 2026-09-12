@@ -70,7 +70,7 @@ const submit = () => {
                                     {{ form.errors.token }}
                                 </div>
                                 <div class="flex items-center justify-end mt-4">
-                                    <button class="main-button" :disabled="form.processing">
+                                    <button class="main-button" v-loading data-loading-text="Reset in corso">
                                         Reset Password
                                     </button>
                                 </div>

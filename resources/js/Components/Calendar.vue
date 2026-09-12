@@ -549,7 +549,8 @@ function formatDateForInput(date) {
                 <button class="secondary-button" @click="showNewAppointmentModal = false">
                     Annulla
                 </button>
-                <button class="main-button" @click="handleNewAppointment">
+                <button class="main-button" @click="handleNewAppointment" v-loading
+                    data-loading-text="Salvataggio in corso">
                     Salva
                 </button>
             </div>

@@ -150,7 +150,7 @@ const saveHistory = () => {
                     <button class="secondary-button" @click="$emit('close')">
                         Annulla
                     </button>
-                    <button class="main-button" @click="saveHistory">
+                    <button class="main-button" @click="saveHistory" v-loading data-loading-text="Salvataggio in corso">
                         Salva
                     </button>
                 </div>

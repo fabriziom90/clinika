@@ -1,27 +1,27 @@
 <script setup>
-    import { Head, useForm } from '@inertiajs/vue3';
-    import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { Head, useForm } from '@inertiajs/vue3';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
-    const props = defineProps({
-        consentType: Object
-    })
+const props = defineProps({
+    consentType: Object
+})
 
-    const form = useForm({
-        id: props.consentType.id,
-        name: props.consentType.name,
-        description: props.consentType.description,
-        acquisition_method: props.consentType.acquisition_method,
-        is_required: props.consentType.is_required,
-        is_active: props.consentType.is_active
-    })
+const form = useForm({
+    id: props.consentType.id,
+    name: props.consentType.name,
+    description: props.consentType.description,
+    acquisition_method: props.consentType.acquisition_method,
+    is_required: props.consentType.is_required,
+    is_active: props.consentType.is_active
+})
 
-    const submit = () => {
-        form.put(route("admin.consent-types.update", form.id), {
-            onError: (errors) => {
-                console.log(errors);
-            }
-        });
-    }
+const submit = () => {
+    form.put(route("admin.consent-types.update", form.id), {
+        onError: (errors) => {
+            console.log(errors);
+        }
+    });
+}
 </script>
 <template lang="">
     <Head title="Modifica modulo consenso"/>
@@ -101,7 +101,7 @@
                         </div>
                     </div>
                     <div class="col-12">
-                        <button class="main-button" type="submit" :disabled="form.processing">Salva</button>
+                        <button class="main-button" type="submit" v-loading data-loading-text="Salvataggio in corso">Salva</button>
                     </div>
                 </div>
             </form>
@@ -109,5 +109,5 @@
     </AuthenticatedLayout>
 </template>
 <style lang="scss" scoped>
-    @use '../../../scss/app.scss' as *;
+@use '../../../scss/app.scss' as *;
 </style>

@@ -96,7 +96,7 @@ const generateInvoice = () => {
                             <option value="no_show">Assente</option>
                         </select>
 
-                        <button class="secondary-button py-0" @click="updateStatus">
+                        <button class="secondary-button py-0" @click="updateStatus" v-loading data-loading-text="Salvataggio in corso">
                             Salva
                         </button>
                     </div>

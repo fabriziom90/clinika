@@ -101,7 +101,8 @@ const save = () => {
                 </div>
             </div>
             <div class="col-12">
-                <button class="main-button" type="submit" @click="save">Salva</button>
+                <button class="main-button" type="submit" @click="save" v-loading
+                    data-loading-text="Salvataggio in corso">Salva</button>
             </div>
         </div>
     </AuthenticatedLayout>

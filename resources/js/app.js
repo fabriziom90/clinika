@@ -10,6 +10,8 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import { createPinia } from 'pinia';
 
+import loading from './directives/loading';
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
@@ -21,11 +23,12 @@ createInertiaApp({
             .use(pinia)
             .use(plugin)
             .use(ZiggyVue)
+            .directive('loading', loading)
             .mount(el);
 
             
     },
     progress: {
-        color: '#4B5563',
+        color: '#c53238',
     },
 });

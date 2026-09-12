@@ -67,7 +67,7 @@ const handleInlineUpdate = (updatedData) => {
                     }}</span>
                 </div>
                 <div>
-                    <button type="submit" class="btn-negative">Salva</button>
+                    <button type="submit" class="btn-negative" v-loading data-loading-text="Salvataggio in corso">Salva</button>
                 </div>
             </form>
         </div>
