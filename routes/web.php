@@ -114,6 +114,7 @@ Route::middleware(['tenant', 'auth'])->group(function () {
         Route::get('/reminders/{reminder}', [AppointmentReminderController::class, 'show'])->name('reminders.show');
         Route::put('/invoices/{invoice}/change-status', [InvoiceController::class, 'changeStatus'])->name('invoices.change-status');
         Route::get('/invoices/create/{appointment}', [InvoiceController::class, 'create'])->name('appointments.invoice.create');
+        Route::get('/invoices/export', [InvoiceController::class, 'export'])->name('invoices.export');
         Route::resource('invoices', InvoiceController::class);
         Route::resource('/consent-types', ConsentTypeController::class);
         Route::resource('/consent-types.consent-versions', ConsentVersionController::class);

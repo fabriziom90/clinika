@@ -74,6 +74,10 @@ class RoleSeeder extends Seeder
                 'display_name' => 'Cambia stato fattura',
             ],
             [
+                'name' => 'invoices.export',
+                'display_name' => 'Esporta storico fatture',
+            ],
+            [
                 'name' => 'appointment.change-status',
                 'display_name' => 'Cambia stato appuntamento',
             ],

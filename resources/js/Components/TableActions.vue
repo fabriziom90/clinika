@@ -74,6 +74,7 @@ const generatePdf = () => {
 <template>
 
     <td class="actions">
+
         <Link v-if="actions.show" class="show-button" :href="getActionUrl('show')">
             <i class="fas fa-eye"></i>
         </Link>

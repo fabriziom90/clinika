@@ -50,6 +50,7 @@ class InvoiceControllerTest extends TestCase
             'invoices.update',
             'invoices.delete',
             'invoices.change-status',
+            'invoices.export',
         ] as $permission) {
             Permission::on('tenant')->firstOrCreate([
                 'name' => $permission,
@@ -405,6 +406,60 @@ class InvoiceControllerTest extends TestCase
         $this->actingAs($user)->put($this->invoiceStatusUrl($clinic, $invoice), ['status' => 'issued'])->assertRedirect();
         $invoice->refresh();
         $this->assertSame('paid', $invoice->status);
+    }
+
+    public function test_user_without_export_permission_cannot_export_invoices(): void
+    {
+        $clinic = $this->createClinic();
+        $user = $this->createUser();
+
+        $this->actingAs($user)
+            ->get($this->url($clinic, '/admin/invoices/export'))
+            ->assertForbidden();
+    }
+
+    public function test_user_with_export_permission_can_export_invoices_csv(): void
+    {
+        $clinic = $this->createClinic();
+        $user = $this->createUser();
+        $user->givePermissionTo('invoices.export');
+
+        $invoice = $this->createInvoice();
+
+        $response = $this->actingAs($user)
+            ->get($this->url($clinic, '/admin/invoices/export'));
+
+        $response->assertSuccessful();
+        $response->assertHeader('content-type', 'text/csv; charset=UTF-8');
+
+        $content = $response->streamedContent();
+        $this->assertStringContainsString('Numero;Data;Paziente;Medico', $content);
+        $this->assertStringContainsString($invoice->number, $content);
+        $this->assertStringContainsString('Mario Rossi', $content);
+    }
+
+    public function test_user_can_export_invoices_csv_with_applied_filters(): void
+    {
+        $clinic = $this->createClinic();
+        $user = $this->createUser();
+        $user->givePermissionTo('invoices.export');
+
+        $invoice = $this->createInvoice();
+
+        $response = $this->actingAs($user)
+            ->get($this->url($clinic, '/admin/invoices/export?status=draft&search=Mario'));
+
+        $response->assertSuccessful();
+
+        $content = $response->streamedContent();
+        $this->assertStringContainsString($invoice->number, $content);
+
+        // Test con filtro non corrispondente (nessun risultato)
+        $responseEmpty = $this->actingAs($user)
+            ->get($this->url($clinic, '/admin/invoices/export?status=paid'));
+
+        $contentEmpty = $responseEmpty->streamedContent();
+        $this->assertStringNotContainsString($invoice->number, $contentEmpty);
     }
 
     private function url(Clinic $clinic, string $path): string

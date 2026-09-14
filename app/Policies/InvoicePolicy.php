@@ -36,4 +36,9 @@ class InvoicePolicy
     {
         return $user->can('invoices.change-status');
     }
+
+    public function export(User $user): bool
+    {
+        return $user->can('invoices.export');
+    }
 }

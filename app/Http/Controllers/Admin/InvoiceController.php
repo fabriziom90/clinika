@@ -9,10 +9,12 @@ use App\Http\Requests\UpdateInvoiceRequest;
 use App\Models\Appointment;
 use App\Models\Invoice;
 use App\Services\InvoicePdfService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use OwenIt\Auditing\Models\Audit;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class InvoiceController extends Controller
 {
@@ -24,21 +26,64 @@ class InvoiceController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $invoices = Invoice::query()
+        // 1. Funzione closure per applicare i filtri in modo riutilizzabile e coerente
+        $applyFilters = function ($query) use ($request) {
+            if ($request->filled('number')) {
+                $query->where('number', 'like', "%{$request->number}%");
+            }
+
+            if ($request->filled('date')) {
+                $query->whereDate('date', $request->date);
+            }
+
+            if ($request->filled('year')) {
+                $query->whereYear('date', $request->year);
+            }
+
+            if ($request->filled('patient')) {
+                $search = $request->patient;
+                $query->where(function ($q) use ($search) {
+                    $q->where('full_name', 'like', "%{$search}%")
+                        ->orWhereHas('patient', function ($pQuery) use ($search) {
+                            $pQuery->where('name', 'like', "%{$search}%")
+                                ->orWhere('surname', 'like', "%{$search}%");
+                        });
+                });
+            }
+
+            if ($request->filled('doctor')) {
+                $search = $request->doctor;
+                $query->whereHas('doctor.user', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('surname', 'like', "%{$search}%");
+                });
+            }
+
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+        };
+
+        // 2. QUERY STATISTICHE: Pura aggregazione SQL, zero caricamento di relazioni
+        $statsQuery = Invoice::query();
+        $applyFilters($statsQuery);
+
+        $totalsByStatus = $statsQuery
+            ->selectRaw('status, SUM(amount) as total_amount, COUNT(*) as count')
+            ->groupBy('status')
+            ->get()
+            ->keyBy('status');
+
+        $grandTotal = $totalsByStatus->sum('total_amount');
+        $grandCount = $totalsByStatus->sum('count');
+
+        // 3. QUERY PAGINATA: Dettagli della pagina corrente + Eager Loading relazioni
+        $invoicesQuery = Invoice::query()
             ->select([
-                'id',
-                'uuid',
-                'number',
-                'date',
-                'full_name',
-                'amount',
-                'status',
-                'patient_id',
-                'doctor_id',
-                'description',
-                'created_at',
+                'id', 'uuid', 'number', 'date', 'full_name', 'amount', 'status',
+                'patient_id', 'doctor_id', 'description', 'created_at',
             ])
             ->with([
                 'patient:id,name,surname',
@@ -46,10 +91,15 @@ class InvoiceController extends Controller
                 'doctor.user:id,name,surname',
                 'invoiceItems:id,invoice_id,service_id,description,quantity,unit_price,total',
                 'invoiceItems.service:id,name',
-            ])
-            ->orderByDesc('date')
-            ->paginate(15);
+            ]);
 
+        $applyFilters($invoicesQuery);
+
+        $invoices = $invoicesQuery->orderByDesc('date')
+            ->paginate(15)
+            ->withQueryString();
+
+        // 4. Log Audit
         Audit::forceCreate([
             'user_id' => auth()->id(),
             'user_type' => get_class(auth()->user()),
@@ -62,8 +112,20 @@ class InvoiceController extends Controller
             'new_values' => [],
         ]);
 
+        // 5. Render Inertia
         return Inertia::render('Invoices/IndexInvoice', [
             'invoices' => $invoices,
+            'filters' => $request->only(['number', 'date', 'year', 'patient', 'doctor', 'status']),
+            'statistics' => [
+                'grand_total' => $grandTotal,
+                'grand_count' => $grandCount,
+                'by_status' => [
+                    'paid' => ['amount' => $totalsByStatus->get('paid')->total_amount ?? 0, 'count' => $totalsByStatus->get('paid')->count ?? 0],
+                    'issued' => ['amount' => $totalsByStatus->get('issued')->total_amount ?? 0, 'count' => $totalsByStatus->get('issued')->count ?? 0],
+                    'draft' => ['amount' => $totalsByStatus->get('draft')->total_amount ?? 0, 'count' => $totalsByStatus->get('draft')->count ?? 0],
+                    'cancelled' => ['amount' => $totalsByStatus->get('cancelled')->total_amount ?? 0, 'count' => $totalsByStatus->get('cancelled')->count ?? 0],
+                ],
+            ],
         ]);
     }
 
@@ -505,5 +567,125 @@ class InvoiceController extends Controller
         ]);
 
         return back();
+    }
+
+    /**
+     * export csv with invoices.
+     */
+    public function export(Request $request): StreamedResponse
+    {
+        $this->authorize('export', Invoice::class);
+
+        $query = Invoice::query()
+            ->with([
+                'patient:id,name,surname',
+                'doctor.user:id,name,surname',
+            ]);
+
+        if ($request->filled('number')) {
+            $query->where('number', 'like', "%{$request->number}%");
+        }
+
+        if ($request->filled('date')) {
+            $query->whereDate('date', $request->date);
+        }
+
+        if ($request->filled('year')) {
+            $query->whereYear('date', $request->year);
+        }
+
+        if ($request->filled('patient')) {
+            $search = $request->patient;
+            $query->where(function ($q) use ($search) {
+                $q->where('full_name', 'like', "%{$search}%")
+                    ->orWhereHas('patient', function ($pQuery) use ($search) {
+                        $pQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('surname', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        if ($request->filled('doctor')) {
+            $search = $request->doctor;
+            $query->whereHas('doctor.user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('surname', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $invoices = $query->orderByDesc('date')->get();
+
+        Audit::forceCreate([
+            'user_id' => auth()->id(),
+            'user_type' => get_class(auth()->user()),
+            'event' => 'exported csv',
+            'auditable_type' => Invoice::class,
+            'auditable_id' => null,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'old_values' => [],
+            'new_values' => [],
+        ]);
+
+        $fileName = 'report_fatture_'.date('Y-m-d_H-i').'.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        return response()->stream(function () use ($invoices) {
+            $file = fopen('php://output', 'w');
+
+            // BOM UTF-8 per garantire la corretta formattazione dei caratteri in Excel
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            // Intestazione colonne CSV
+            fputcsv($file, ['Numero', 'Data', 'Paziente', 'Medico', 'Importo (€)', 'Stato'], ';');
+
+            $statusLabels = [
+                'draft' => 'Bozza',
+                'issued' => 'Emessa',
+                'paid' => 'Pagata',
+                'cancelled' => 'Annullata',
+            ];
+
+            foreach ($invoices as $invoice) {
+                // Estrazione Nome Paziente
+                $patientName = '-';
+                if ($invoice->full_name) {
+                    $patientName = $invoice->full_name;
+                } elseif ($invoice->patient) {
+                    $patientName = trim("{$invoice->patient->name} {$invoice->patient->surname}");
+                }
+
+                // Estrazione Nome Medico (gestione sicura della relazione)
+                $doctorName = '-';
+                $doctorUser = $invoice->doctor?->user;
+                if ($doctorUser) {
+                    $doctorName = trim("{$doctorUser->name} {$doctorUser->surname}");
+                }
+
+                $status = $statusLabels[$invoice->status] ?? $invoice->status;
+
+                fputcsv($file, [
+                    $invoice->number,
+                    $invoice->date ? date('d/m/Y', strtotime($invoice->date)) : '',
+                    $patientName,
+                    $doctorName,
+                    number_format($invoice->amount, 2, ',', '.'),
+                    $status,
+                ], ';');
+            }
+
+            fclose($file);
+        }, 200, $headers);
     }
 }

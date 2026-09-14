@@ -92,4 +92,10 @@ export const tableConfig = {
             edit: "admin.specialties.edit",
         },
     },
+    "admin.reminder-types": {
+        actions: {
+            delete: true,
+            edit: true
+        }
+    }
 };
