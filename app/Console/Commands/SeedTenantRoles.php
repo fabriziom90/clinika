@@ -4,12 +4,15 @@ namespace App\Console\Commands;
 
 use App\Models\Clinic;
 use App\Services\Connection\TenantDatabaseService;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
 class SeedTenantRoles extends Command
 {
-    protected $signature = 'tenant:seed-roles {clinic : ID o slug della clinica} {--db-name : Usa l\'argomento come nome del database tenant}';
+    protected $signature = 'tenant:seed-roles
+                            {clinic : ID o slug della clinica}
+                            {--db-name= : Nome del database tenant}';
 
     protected $description = 'Esegue il RoleSeeder esclusivamente sul database del tenant specificato';
 
@@ -18,10 +21,12 @@ class SeedTenantRoles extends Command
         $identifier = $this->argument('clinic');
 
         if ($this->option('db-name')) {
+            $database = $this->option('db-name');
+
             config([
                 'database.connections.tenant.host' => env('DB_HOST', '127.0.0.1'),
                 'database.connections.tenant.port' => env('DB_PORT', '3306'),
-                'database.connections.tenant.database' => $identifier,
+                'database.connections.tenant.database' => $database,
                 'database.connections.tenant.username' => env('DB_USERNAME'),
                 'database.connections.tenant.password' => env('DB_PASSWORD'),
             ]);
@@ -30,9 +35,9 @@ class SeedTenantRoles extends Command
             DB::reconnect('tenant');
             DB::setDefaultConnection('tenant');
 
-            $this->info("Database: {$identifier}");
+            $this->info("Database: {$database}");
         } else {
-            $clinic = Clinic::query()
+            $clinic = Clinic::on('central')
                 ->where('id', $identifier)
                 ->orWhere('slug', $identifier)
                 ->first();
@@ -59,19 +64,12 @@ class SeedTenantRoles extends Command
             $this->info('Connessione tenant configurata.');
         }
 
-        if (! $this->option('db-name') && ! $this->confirm('Eseguire RoleSeeder su questo database?')) {
-            $this->info('Operazione annullata.');
-
-            return self::SUCCESS;
-        }
+        $this->info('Connessione: '.DB::getDefaultConnection());
+        $this->info('Database: '.DB::connection('tenant')->getDatabaseName());
 
         $this->info('Eseguo RoleSeeder...');
 
-        $this->call('db:seed', [
-            '--class' => 'Database\\Seeders\\RoleSeeder',
-            '--database' => 'tenant',
-            '--force' => true,
-        ]);
+        app(RoleSeeder::class)->run();
 
         $this->info('RoleSeeder completato.');
 

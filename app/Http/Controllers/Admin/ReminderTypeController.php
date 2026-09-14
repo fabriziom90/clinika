@@ -11,6 +11,11 @@ use Inertia\Inertia;
 
 class ReminderTypeController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(\App\Models\ReminderType::class, 'reminder_type');
+    }
+
     /**
      * Display a listing of the resource.
      */

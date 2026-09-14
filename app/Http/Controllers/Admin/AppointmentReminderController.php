@@ -12,6 +12,8 @@ class AppointmentReminderController extends Controller
 {
     public function index(Request $request)
     {
+        $this->authorize('viewAny', \App\Models\AppointmentReminder::class);
+
         $query = AppointmentReminder::with([
             'appointment',
             'patient',
@@ -49,7 +51,7 @@ class AppointmentReminderController extends Controller
 
             $reminders = $reminders->filter(function ($reminder) use ($search) {
 
-                if (!$reminder->patient) {
+                if (! $reminder->patient) {
                     return false;
                 }
 
@@ -91,10 +93,12 @@ class AppointmentReminderController extends Controller
 
     public function show(AppointmentReminder $reminder)
     {
+        $this->authorize('view', $reminder);
+
         $reminder->load([
             'appointment',
             'patient',
-            'reminderType'
+            'reminderType',
         ]);
 
         return Inertia::render('Reminders/ShowReminder', ['reminder' => $reminder]);

@@ -17,7 +17,7 @@ class ConsentVersionController extends Controller
 {
     public function __construct()
     {
-        $this->authorizeResource(\App\Models\ConsentVersion::class, 'consentVersion');
+        $this->authorizeResource(\App\Models\ConsentVersion::class, 'consent_version');
     }
 
     /**

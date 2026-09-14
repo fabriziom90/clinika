@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Permission;
+use App\Models\Role;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
 class RoleSeeder extends Seeder
 {
@@ -21,6 +21,7 @@ class RoleSeeder extends Seeder
             'secretary' => 'Segretaria',
             'nurse' => 'Infermiere',
             'appointment' => 'Appuntamento',
+            'appointment-reminder' => 'Promemoria appuntamento',
             'user' => 'Utente di sistema',
             'role' => 'Ruolo',
             'specialty' => 'Specializzazioni',
@@ -127,6 +128,7 @@ class RoleSeeder extends Seeder
             'appointment.view',
             'appointment.create',
             'appointment.update',
+            'appointment-reminder.view',
             'medical-record.view',
             'medical-entry.view',
             'medical-entry.create',
