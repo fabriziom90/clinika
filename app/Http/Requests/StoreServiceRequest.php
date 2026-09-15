@@ -27,6 +27,7 @@ class StoreServiceRequest extends FormRequest
             'services.*.name' => ['required', 'string', 'max:255'],
             'services.*.default_duration' => ['required', 'integer', 'min:1'],
             'services.*.default_price' => ['required', 'numeric', 'min:0'],
+            'services.*.preparation_instructions' => 'nullable|string',
             'services.*.active' => ['required', 'boolean'],
         ];
     }
@@ -34,7 +35,7 @@ class StoreServiceRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'services.requires' => 'Devi inserire almeno una prestazione',
+            'services.required' => 'Devi inserire almeno una prestazione',
             'services.*.name.required' => 'Il nome della prestazione è obbligatorio.',
             'services.*.name.min' => 'Il nome della prestazione deve contenere almeno 3 caratteri.',
             'services.*.name.unique' => 'Esiste già una prestazione con questo nome.',
@@ -48,6 +49,8 @@ class StoreServiceRequest extends FormRequest
             'services.*.default_price.numeric' => 'Il prezzo deve essere un valore numerico.',
             'services.*.default_price.min' => 'Il prezzo non può essere negativo.',
             'services.*.default_price.max' => 'Il prezzo massimo consentito è 9.999,99 €.',
+
+            'services.*.preparation_instructions.string' => 'Le istruzioni di preparazione devono essere un testo',
 
             'services.*.active.required' => 'Devi indicare se la prestazione è attiva.',
             'services.*.active.boolean' => 'Valore non valido per lo stato della prestazione.',

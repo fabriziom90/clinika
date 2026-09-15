@@ -63,10 +63,18 @@ class SpecialtyController extends Controller
 
     public function edit(Specialty $specialty)
     {
-        $services = Service::all();
-        $specialty->load('services:id,name');
+        $specialty->load('services:id,name,default_duration,default_price,active');
 
-        return Inertia::render('Specialties/EditSpecialty', ['specialty' => $specialty, 'services' => Service::select('id', 'name')->get()]);
+        return Inertia::render('Specialties/EditSpecialty', [
+            'specialty' => $specialty,
+            'services' => Service::select(
+                'id',
+                'name',
+                'default_duration',
+                'default_price',
+                'active'
+            )->get(),
+        ]);
     }
 
     /**
@@ -74,12 +82,8 @@ class SpecialtyController extends Controller
      */
     public function update(UpdateSpecialtyRequest $request, Specialty $specialty)
     {
-        $form_data = $request->validated();
-
-        $services = $request->all()['service_ids'];
-
-        $specialty->update($form_data);
-
+        $formData = $request->validated();
+        $specialty->update($formData);
         $specialty->services()->sync($request->service_ids);
 
         return redirect()->route('admin.specialties.index')->with(

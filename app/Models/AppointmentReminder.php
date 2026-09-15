@@ -11,7 +11,13 @@ class AppointmentReminder extends Model
     use HasFactory;
 
     protected $fillable = [
-        'appointment_id', 'patient_id', 'reminder_type_id', 'scheduled_for', 'sent_at', 'status', 'error_message',
+        'appointment_id',
+        'patient_id',
+        'reminder_type_id',
+        'scheduled_for',
+        'sent_at',
+        'status',
+        'error_message',
     ];
 
     protected $casts = [
@@ -33,5 +39,18 @@ class AppointmentReminder extends Model
     public function reminderType()
     {
         return $this->belongsTo(ReminderType::class);
+    }
+
+    public function composedMessage()
+    {
+        $message = $this->reminderType->message ?? '';
+
+        $instructions = $this->appointment?->service?->preparation_instructions;
+
+        if (filled($instructions)) {
+            $message .= "\n\n".$instructions;
+        }
+
+        return $message;
     }
 }

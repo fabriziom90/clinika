@@ -28,11 +28,15 @@ const props = defineProps({
     parentId: {
         type: [Number, String],
         default: null
+    },
+    customEdit: {
+        type: Boolean,
+        default: false
     }
 });
 
 //emit defining
-const emit = defineEmits(["updated"]);
+const emit = defineEmits(["updated", "edit"]);
 
 //page
 const page = usePage();
@@ -120,6 +124,10 @@ const closeDeleteModal = () => {
     showDeleteModal.value = false;
 };
 
+const handleEdit = (item) => {
+    emit("edit", item);
+};
+
 const handleDeleted = (updatedItems) => {
     emit("updated", updatedItems);
 };
@@ -194,26 +202,19 @@ function normalizeValueForInput(value, key) {
                         <template v-else>
                             <div v-if="key === 'name' && item.active != undefined" class="status-dot"
                                 :class="item.active == true ? 'active' : 'inactive'"></div>
-                            <span  v-if="key === 'pdf_path' && item.pdf_path" v-html="formatTableValue(item, key)"></span>
+                            <span v-if="key === 'pdf_path' && item.pdf_path"
+                                v-html="formatTableValue(item, key)"></span>
                             <template v-else>
                                 {{ formatTableValue(item, key) }}
                             </template>
                         </template>
                     </td>
-                    <TableActions
-                        :item="item"
-                        :baseRoute="baseRoute"
-                        :editableColumns="editableColumns"
-                        :editingItem="editingItem"
-
-                        @startEdit="startEdit"
-                        @cancelEdit="cancelEdit"
-                        @saveEdit="saveEdit"
-                        @delete="(item) => {
+                    <TableActions :item="item" :baseRoute="baseRoute" :editableColumns="editableColumns"
+                        :editingItem="editingItem" :customEdit="customEdit" @startEdit="startEdit"
+                        @cancelEdit="cancelEdit" @saveEdit="saveEdit" @edit="handleEdit" @delete="(item) => {
                             deletingItem = item;
                             showDeleteModal = true;
-                        }"
-                    />
+                        }" />
                 </tr>
                 <tr v-if="!paginatedItems.length">
                     <td :colspan="columnCount" class="text-center">
@@ -233,8 +234,8 @@ function normalizeValueForInput(value, key) {
             </button>
         </div>
     </div>
-    <Modal :show="showDeleteModal" :item="deletingItem" :baseRoute="baseRoute" :parentId="parentId" @close="closeDeleteModal"
-        @deleted="handleDeleted" />
+    <Modal :show="showDeleteModal" :item="deletingItem" :baseRoute="baseRoute" :parentId="parentId"
+        @close="closeDeleteModal" @deleted="handleDeleted" />
 </template>
 
 <style lang="scss" scoped>

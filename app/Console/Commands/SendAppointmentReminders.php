@@ -4,63 +4,75 @@ namespace App\Console\Commands;
 
 use App\Enums\ReminderStatus;
 use App\Models\AppointmentReminder;
+use App\Models\Clinic;
+use App\Services\Connection\TenantDatabaseService;
 use App\Services\ReminderSenderService;
 use Illuminate\Console\Command;
+use Throwable;
 
 class SendAppointmentReminders extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'reminders:send';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Invia i reminder degli appuntamenti programmati';
 
-    public function __construct(protected ReminderSenderService $sender)
-    {
+    public function __construct(
+        protected ReminderSenderService $sender,
+        protected TenantDatabaseService $tenantDatabaseService
+    ) {
         parent::__construct();
     }
 
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
-        // $reminders = AppointmentReminder::with([
-        //     'appointment',
-        //     'patient',
-        //     'reminderType',
-        // ])
-        //     ->where('status', 'pending')
-        //     ->where('scheduled_for', '<=', now())
-        //     ->get();
+        $clinics = Clinic::where('active', true)->get();
 
-        $reminders = AppointmentReminder::with([
-            'appointment',
-            'patient',
-            'reminderType',
-        ])
-            ->where(function ($query) {
-                $query->where('status', ReminderStatus::PENDING)
-                    ->orWhere(function ($q) {
-                        $q->where('status', ReminderStatus::FAILED)
-                            ->where('attempt', '<', 3);
-                    });
-            })
-            ->where('scheduled_for', '<=', now())
-            ->get();
+        if ($clinics->isEmpty()) {
+            $this->info('Nessuna clinica attiva trovata.');
 
-        foreach ($reminders as $reminder) {
-            $this->sender->send($reminder);
+            return Command::SUCCESS;
+        }
 
-            $this->info("Reminder {$reminder->id} elaborato");
+        foreach ($clinics as $clinic) {
+            $this->newLine();
+            $this->info("Clinica: {$clinic->name}");
+
+            try {
+                $this->tenantDatabaseService->connect($clinic);
+
+                $reminders = AppointmentReminder::with([
+                    'appointment',
+                    'patient',
+                    'reminderType',
+                ])
+                    ->where(function ($query) {
+                        $query->where('status', ReminderStatus::PENDING)
+                            ->orWhere(function ($q) {
+                                $q->where('status', ReminderStatus::FAILED)
+                                    ->where('attempt', '<', 3);
+                            });
+                    })
+                    ->where('scheduled_for', '<=', now())
+                    ->get();
+
+                $this->info("Reminder da elaborare: {$reminders->count()}");
+
+                foreach ($reminders as $reminder) {
+                    try {
+                        $this->sender->send($reminder);
+
+                        $this->info("  ✓ Reminder {$reminder->id} elaborato");
+                    } catch (Throwable $e) {
+                        $this->error("  ✗ Reminder {$reminder->id}: {$e->getMessage()}");
+
+                        report($e);
+                    }
+                }
+            } catch (Throwable $e) {
+                $this->error("Errore nella clinica {$clinic->name}: {$e->getMessage()}");
+
+                report($e);
+            }
         }
 
         return Command::SUCCESS;

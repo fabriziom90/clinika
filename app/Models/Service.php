@@ -10,7 +10,7 @@ class Service extends Model implements AuditableContract
 {
     use Auditable;
 
-    protected $fillable = ['name', 'note', 'default_duration', 'default_price', 'active', 'code'];
+    protected $fillable = ['name', 'note', 'default_duration', 'default_price', 'preparation_instructions', 'active', 'code'];
 
     public function specialties()
     {

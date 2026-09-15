@@ -53,8 +53,8 @@ class AppointmentReminderService
             $date = $appointmentDate;
         }
 
-        return $date->setTime(8, 0);
-        // return now(); // only for testing
+        // return $date->setTime(8, 0);
+        return now(); // only for testing
 
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateServiceRequest extends FormRequest
 {
@@ -31,6 +32,7 @@ class UpdateServiceRequest extends FormRequest
             ],
             'default_duration' => 'required|integer|min:5|max:600',
             'default_price' => 'required|numeric|min:0|max:9999.99',
+            'preparation_instructions' => 'nullable|string',
             'active' => 'required|boolean',
         ];
     }
@@ -51,6 +53,8 @@ class UpdateServiceRequest extends FormRequest
             'default_price.numeric' => 'Il prezzo deve essere un valore numerico.',
             'default_price.min' => 'Il prezzo non può essere negativo.',
             'default_price.max' => 'Il prezzo massimo consentito è 9.999,99 €.',
+
+            'preparation_instructions.string' => 'Le istruzioni di preparazione devono essere un testo',
 
             'active.required' => 'Devi indicare se la prestazione è attiva.',
             'active.boolean' => 'Valore non valido per lo stato della prestazione.',

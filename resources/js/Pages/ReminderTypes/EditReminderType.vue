@@ -92,7 +92,7 @@ const save = () => {
             <div class="col-12">
                 <label for="" class="form-label">Testo promemoria</label>
                 <div v-span>
-                    <em>Nel testo inserire { { nome_cognome } }, { { data_appuntament0 } } e { { orario_appuntamento } }
+                    <em>Nel testo inserire { { nome_cognome } }, { { data_appuntamento } } e { { orario_appuntamento } }
                         come segnaposti del nome e cognome del paziente, la data e l'orario dell'appuntamento</em>
                 </div>
                 <textarea class="form-control" :class="{ 'is-invalid': form.errors.message }"

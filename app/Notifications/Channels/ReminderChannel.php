@@ -12,14 +12,14 @@ abstract class ReminderChannel
         $appointment = $reminder->appointment;
         $patient = $reminder->patient;
 
-        $message = $reminder->reminderType->message;
+        $message = $reminder->composedMessage();
         $startTime = Carbon::parse($appointment->start_time);
 
-        return str_replace(
+        return preg_replace(
             [
-                '{{nome_cognome}}',
-                '{{data_appuntamento}}',
-                '{{orario_appuntamento}}',
+                '/\{\{\s*nome_cognome\s*\}\}/',
+                '/\{\{\s*data_appuntamento\s*\}\}/',
+                '/\{\{\s*orario_appuntamento\s*\}\}/',
             ],
             [
                 $patient->name.' '.$patient->surname,

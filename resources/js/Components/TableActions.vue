@@ -22,6 +22,10 @@ const props = defineProps({
     editingItem: {
         type: [Number, String, null],
         default: null,
+    },
+    customEdit: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -30,7 +34,8 @@ const emit = defineEmits([
     "cancelEdit",
     "saveEdit",
     "delete",
-    "generatePdf"
+    "generatePdf",
+    "edit"
 ]);
 
 const config = tableConfig[props.baseRoute] ?? {};
@@ -94,10 +99,15 @@ const generatePdf = () => {
             </button>
         </template>
 
-        <Link v-if="actions.edit && !editableColumns.length && (hasRole('admin') || hasRole('secretary'))"
-            class="edit-button" :href="getActionUrl('edit')">
-            <i class="fas fa-edit"></i>
-        </Link>
+        <!-- Custom edit -->
+        <button
+            v-if="actions.edit && customEdit && !editableColumns.length && (hasRole('admin') || hasRole('secretary'))"
+            type="button" class="edit-button" @click="$emit('edit', item)"> <i class="fas fa-edit"></i>
+        </button>
+
+        <!-- Standard edit -->
+        <Link v-else-if="actions.edit && !editableColumns.length && (hasRole('admin') || hasRole('secretary'))"
+            class="edit-button" :href="getActionUrl('edit')"> <i class="fas fa-edit"></i> </Link>
 
         <Link v-if="actions.versions" class="btn-blue"
             :href="route('admin.consent-types.consent-versions.index', item.id)" title="Gestisci versioni">

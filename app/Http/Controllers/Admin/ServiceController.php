@@ -61,11 +61,11 @@ class ServiceController extends Controller
             $newService->fill($service);
             $newService->save();
 
-            $createdServices[] = $service;
+            $createdServices[] = $newService->fresh();
         }
 
         return redirect()->back()->with([
-            'service' => $newService,
+            'service' => $createdServices,
             'toast' => [
                 'type' => 'success',
                 'message' => 'Prestazione/i sanitaria/e inserita/e con successo',
@@ -94,7 +94,15 @@ class ServiceController extends Controller
      */
     public function update(UpdateServiceRequest $request, Service $service)
     {
-        //
+        $service->update($request->validated());
+
+        return redirect()->back()->with([
+            'service' => $service->fresh(),
+            'toast' => [
+                'type' => 'success',
+                'message' => 'Prestazione sanitaria modificata con successo',
+            ],
+        ]);
     }
 
     /**
@@ -102,7 +110,17 @@ class ServiceController extends Controller
      */
     public function destroy(Service $service)
     {
-        //
+        $service->specialties()->detach();
+        $service->doctors()->detach();
+
+        $service->delete();
+
+        return redirect()->back()->with([
+            'toast' => [
+                'type' => 'success',
+                'message' => 'Prestazione sanitaria cancellata con successo',
+            ],
+        ]);
     }
 
     public function serviceCodeFromName(string $name): string

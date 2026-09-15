@@ -1,11 +1,12 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useForm, Head } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import ServiceModal from './ServiceModal.vue'
+import Table from '@/Components/Table.vue'
 import { useToast } from 'vue-toast-notification'
-import Multiselect from 'vue-multiselect';
-import 'vue-multiselect/dist/vue-multiselect.css';
+import Multiselect from 'vue-multiselect'
+import 'vue-multiselect/dist/vue-multiselect.css'
 
 const $toast = useToast()
 
@@ -18,9 +19,25 @@ const form = useForm({
     service_ids: []
 })
 
-const selectedServices = ref([]);
+const servicesList = ref([...props.services]);
+watch(
+    () => props.services,
+    (services) => {
+        servicesList.value = [...services]
+    }
+)
+
+const selectedServices = ref([])
 
 const showServiceModal = ref(false)
+const selectedService = ref(null)
+
+const serviceColumns = {
+    name: 'Prestazione',
+    default_duration: 'Durata',
+    default_price: 'Prezzo',
+    active: 'Stato'
+}
 
 const handleSubmitForm = () => {
     if (selectedServices.value.length === 0) {
@@ -28,17 +45,34 @@ const handleSubmitForm = () => {
         return
     }
 
-    form.service_ids = selectedServices.value.map(service => service.id);
+    form.service_ids = selectedServices.value.map(service => service.id)
+
     form.post(route('admin.specialties.store'))
 }
 
-const onServicesSaved = (newServices) => {
-    newServices.forEach(s => props.services.push(s))
-
-    showServiceModal.value = false
+const openCreateServiceModal = () => {
+    selectedService.value = null
+    showServiceModal.value = true
 }
-</script>
 
+const editService = (service) => {
+    selectedService.value = service
+    showServiceModal.value = true
+}
+
+const closeServiceModal = () => {
+    showServiceModal.value = false
+    selectedService.value = null
+}
+
+const onServicesSaved = (savedServices) => {
+
+
+    closeServiceModal()
+}
+
+
+</script>
 
 <template>
 
@@ -52,8 +86,10 @@ const onServicesSaved = (newServices) => {
 
                 <div class="col-md-4">
                     <label class="form-label">Nome specializzazione</label>
+
                     <input class="form-control" v-model="form.name" placeholder="Nome"
                         :class="{ 'is-invalid': form.errors.name }" />
+
                     <span v-if="form.errors.name" class="text-danger">
                         {{ form.errors.name }}
                     </span>
@@ -61,19 +97,14 @@ const onServicesSaved = (newServices) => {
 
                 <div class="col-md-4">
                     <label class="form-label">Prestazione sanitaria</label>
-                    <Multiselect v-model="selectedServices" :options="services" :multiple="true" :searchable="true"
+
+                    <Multiselect v-model="selectedServices" :options="servicesList" :multiple="true" :searchable="true"
                         track-by="id" label="name" placeholder="Seleziona una o più prestazioni"
                         select-label="Premi invio per selezionare"
                         select-group-label="Premi invio per selezionare il gruppo" selected-label="Selezionato"
                         deselect-label="Premi invio per rimuovere"
                         deselect-group-label="Premi invio per rimuovere il gruppo"
                         no-options="Nessuna prestazione disponibile" no-result="Nessun risultato trovato" />
-                    <small class="text-muted d-block mt-1">
-                        Non trovi la prestazione?
-                        <a class="text-red" href="#" @click.prevent="showServiceModal = true">
-                            Aggiungila cliccando qui
-                        </a>
-                    </small>
                 </div>
 
                 <div class="col-12">
@@ -84,7 +115,22 @@ const onServicesSaved = (newServices) => {
             </div>
         </form>
 
-        <ServiceModal v-if="showServiceModal" @close="showServiceModal = false" @saved="onServicesSaved" />
+        <div class="mt-5">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="mb-0">Prestazioni sanitarie</h3>
+
+                <button type="button" class="main-button" @click="openCreateServiceModal">
+                    <i class="fas fa-plus me-1"></i>
+                    Nuova prestazione
+                </button>
+            </div>
+
+            <Table :items="servicesList" :columns="serviceColumns" base-route="admin.services" custom-edit
+                @edit="editService" />
+        </div>
+
+        <ServiceModal v-if="showServiceModal" :service="selectedService" @close="closeServiceModal"
+            @saved="onServicesSaved" />
     </AuthenticatedLayout>
 </template>
 
