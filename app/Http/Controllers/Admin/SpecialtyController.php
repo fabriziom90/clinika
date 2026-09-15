@@ -71,6 +71,7 @@ class SpecialtyController extends Controller
                 'id',
                 'name',
                 'default_duration',
+                'preparation_instructions',
                 'default_price',
                 'active'
             )->get(),

@@ -68,21 +68,6 @@ const closeServiceModal = () => {
 }
 
 const onServicesSaved = (savedServices) => {
-    savedServices.forEach(service => {
-        const index = servicesList.value.findIndex(item => item.id === service.id)
-
-        if (index !== -1) {
-            servicesList.value[index] = service
-
-            const selectedIndex = selectedServices.value.findIndex(item => item.id === service.id)
-
-            if (selectedIndex !== -1) {
-                selectedServices.value[selectedIndex] = service
-            }
-        } else {
-            servicesList.value.push(service)
-        }
-    })
 
     closeServiceModal()
 }
