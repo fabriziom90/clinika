@@ -22,7 +22,7 @@ class PatientObserver
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
             'old_values' => [],
-            'new_values' => $patient->toArray(),
+            'new_values' => [],
         ]);
     }
 
@@ -39,8 +39,8 @@ class PatientObserver
             'auditable_id' => $patient->id,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
-            'old_values' => $patient->getOriginal(),
-            'new_values' => $patient->getChanges(),
+            'old_values' => [],
+            'new_values' => [],
         ]);
     }
 
@@ -57,7 +57,7 @@ class PatientObserver
             'auditable_id' => $patient->id,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
-            'old_values' => $patient->toArray(),
+            'old_values' => [],
             'new_values' => [],
         ]);
     }

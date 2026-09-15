@@ -22,7 +22,7 @@ class ConsentTypeObserver
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
             'old_values' => [],
-            'new_values' => $consentType->toArray(),
+            'new_values' => [],
         ]);
     }
 
@@ -40,7 +40,7 @@ class ConsentTypeObserver
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
             'old_values' => [],
-            'new_values' => $consentType->toArray(),
+            'new_values' => [],
         ]);
     }
 
@@ -58,7 +58,7 @@ class ConsentTypeObserver
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
             'old_values' => [],
-            'new_values' => $consentType->toArray(),
+            'new_values' => [],
         ]);
     }
 

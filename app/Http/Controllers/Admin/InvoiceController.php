@@ -294,7 +294,7 @@ class InvoiceController extends Controller
                 'ip_address' => request()->ip(),
                 'user_agent' => request()->userAgent(),
                 'old_values' => [],
-                'new_values' => $invoice->toArray(),
+                'new_values' => [],
             ]);
 
             DB::commit();
@@ -475,7 +475,7 @@ class InvoiceController extends Controller
                 'ip_address' => request()->ip(),
                 'user_agent' => request()->userAgent(),
                 'old_values' => [],
-                'new_values' => $invoice->fresh()->toArray(),
+                'new_values' => [],
             ]);
 
             DB::commit();
@@ -512,7 +512,7 @@ class InvoiceController extends Controller
             'auditable_id' => $invoice->id,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
-            'old_values' => $invoice->toArray(),
+            'old_values' => [],
             'new_values' => [],
         ]);
 
@@ -560,10 +560,8 @@ class InvoiceController extends Controller
             'auditable_id' => $invoice->id,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
-            'old_values' => $oldStatus,
-            'new_values' => [
-                'status' => $newStatus,
-            ],
+            'old_values' => [],
+            'new_values' => [],
         ]);
 
         return back();

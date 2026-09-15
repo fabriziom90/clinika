@@ -6,7 +6,6 @@ use App\Models\ConsentVersion;
 use Illuminate\Support\Facades\Auth;
 use OwenIt\Auditing\Models\Audit;
 
-
 class ConsentVersionObserver
 {
     /**
@@ -23,7 +22,7 @@ class ConsentVersionObserver
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
             'old_values' => [],
-            'new_values' => $consentVersion->toArray(),
+            'new_values' => [],
         ]);
     }
 
@@ -41,7 +40,7 @@ class ConsentVersionObserver
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
             'old_values' => [],
-            'new_values' => $consentVersion->toArray(),
+            'new_values' => [],
         ]);
     }
 
@@ -59,7 +58,7 @@ class ConsentVersionObserver
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
             'old_values' => [],
-            'new_values' => $consentVersion->toArray(),
+            'new_values' => [],
         ]);
     }
 

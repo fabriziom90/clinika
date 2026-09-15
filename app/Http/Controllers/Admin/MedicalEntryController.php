@@ -115,7 +115,7 @@ class MedicalEntryController extends Controller
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
             'old_values' => [],
-            'new_values' => $entry->toArray(),
+            'new_values' => [],
         ]);
 
         return redirect()->route('admin.patients.show', $patient_id)->with('toast', [
@@ -172,8 +172,8 @@ class MedicalEntryController extends Controller
                 'auditable_id' => $entry->id,
                 'ip_address' => request()->ip(),
                 'user_agent' => request()->userAgent(),
-                'old_values' => $latestVersion->toArray(),
-                'new_values' => $latestVersion->toArray(),
+                'old_values' => [],
+                'new_values' => [],
             ]);
 
             return redirect()->back()->with('toast', [
@@ -235,8 +235,8 @@ class MedicalEntryController extends Controller
             'auditable_id' => $entry->id,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
-            'old_values' => $latestVersion->toArray(),
-            'new_values' => $newVersion->toArray(),
+            'old_values' => [],
+            'new_values' => [],
         ]);
 
         return redirect()->back()->with('toast', [
@@ -270,7 +270,7 @@ class MedicalEntryController extends Controller
             'auditable_id' => $version->id,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
-            'old_values' => $version->toArray(),
+            'old_values' => [],
             'new_values' => [],
         ]);
 
