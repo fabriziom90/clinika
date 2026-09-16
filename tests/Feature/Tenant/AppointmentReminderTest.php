@@ -6,6 +6,7 @@ use App\Enums\AppointmentStatus;
 use App\Enums\ReminderStatus;
 use App\Models\Appointment;
 use App\Models\AppointmentReminder;
+use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\ReminderType;
 use App\Services\AppointmentReminderService;
@@ -100,6 +101,89 @@ class AppointmentReminderTest extends TestCase
             'status' => ReminderStatus::PENDING,
             'error_message' => null,
         ]);
+    }
+
+    private function createReminderWithService(?string $preparationInstructions, ?bool $withService = true): AppointmentReminder
+    {
+        $patient = Patient::factory()->create();
+        $doctor = Doctor::factory()->create();
+
+        $service = null;
+        if ($withService) {
+            $service = \App\Models\Service::create([
+                'name' => 'Prelievo del sangue',
+                'default_duration' => 15,
+                'default_price' => 20,
+                'preparation_instructions' => $preparationInstructions,
+                'active' => true,
+            ]);
+        }
+
+        $appointment = Appointment::factory()->create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+        ]);
+
+        if ($service) {
+            $appointment->service_id = $service->id;
+            $appointment->save();
+        }
+
+        $reminderType = ReminderType::create([
+            'name' => 'Promemoria test',
+            'code' => 'test-'.uniqid(),
+            'message' => 'Ti aspettiamo per il tuo appuntamento.',
+            'sent_before_value' => 1,
+            'sent_before_unit' => 'days',
+            'active' => true,
+        ]);
+
+        return AppointmentReminder::create([
+            'appointment_id' => $appointment->id,
+            'patient_id' => $patient->id,
+            'reminder_type_id' => $reminderType->id,
+            'scheduled_for' => now()->addDay(),
+            'status' => ReminderStatus::PENDING,
+        ]);
+    }
+
+    public function test_composed_message_includes_preparation_instructions_when_present(): void
+    {
+        $reminder = $this->createReminderWithService('Presentarsi a digiuno da almeno 8 ore.');
+
+        $expected = "Ti aspettiamo per il tuo appuntamento.\n\nPresentarsi a digiuno da almeno 8 ore.";
+
+        $this->assertSame($expected, $reminder->fresh()->composedMessage());
+    }
+
+    public function test_composed_message_is_just_the_standard_message_when_service_has_no_instructions(): void
+    {
+        $reminder = $this->createReminderWithService(null);
+
+        $this->assertSame(
+            'Ti aspettiamo per il tuo appuntamento.',
+            $reminder->fresh()->composedMessage()
+        );
+    }
+
+    public function test_composed_message_is_just_the_standard_message_when_service_instructions_are_empty_string(): void
+    {
+        $reminder = $this->createReminderWithService('');
+
+        $this->assertSame(
+            'Ti aspettiamo per il tuo appuntamento.',
+            $reminder->fresh()->composedMessage()
+        );
+    }
+
+    public function test_composed_message_is_just_the_standard_message_when_appointment_has_no_service(): void
+    {
+        $reminder = $this->createReminderWithService(null, withService: false);
+
+        $this->assertSame(
+            'Ti aspettiamo per il tuo appuntamento.',
+            $reminder->fresh()->composedMessage()
+        );
     }
 
     public function test_reminder_is_created_in_tenant_database(): void
