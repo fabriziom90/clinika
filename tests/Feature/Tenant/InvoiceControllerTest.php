@@ -12,18 +12,22 @@ use App\Models\Service;
 use App\Models\User;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Permission;
-use Tests\TestCase;
+use Spatie\Permission\PermissionRegistrar;
+use Tests\TenantTestCase;
 
-class InvoiceControllerTest extends TestCase
+class InvoiceControllerTest extends TenantTestCase
 {
     protected function setUp(): void
     {
         parent::setUp();
-
-        Config::set('database.default', 'tenant');
 
         Config::set('database.connections.tenant', [
             'driver' => 'mysql',
@@ -41,8 +45,18 @@ class InvoiceControllerTest extends TestCase
             'engine' => null,
         ]);
 
+        Config::set('database.default', 'tenant');
+
         DB::purge('tenant');
         DB::reconnect('tenant');
+
+        Mail::fake();
+        Notification::fake();
+        Queue::fake();
+        Event::fake();
+        Storage::fake();
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         foreach ([
             'invoices.view',
@@ -65,7 +79,7 @@ class InvoiceControllerTest extends TestCase
         $user = $this->createUser();
 
         $this->actingAs($user)
-            ->get($this->url($clinic, '/admin/invoices'))
+            ->get($this->url($clinic, '/admin/invoices'), $this->host($clinic))
             ->assertForbidden();
     }
 
@@ -73,11 +87,10 @@ class InvoiceControllerTest extends TestCase
     {
         $clinic = $this->createClinic();
         $user = $this->createUser();
-
-        $user->givePermissionTo('invoices.view');
+        $this->grantPermissions($user, 'invoices.view');
 
         $this->actingAs($user)
-            ->get($this->url($clinic, '/admin/invoices'))
+            ->get($this->url($clinic, '/admin/invoices'), $this->host($clinic))
             ->assertSuccessful();
     }
 
@@ -88,7 +101,10 @@ class InvoiceControllerTest extends TestCase
         $appointment = $this->createAppointment();
 
         $this->actingAs($user)
-            ->get($this->url($clinic, "/admin/invoices/create/{$appointment->getRouteKey()}"))
+            ->get(
+                $this->url($clinic, "/admin/invoices/create/{$appointment->getRouteKey()}"),
+                $this->host($clinic)
+            )
             ->assertForbidden();
     }
 
@@ -96,12 +112,15 @@ class InvoiceControllerTest extends TestCase
     {
         $clinic = $this->createClinic();
         $user = $this->createUser();
-        $user->givePermissionTo('invoices.create');
+        $this->grantPermissions($user, 'invoices.create');
 
         $appointment = $this->createAppointment();
 
         $this->actingAs($user)
-            ->get($this->url($clinic, "/admin/invoices/create/{$appointment->getRouteKey()}"))
+            ->get(
+                $this->url($clinic, "/admin/invoices/create/{$appointment->getRouteKey()}"),
+                $this->host($clinic)
+            )
             ->assertSuccessful();
     }
 
@@ -114,7 +133,8 @@ class InvoiceControllerTest extends TestCase
         $this->actingAs($user)
             ->post(
                 $this->url($clinic, '/admin/invoices'),
-                $this->validInvoiceData($appointment)
+                $this->validInvoiceData($appointment),
+                $this->host($clinic)
             )
             ->assertForbidden();
     }
@@ -124,8 +144,7 @@ class InvoiceControllerTest extends TestCase
         $clinic = $this->createClinic();
         $appointment = $this->createAppointment();
         $user = $this->createUser();
-
-        $user->givePermissionTo('invoices.create');
+        $this->grantPermissions($user, 'invoices.create');
 
         Invoice::on('tenant')
             ->where('appointment_id', $appointment->id)
@@ -133,14 +152,21 @@ class InvoiceControllerTest extends TestCase
 
         $data = $this->validInvoiceData($appointment);
 
-        $this->assertSame($appointment->id, $data['appointment_id']);
-        $this->assertSame($appointment->doctor_id, $data['doctor_id']);
-        $this->assertSame($appointment->patient_id, $data['patient_id']);
-
         $response = $this->actingAs($user)
-            ->post($this->url($clinic, '/admin/invoices'), $data);
+            ->post(
+                $this->url($clinic, '/admin/invoices'),
+                $data,
+                $this->host($clinic)
+            );
 
         $response->assertRedirect();
+
+        $this->assertDatabaseHas('invoices', [
+            'appointment_id' => $appointment->id,
+            'doctor_id' => $appointment->doctor_id,
+            'patient_id' => $appointment->patient_id,
+            'deleted_at' => null,
+        ], 'tenant');
 
         $invoice = Invoice::on('tenant')
             ->where('appointment_id', $appointment->id)
@@ -149,11 +175,36 @@ class InvoiceControllerTest extends TestCase
             ->first();
 
         $this->assertNotNull($invoice);
-        $this->assertSame($appointment->id, $invoice->appointment_id);
-        $this->assertSame($appointment->doctor_id, $invoice->doctor_id);
-        $this->assertSame($appointment->patient_id, $invoice->patient_id);
         $this->assertSame('Mario Rossi', $invoice->full_name);
         $this->assertSame(1, $invoice->invoiceItems()->count());
+    }
+
+    public function test_store_validation_rejects_invalid_invoice_data(): void
+    {
+        $clinic = $this->createClinic();
+        $user = $this->createUser();
+        $this->grantPermissions($user, 'invoices.create');
+
+        $appointment = $this->createAppointment();
+
+        $data = $this->validInvoiceData($appointment);
+        $data['appointment_id'] = 999999999;
+        $data['doctor_id'] = 999999999;
+        $data['patient_id'] = 999999999;
+        $data['date'] = 'invalid-date';
+        $data['full_name'] = '';
+        $data['subtotal'] = -1;
+        $data['items'] = [];
+
+        $this->withoutExceptionHandling();
+        $this->expectException(ValidationException::class);
+
+        $this->actingAs($user)
+            ->post(
+                $this->url($clinic, '/admin/invoices'),
+                $data,
+                $this->host($clinic)
+            );
     }
 
     public function test_user_without_update_permission_cannot_access_invoice_edit_page(): void
@@ -163,7 +214,10 @@ class InvoiceControllerTest extends TestCase
         $invoice = $this->createInvoice();
 
         $this->actingAs($user)
-            ->get($this->url($clinic, "/admin/invoices/{$invoice->getRouteKey()}/edit"))
+            ->get(
+                $this->url($clinic, "/admin/invoices/{$invoice->getRouteKey()}/edit"),
+                $this->host($clinic)
+            )
             ->assertForbidden();
     }
 
@@ -171,12 +225,15 @@ class InvoiceControllerTest extends TestCase
     {
         $clinic = $this->createClinic();
         $user = $this->createUser();
-        $user->givePermissionTo('invoices.update');
+        $this->grantPermissions($user, 'invoices.update');
 
         $invoice = $this->createInvoice();
 
         $this->actingAs($user)
-            ->get($this->url($clinic, "/admin/invoices/{$invoice->getRouteKey()}/edit"))
+            ->get(
+                $this->url($clinic, "/admin/invoices/{$invoice->getRouteKey()}/edit"),
+                $this->host($clinic)
+            )
             ->assertSuccessful();
     }
 
@@ -192,7 +249,8 @@ class InvoiceControllerTest extends TestCase
         $this->actingAs($user)
             ->put(
                 $this->url($clinic, "/admin/invoices/{$invoice->getRouteKey()}"),
-                $data
+                $data,
+                $this->host($clinic)
             )
             ->assertForbidden();
 
@@ -205,7 +263,7 @@ class InvoiceControllerTest extends TestCase
     {
         $clinic = $this->createClinic();
         $user = $this->createUser();
-        $user->givePermissionTo('invoices.update');
+        $this->grantPermissions($user, 'invoices.update');
 
         $invoice = $this->createInvoice();
 
@@ -219,15 +277,46 @@ class InvoiceControllerTest extends TestCase
         $this->actingAs($user)
             ->put(
                 $this->url($clinic, "/admin/invoices/{$invoice->getRouteKey()}"),
-                $data
+                $data,
+                $this->host($clinic)
             )
             ->assertRedirect();
 
-        $invoice->refresh();
+        $this->assertDatabaseHas('invoices', [
+            'id' => $invoice->id,
+            'amount' => 150,
+        ], 'tenant');
 
-        $this->assertSame('Luigi Bianchi', $invoice->full_name);
-        $this->assertSame(150.0, (float) $invoice->amount);
-        $this->assertSame(1, $invoice->invoiceItems()->count());
+        $this->assertSame('Luigi Bianchi', $invoice->fresh()->full_name);
+        $this->assertSame(1, $invoice->fresh()->invoiceItems()->count());
+    }
+
+    public function test_update_validation_rejects_invalid_invoice_data(): void
+    {
+        $clinic = $this->createClinic();
+        $user = $this->createUser();
+        $this->grantPermissions($user, 'invoices.update');
+
+        $invoice = $this->createInvoice();
+
+        $data = $this->validInvoiceData($invoice->appointment);
+        $data['appointment_id'] = 999999999;
+        $data['doctor_id'] = 999999999;
+        $data['patient_id'] = 999999999;
+        $data['date'] = 'invalid-date';
+        $data['full_name'] = '';
+        $data['subtotal'] = -1;
+        $data['items'] = [];
+
+        $this->withoutExceptionHandling();
+        $this->expectException(ValidationException::class);
+
+        $this->actingAs($user)
+            ->put(
+                $this->url($clinic, "/admin/invoices/{$invoice->getRouteKey()}"),
+                $data,
+                $this->host($clinic)
+            );
     }
 
     public function test_user_without_delete_permission_cannot_delete_invoice(): void
@@ -238,12 +327,15 @@ class InvoiceControllerTest extends TestCase
 
         $this->actingAs($user)
             ->delete(
-                $this->url($clinic, "/admin/invoices/{$invoice->getRouteKey()}")
+                $this->url($clinic, "/admin/invoices/{$invoice->getRouteKey()}"),
+                [],
+                $this->host($clinic)
             )
             ->assertForbidden();
 
         $this->assertDatabaseHas('invoices', [
             'id' => $invoice->id,
+            'deleted_at' => null,
         ], 'tenant');
     }
 
@@ -251,19 +343,20 @@ class InvoiceControllerTest extends TestCase
     {
         $clinic = $this->createClinic();
         $user = $this->createUser();
-        $user->givePermissionTo('invoices.delete');
+        $this->grantPermissions($user, 'invoices.delete');
 
         $invoice = $this->createInvoice();
-        $invoiceId = $invoice->id;
 
         $this->actingAs($user)
             ->delete(
-                $this->url($clinic, "/admin/invoices/{$invoice->getRouteKey()}")
+                $this->url($clinic, "/admin/invoices/{$invoice->getRouteKey()}"),
+                [],
+                $this->host($clinic)
             )
             ->assertRedirect();
 
         $this->assertSoftDeleted('invoices', [
-            'id' => $invoiceId,
+            'id' => $invoice->id,
         ], 'tenant');
     }
 
@@ -274,138 +367,136 @@ class InvoiceControllerTest extends TestCase
         $invoice = $this->createInvoice();
 
         $this->actingAs($user)
-            ->put($this->invoiceStatusUrl($clinic, $invoice), [
-                'status' => 'issued',
-            ])
+            ->put(
+                $this->invoiceStatusUrl($clinic, $invoice),
+                ['status' => 'issued'],
+                $this->host($clinic)
+            )
             ->assertForbidden();
 
-        $invoice->refresh();
-
-        $this->assertSame('draft', $invoice->status);
+        $this->assertSame('draft', $invoice->fresh()->status);
     }
 
     public function test_user_with_change_status_permission_can_change_invoice_status(): void
     {
         $clinic = $this->createClinic();
         $user = $this->createUser();
-        $user->givePermissionTo('invoices.change-status');
+        $this->grantPermissions($user, 'invoices.change-status');
 
         $invoice = $this->createInvoice();
 
         $this->actingAs($user)
-            ->put($this->invoiceStatusUrl($clinic, $invoice), [
-                'status' => 'issued',
-            ])
+            ->put(
+                $this->invoiceStatusUrl($clinic, $invoice),
+                ['status' => 'issued'],
+                $this->host($clinic)
+            )
             ->assertRedirect();
 
-        $invoice->refresh();
-
-        $this->assertSame('issued', $invoice->status);
+        $this->assertSame('issued', $invoice->fresh()->status);
     }
 
     public function test_invoice_status_cannot_skip_allowed_transition(): void
     {
         $clinic = $this->createClinic();
         $user = $this->createUser();
-        $user->givePermissionTo('invoices.change-status');
+        $this->grantPermissions($user, 'invoices.change-status');
 
         $invoice = $this->createInvoice();
-
-        $this->actingAs($user)
-            ->put($this->invoiceStatusUrl($clinic, $invoice), [
-                'status' => 'paid',
-            ])
-            ->assertRedirect();
-
-        $invoice->refresh();
-
-        $this->assertSame('draft', $invoice->status);
-    }
-
-    public function test_store_validation_rejects_invalid_invoice_data(): void
-    {
-        $clinic = $this->createClinic();
-        $user = $this->createUser();
-        $user->givePermissionTo('invoices.create');
-
-        $appointment = $this->createAppointment();
-
-        $data = $this->validInvoiceData($appointment);
-
-        $data['appointment_id'] = 999999999;
-        $data['doctor_id'] = 999999999;
-        $data['patient_id'] = 999999999;
-        $data['date'] = 'invalid-date';
-        $data['full_name'] = '';
-        $data['subtotal'] = -1;
-        $data['items'] = [];
-
-        $this->withoutExceptionHandling();
-
-        $this->expectException(ValidationException::class);
-
-        $this->actingAs($user)
-            ->post($this->url($clinic, '/admin/invoices'), $data);
-    }
-
-    public function test_update_validation_rejects_invalid_invoice_data(): void
-    {
-        $clinic = $this->createClinic();
-        $user = $this->createUser();
-        $user->givePermissionTo('invoices.update');
-
-        $invoice = $this->createInvoice();
-
-        $data = $this->validInvoiceData($invoice->appointment);
-
-        $data['appointment_id'] = 999999999;
-        $data['doctor_id'] = 999999999;
-        $data['patient_id'] = 999999999;
-        $data['date'] = 'invalid-date';
-        $data['full_name'] = '';
-        $data['subtotal'] = -1;
-        $data['items'] = [];
-
-        $this->withoutExceptionHandling();
-
-        $this->expectException(ValidationException::class);
 
         $this->actingAs($user)
             ->put(
-                $this->url($clinic, "/admin/invoices/{$invoice->getRouteKey()}"),
-                $data
-            );
+                $this->invoiceStatusUrl($clinic, $invoice),
+                ['status' => 'paid'],
+                $this->host($clinic)
+            )
+            ->assertRedirect();
+
+        $this->assertSame('draft', $invoice->fresh()->status);
     }
 
     public function test_user_with_change_status_permission_can_mark_issued_invoice_as_paid(): void
     {
+        $this->withoutExceptionHandling();
+
         $clinic = $this->createClinic();
         $user = $this->createUser();
-        $user->givePermissionTo('invoices.change-status');
+        $this->grantPermissions($user, 'invoices.change-status');
+
         $invoice = $this->createInvoice();
-        $this->actingAs($user)->put($this->invoiceStatusUrl($clinic, $invoice), ['status' => 'issued'])->assertRedirect();
-        $invoice->refresh();
-        $this->assertSame('issued', $invoice->status);
-        $this->actingAs($user)->put($this->invoiceStatusUrl($clinic, $invoice), ['status' => 'paid'])->assertRedirect();
-        $invoice->refresh();
-        $this->assertSame('paid', $invoice->status);
+
+        $this->actingAs($user)
+            ->put(
+                $this->invoiceStatusUrl($clinic, $invoice),
+                ['status' => 'issued'],
+                $this->host($clinic)
+            )
+            ->assertRedirect();
+
+        $this->assertSame('issued', $invoice->fresh()->status);
+
+        $this->actingAs($user)
+            ->put(
+                $this->invoiceStatusUrl($clinic, $invoice),
+                [
+                    'status' => 'paid',
+                    'payment_method' => 'cash',
+                    'payment_date' => now()->toDateString(),
+                    'paid_at' => now()->toDateString(),
+                    'amount' => 100,
+                    'notes' => 'Pagamento effettuato',
+                ],
+                $this->host($clinic)
+            )
+            ->assertRedirect();
+
+        $this->assertSame('paid', $invoice->fresh()->status);
     }
 
     public function test_paid_invoice_cannot_change_status(): void
     {
+        $this->withoutExceptionHandling();
+
         $clinic = $this->createClinic();
         $user = $this->createUser();
-        $user->givePermissionTo('invoices.change-status');
+        $this->grantPermissions($user, 'invoices.change-status');
+
         $invoice = $this->createInvoice();
-        $this->actingAs($user)->put($this->invoiceStatusUrl($clinic, $invoice), ['status' => 'issued'])->assertRedirect();
-        $invoice->refresh();
-        $this->assertSame('issued', $invoice->status);
-        $this->actingAs($user)->put($this->invoiceStatusUrl($clinic, $invoice), ['status' => 'paid'])->assertRedirect();
-        $invoice->refresh();
-        $this->assertSame('paid', $invoice->status);
-        $this->actingAs($user)->put($this->invoiceStatusUrl($clinic, $invoice), ['status' => 'issued'])->assertRedirect();
-        $invoice->refresh();
-        $this->assertSame('paid', $invoice->status);
+
+        $this->actingAs($user)
+            ->put(
+                $this->invoiceStatusUrl($clinic, $invoice),
+                ['status' => 'issued'],
+                $this->host($clinic)
+            )
+            ->assertRedirect();
+
+        $this->actingAs($user)
+            ->put(
+                $this->invoiceStatusUrl($clinic, $invoice),
+                [
+                    'status' => 'paid',
+                    'payment_method' => 'cash',
+                    'payment_date' => now()->toDateString(),
+                    'paid_at' => now()->toDateString(),
+                    'amount' => 100,
+                    'notes' => 'Pagamento effettuato',
+                ],
+                $this->host($clinic)
+            )
+            ->assertRedirect();
+
+        $this->assertSame('paid', $invoice->fresh()->status);
+
+        $this->actingAs($user)
+            ->put(
+                $this->invoiceStatusUrl($clinic, $invoice),
+                ['status' => 'issued'],
+                $this->host($clinic)
+            )
+            ->assertRedirect();
+
+        $this->assertSame('paid', $invoice->fresh()->status);
     }
 
     public function test_user_without_export_permission_cannot_export_invoices(): void
@@ -414,7 +505,10 @@ class InvoiceControllerTest extends TestCase
         $user = $this->createUser();
 
         $this->actingAs($user)
-            ->get($this->url($clinic, '/admin/invoices/export'))
+            ->get(
+                $this->url($clinic, '/admin/invoices/export'),
+                $this->host($clinic)
+            )
             ->assertForbidden();
     }
 
@@ -422,17 +516,21 @@ class InvoiceControllerTest extends TestCase
     {
         $clinic = $this->createClinic();
         $user = $this->createUser();
-        $user->givePermissionTo('invoices.export');
+        $this->grantPermissions($user, 'invoices.export');
 
         $invoice = $this->createInvoice();
 
         $response = $this->actingAs($user)
-            ->get($this->url($clinic, '/admin/invoices/export'));
+            ->get(
+                $this->url($clinic, '/admin/invoices/export'),
+                $this->host($clinic)
+            );
 
         $response->assertSuccessful();
         $response->assertHeader('content-type', 'text/csv; charset=UTF-8');
 
         $content = $response->streamedContent();
+
         $this->assertStringContainsString('Numero;Data;Paziente;Medico', $content);
         $this->assertStringContainsString($invoice->number, $content);
         $this->assertStringContainsString('Mario Rossi', $content);
@@ -442,24 +540,67 @@ class InvoiceControllerTest extends TestCase
     {
         $clinic = $this->createClinic();
         $user = $this->createUser();
-        $user->givePermissionTo('invoices.export');
+        $this->grantPermissions($user, 'invoices.export');
 
         $invoice = $this->createInvoice();
 
         $response = $this->actingAs($user)
-            ->get($this->url($clinic, '/admin/invoices/export?status=draft&search=Mario'));
+            ->get(
+                $this->url($clinic, '/admin/invoices/export?status=draft&search=Mario'),
+                $this->host($clinic)
+            );
 
         $response->assertSuccessful();
 
         $content = $response->streamedContent();
+
         $this->assertStringContainsString($invoice->number, $content);
 
-        // Test con filtro non corrispondente (nessun risultato)
         $responseEmpty = $this->actingAs($user)
-            ->get($this->url($clinic, '/admin/invoices/export?status=paid'));
+            ->get(
+                $this->url($clinic, '/admin/invoices/export?status=paid'),
+                $this->host($clinic)
+            );
 
         $contentEmpty = $responseEmpty->streamedContent();
+
         $this->assertStringNotContainsString($invoice->number, $contentEmpty);
+    }
+
+    public function test_cannot_access_or_edit_invoice_belonging_to_another_clinic_tenant(): void
+    {
+        $clinicA = $this->createClinic();
+        $clinicB = $this->createClinic();
+
+        $user = $this->createUser();
+        $this->grantPermissions($user, [
+            'invoices.view',
+            'invoices.update',
+        ]);
+
+        $invoiceB = $this->createInvoice();
+        $invoiceB->forceDelete();
+
+        $this->actingAs($user)
+            ->get(
+                $this->url($clinicA, "/admin/invoices/{$invoiceB->getRouteKey()}/edit"),
+                $this->host($clinicA)
+            )
+            ->assertNotFound();
+    }
+
+    private function grantPermissions(User $user, array|string $permissions): void
+    {
+        $user->givePermissionTo($permissions);
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+    }
+
+    private function host(Clinic $clinic): array
+    {
+        return [
+            'HTTP_HOST' => "{$clinic->slug}.clinika.test",
+        ];
     }
 
     private function url(Clinic $clinic, string $path): string
@@ -477,8 +618,8 @@ class InvoiceControllerTest extends TestCase
 
     private function createClinic(): Clinic
     {
-        $clinic = Clinic::on('central')->create([
-            'uuid' => Str::uuid(),
+        return Clinic::on('central')->create([
+            'uuid' => (string) Str::uuid(),
             'name' => 'Test Clinic',
             'slug' => 'test-'.Str::lower(Str::random(8)),
             'email' => 'test@example.com',
@@ -494,11 +635,6 @@ class InvoiceControllerTest extends TestCase
             'db_password' => '',
             'active' => true,
         ]);
-
-        DB::purge('tenant');
-        DB::reconnect('tenant');
-
-        return $clinic;
     }
 
     private function createUser(): User
@@ -591,6 +727,8 @@ class InvoiceControllerTest extends TestCase
         $doctor->services()->attach($service->id, [
             'price' => 100,
             'duration_minutes' => 60,
+            'compensation_type' => 'percentage',
+            'compensation_value' => 70,
             'active' => true,
         ]);
 
@@ -622,7 +760,7 @@ class InvoiceControllerTest extends TestCase
         $invoice = new Invoice;
 
         $invoice->setConnection('tenant');
-        $invoice->uuid = Str::uuid();
+        $invoice->uuid = (string) Str::uuid();
         $invoice->number = $progressive.'/'.$year;
         $invoice->year = $year;
         $invoice->progressive_number = $progressive;

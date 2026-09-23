@@ -184,7 +184,8 @@ const confirmDelete = () => {
         </div>
         <div class="col-4">
           <ExportToPdfButton :title="`Inventario medicinali ${page.props.clinicRoom.name}`" :columns="pdfColumns"
-            :rows="pdfRows" :filename="`inventario_medicinali_${page.props.clinicRoom.name}.pdf`" />
+            :rows="pdfRows" :filename="`inventario_medicinali_${page.props.clinicRoom.name}.pdf`"
+            audit-type="App\Models\InventoryDrug" :audit-id="roomId" />
         </div>
       </div>
 

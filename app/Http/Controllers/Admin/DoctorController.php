@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateDoctorRequest;
 use App\Mail\PersonSetPasswordMail;
 use App\Models\Clinic;
 use App\Models\Doctor;
+use App\Models\DoctorCompensation;
 use App\Models\Nationality;
 use App\Models\Nurse;
 use App\Models\Patient;
@@ -118,6 +119,8 @@ class DoctorController extends Controller
                 $servicesSync[$service['service_id']] = [
                     'price' => $service['price'],
                     'duration_minutes' => $service['duration'],
+                    'compensation_type' => $service['compensation_type'],
+                    'compensation_value' => $service['compensation_value'],
                     'active' => $service['active'] ?? 1,
                 ];
             }
@@ -157,19 +160,44 @@ class DoctorController extends Controller
      */
     public function show(Doctor $doctor)
     {
-
         $user = Auth::user();
 
-        $doctor = Doctor::with(['user', 'nationality', 'specialty', 'appointments.service', 'appointments.patient', 'appointments.doctor', 'appointments.doctor.user', 'services'])->findOrFail($doctor->id);
+        $doctor = Doctor::with([
+            'user',
+            'nationality',
+            'specialty',
+            'appointments.service',
+            'appointments.patient',
+            'appointments.doctor',
+            'appointments.doctor.user',
+            'services',
+        ])->findOrFail($doctor->id);
+
         $doctors = Doctor::all();
         $patients = Patient::all();
         $nurses = Nurse::all();
         $nationalities = Nationality::all();
-        $user = Auth::user();
+
+        $compensations = DoctorCompensation::with([
+            'service:id,name,code',
+            'invoice:id,number,date,status',
+        ])
+            ->where('doctor_id', $doctor->id)
+            ->orderByDesc('created_at')
+            ->get();
 
         app(\App\Observers\DoctorObserver::class)->viewed($doctor);
 
-        return Inertia::render('Doctors/ShowDoctor', ['doctor' => $doctor, 'doctors' => $doctors, 'patients' => $patients, 'nurses' => $nurses, 'nationalities' => $nationalities, 'userIsAdmin' => $user->hasRole('Admin'), 'userCanCreateAppointment' => $user->can('appointment.create')]);
+        return Inertia::render('Doctors/ShowDoctor', [
+            'doctor' => $doctor,
+            'doctors' => $doctors,
+            'patients' => $patients,
+            'nurses' => $nurses,
+            'nationalities' => $nationalities,
+            'compensations' => $compensations,
+            'userIsAdmin' => $user->hasRole('Admin'),
+            'userCanCreateAppointment' => $user->can('appointment.create'),
+        ]);
     }
 
     /**
@@ -178,7 +206,7 @@ class DoctorController extends Controller
     public function edit(Doctor $doctor)
     {
         $doctor->load(['user', 'services' => function ($service) {
-            $service->select('services.id', 'name')->withPivot('price', 'duration_minutes', 'price');
+            $service->select('services.id', 'name')->withPivot('price', 'duration_minutes', 'compensation_type', 'compensation_value', 'price');
         }]);
 
         $doctor->services = $doctor->services->map(function ($service) {
@@ -187,6 +215,8 @@ class DoctorController extends Controller
                 'name' => $service->name,
                 'price' => $service->pivot->price,
                 'duration_minutes' => $service->pivot->duration_minutes,
+                'compensation_type' => $service->pivot->compensation_type,
+                'compensation_value' => $service->pivot->compensation_value,
                 'active' => $service->pivot->active,
             ];
         });
@@ -233,6 +263,8 @@ class DoctorController extends Controller
                 $servicesSync[$service['service_id']] = [
                     'price' => $service['price'],
                     'duration_minutes' => $service['duration'],
+                    'compensation_type' => $service['compensation_type'],
+                    'compensation_value' => $service['compensation_value'],
                     'active' => $service['active'] ?? 1,
                 ];
             }

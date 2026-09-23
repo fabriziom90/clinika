@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Doctor;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreInvoiceRequest extends FormRequest
@@ -52,6 +53,85 @@ class StoreInvoiceRequest extends FormRequest
             'items.*.vat_percentage' => ['required', 'numeric', 'min:0'],
             'items.*.total' => ['required', 'numeric', 'min:0'],
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $doctor = Doctor::with([
+                'services' => function ($query) {
+                    $query->withPivot([
+                        'price',
+                        'duration_minutes',
+                        'compensation_type',
+                        'compensation_value',
+                        'active',
+                    ]);
+                },
+            ])->find($this->input('doctor_id'));
+
+            if (! $doctor) {
+                return;
+            }
+
+            $serviceIds = collect($this->input('items', []))
+                ->pluck('service_id')
+                ->filter()
+                ->unique()
+                ->values();
+
+            if ($serviceIds->isEmpty()) {
+                return;
+            }
+
+            $doctorServices = $doctor->services
+                ->whereIn('id', $serviceIds)
+                ->keyBy('id');
+
+            $subtotal = 0;
+            $maximumCompensation = 0;
+
+            foreach ($this->input('items', []) as $index => $item) {
+                $quantity = (float) ($item['quantity'] ?? 0);
+                $unitPrice = (float) ($item['unit_price'] ?? 0);
+
+                $subtotal += $quantity * $unitPrice;
+
+                $serviceId = $item['service_id'] ?? null;
+
+                if (! $serviceId || ! $doctorServices->has($serviceId)) {
+                    continue;
+                }
+
+                $service = $doctorServices->get($serviceId);
+                $compensationType = $service->pivot->compensation_type;
+                $compensationValue = (float) $service->pivot->compensation_value;
+
+                if ($compensationType === 'percentage') {
+                    $maximumCompensation +=
+                        ($quantity * $unitPrice) * ($compensationValue / 100);
+                } else {
+                    $maximumCompensation += $compensationValue * $quantity;
+                }
+            }
+
+            if ($subtotal <= 0) {
+                return;
+            }
+
+            $discountPercentage = (float) $this->input('discount_amount', 0);
+
+            $discountAmount = $subtotal * ($discountPercentage / 100);
+
+            $discountedSubtotal = $subtotal - $discountAmount;
+
+            if ($discountedSubtotal < $maximumCompensation) {
+                $validator->errors()->add(
+                    'discount_amount',
+                    'Lo sconto applicato è troppo elevato: non può ridurre l\'importo delle prestazioni al di sotto del compenso spettante al medico.'
+                );
+            }
+        });
     }
 
     public function messages(): array

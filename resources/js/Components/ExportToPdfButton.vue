@@ -1,6 +1,7 @@
 <script setup>
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { router } from "@inertiajs/vue3";
 
 const props = defineProps({
   title: {
@@ -18,10 +19,18 @@ const props = defineProps({
   filename: {
     type: String,
     default: "export.pdf"
+  },
+  auditType: {
+    type: String,
+    required: true
+  },
+  auditId: {
+    type: [Number, String],
+    default: null
   }
 });
 
-const exportPdf = () => {
+const exportPdf = async () => {
   const doc = new jsPDF();
 
   doc.setFontSize(16);
@@ -34,6 +43,16 @@ const exportPdf = () => {
   });
 
   doc.save(props.filename);
+
+  try {
+    router.post(route("admin.audits.export"), {
+      auditable_type: props.auditType,
+      auditable_id: props.auditId,
+      tags: props.auditTags
+    });
+  } catch (error) {
+    console.error("Errore registrazione audit esportazione:", error);
+  }
 };
 </script>
 
@@ -42,10 +61,11 @@ const exportPdf = () => {
     Esporta PDF
   </button>
 </template>
-<style lang="scss" scoped>
-    @use '../../scss/app.scss' as *;
 
-    .main-button{
-        padding: 10px 20px !important;
-    }
+<style lang="scss" scoped>
+@use '../../scss/app.scss' as *;
+
+.main-button {
+  padding: 10px 20px !important;
+}
 </style>

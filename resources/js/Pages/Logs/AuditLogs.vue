@@ -34,6 +34,9 @@ const entityLabels = {
     "App\\Models\\Invoice": "Fattura",
     "App\\Models\\Appointment": "Appuntamento",
     "App\\Models\\Clinic": "Clinica",
+    "App\\Models\\DoctorCompensation": "Compenso Medico",
+    "App\\Models\\InventoryProduct": "Prodotti stanza",
+    "App\\Models\\InventoryDrug": "Medicinali stanza",
 };
 
 const getEntityLabel = (type) => {

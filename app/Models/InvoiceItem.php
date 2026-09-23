@@ -33,4 +33,9 @@ class InvoiceItem extends Model implements AuditableContract
     {
         return $this->belongsTo(Service::class);
     }
+
+    public function compensation()
+    {
+        return $this->hasOne(DoctorCompensation::class);
+    }
 }

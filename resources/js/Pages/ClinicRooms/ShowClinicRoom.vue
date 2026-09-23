@@ -5,7 +5,7 @@ import InventoryDrugTable from "@/Components/InventoryDrugTable.vue";
 import InventoryProductTable from "@/Components/InventoryProductTable.vue";
 import { ref } from "vue";
 import { useToast } from "vue-toast-notification";
-import ExportToPdfButton from "@/Components/ExportToPdfButton.vue";
+
 
 const props = defineProps({
     clinicRoom: Object,

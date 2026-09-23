@@ -46,6 +46,8 @@ const form = useForm({
         service_id: "",
         price: "",
         duration: "",
+        compensation_type: "",
+        compensation_value: "",
         active: 1
     }],
     user_id: "",
@@ -60,11 +62,14 @@ onMounted(() => {
     const person = props.person;
 
     if (person.services && person.services.length) {
+        console.log(form.services)
         form.services = person.services.map(s => ({
             service_id: s.id,
             name: s.name,
             price: s.pivot?.price ?? 0,
             duration: s.pivot?.duration_minutes ?? 0,
+            compensation_type: s.pivot?.compensation_type ?? 'percentage',
+            compensation_value: s.pivot.compensation_value ?? 0,
             active: s.pivot?.active ?? 1
         }));
     }
@@ -98,7 +103,7 @@ onMounted(() => {
         form.reminder_types = person.reminder_types ? person.reminder_types.map(reminder => reminder.id) : []
     }
 
-    console.log(form);
+
 });
 
 // filter functions
@@ -135,6 +140,8 @@ const addRow = () => {
     form.services.push({
         name: "",
         duration: "",
+        compensation_type: "percentage",
+        compensation_value: "",
         price: "",
         active: 1,
     });
@@ -193,6 +200,8 @@ watch(() => form.specialty_id, (newVal, oldVal) => {
             service_id: "",
             price: "",
             duration: "",
+            compensation_type: "",
+            compensation_value: "",
             active: 1
         }]
     }
@@ -568,34 +577,48 @@ const handleSubmitForm = () => {
                 <hr>
                 <h3>Prestazioni medico</h3>
                 <div class="row mb-2">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label for="" class="form-label"><strong>Prestazione</strong></label>
                     </div>
-                    <div class="col-md-2">
-                        <label for="" class="form-label"><strong>Prezzo</strong></label>
+                    <div class="col-md-1">
+                        <label for="" class="form-label"><strong>Prezzo totale</strong></label>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-1">
                         <label for="" class="form-label"><strong>Durata (minuti)</strong></label>
                     </div>
                     <div class="col-md-2">
+                        <label for="" class="form-label"><strong>Tipologia compenso</strong></label>
+                    </div>
+                    <div class="col-md-2"><label for="" class="form-label"><strong>Compenso medico</strong></label></div>
+                    <div class="col-md-1">
                         <label for="" class="form-label"><strong>Attivo</strong></label>
                     </div>
                 </div>
                 <div v-for="service, index in form.services" :key="index" class="row gy-3 mb-3">
                     <div class="row gy-2">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <select name="" id="" class="form-select" v-model="service.service_id" @change="onServiceChange(index)">
                                 <option value="">Seleziona una specializzazione prima</option>
                                 <option :value="service.id" v-for="service in filteredServices" :key="service.id">{{ service.name }}</option>
                             </select>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-1">
                             <input class="form-control" type="number" placeholder="Prezzo" v-model="service.price" />
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-1">
                             <input class="form-control" type="number" placeholder="Durata" v-model="service.duration" />
                         </div>
                         <div class="col-md-2">
+                            <select class="form-select" name="compensation_type" id="compensation_type" v-model="service.compensation_type">
+                                <option value="">Seleziona tipologia compenso</option>
+                                <option value="percentage">Percentuale</option>
+                                <option value="fixed">Fisso</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <input class="form-control" type="number" min="0" placeholder="Valore compenso" v-model="service.compensation_value">
+                        </div>
+                        <div class="col-md-1">
                             <select class="form-select" v-model="service.active">
                                 <option :value="1">Attiva</option>
                                 <option :value="0">Disattiva</option>

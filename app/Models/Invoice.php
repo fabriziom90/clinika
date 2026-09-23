@@ -73,4 +73,9 @@ class Invoice extends Model implements AuditableContract
     {
         return $this->hasMany(InvoiceItem::class);
     }
+
+    public function compensations()
+    {
+        return $this->hasMany(DoctorCompensation::class);
+    }
 }

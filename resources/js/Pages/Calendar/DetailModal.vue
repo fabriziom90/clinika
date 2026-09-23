@@ -81,12 +81,13 @@ const generateInvoice = () => {
                         <span class="status-pill me-2" :class="{ 'cursor-default': !isAdmin}" @click="editingStatus = !editingStatus">
                             {{ item.status_label }}
                         </span>
+                        {{ console.log(item) }}
                         <span class="status-pill" v-if="configStore.hasPermission('appointment.create') && item.status === 'completed' && !item.invoice" @click="generateInvoice">
                             Genera fattura
                         </span>
-                        <span v-if="configStore.hasPermission('appointment.create') && item.invoice">
+                        <a class="status-pill" v-if="configStore.hasPermission('appointment.create') && item.invoice" target="_blank" :href="route('admin.invoices.show', item.invoice.uuid)">
                             Visualizza fattura
-                        </span>
+                        </a>
                     </h5>
                     <div v-if="configStore.hasPermission('appointment.create') && editingStatus" class="status-editor ms-2" >
                         <select class="form-select py-0 my-0" v-model="selectedStatus">

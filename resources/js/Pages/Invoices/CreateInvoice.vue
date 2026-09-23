@@ -80,6 +80,8 @@ watch(
     }
 )
 
+
+
 // totale singola riga
 const calculateItemTotal = (item) => {
     const imponibile = Number(item.quantity) * Number(item.unit_price);
@@ -103,6 +105,54 @@ const vatAmount = computed(() => {
         return sum + imponibile * (Number(item.vat_percentage) / 100);
     }, 0);
 });
+
+const maxDiscountPercentage = computed(() => {
+    if (!form.items.length) {
+        return 0;
+    }
+
+    let maxDiscountAmount = 0;
+    let totalSubtotal = 0;
+
+    form.items.forEach(item => {
+        const service = props.services.find(
+            service => service.id === item.service_id
+        );
+
+        if (!service) {
+            return;
+        }
+
+        const lineAmount =
+            Number(item.quantity) * Number(item.unit_price);
+
+        totalSubtotal += lineAmount;
+
+        const lineMaxDiscountPercentage =
+            Number(service.max_discount_percentage ?? 0);
+
+        const lineMaxDiscountAmount =
+            lineAmount * lineMaxDiscountPercentage / 100;
+
+        maxDiscountAmount += lineMaxDiscountAmount;
+    });
+
+    if (totalSubtotal <= 0) {
+        return 0;
+    }
+
+    return (maxDiscountAmount / totalSubtotal) * 100;
+});
+
+watch(
+    maxDiscountPercentage,
+    (maxDiscount) => {
+        if (Number(form.discount_amount) > maxDiscount) {
+            form.discount_amount = Number(maxDiscount.toFixed(2));
+        }
+    },
+    { immediate: true }
+);
 
 const total = computed(() => {
     const discount = subtotal.value * form.discount_amount / 100;
@@ -149,6 +199,13 @@ const removeItem = (index) => {
 };
 
 const submit = () => {
+    const discount = Number(form.discount_amount);
+
+    if (discount < 0 || discount > 100) {
+        $toast.error("Lo sconto deve essere compreso tra 0% e 100%");
+        return;
+    }
+
     form.subtotal = subtotal.value;
     form.vat_amount = vatAmount.value;
     form.total = total.value;
@@ -275,7 +332,11 @@ const submit = () => {
                             </p>
                             <p>
                                 Sconto:
-                                <input type="number" step="0.01" class="form-control" v-model="form.discount_amount" />
+                                <input type="number" step="0.01" min="0" :max="maxDiscountPercentage"
+                                    class="form-control" v-model="form.discount_amount" />
+                                <small class="text-muted">
+                                    Sconto massimo applicabile: {{ maxDiscountPercentage.toFixed(2) }}%
+                                </small>
                             </p>
                             <p>
                                 Metodo pagamento:

@@ -162,6 +162,16 @@ const exportData = () => {
                     </div>
                 </div>
                 <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="card bg-warning text-white h-100 shadow-sm border-0">
+                        <div class="card-body">
+                            <h6 class="card-title text-uppercase mb-1"><i class="fas fa-calculator me-1"></i> Totale
+                                compenso medici</h6>
+                            <h3 class="mb-0">{{ Number(statistics.doctor_compensation_total).toFixed(2) }} €</h3>
+                            <small>{{ statistics.grand_count }} fatture totali visualizzate</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3">
                     <div class="card bg-dark text-white h-100 shadow-sm border-0">
                         <div class="card-body">
                             <h6 class="card-title text-uppercase mb-1"><i class="fas fa-calculator me-1"></i> Totale
@@ -273,7 +283,7 @@ const exportData = () => {
                             <i class="fas fa-angle-left"></i> Precedente
                         </button>
                         <span>Pagina <strong>{{ invoices.current_page }}</strong> di <strong>{{ invoices.last_page
-                                }}</strong></span>
+                        }}</strong></span>
                         <button class="btn btn-outline-secondary btn-sm"
                             :disabled="invoices.current_page === invoices.last_page"
                             @click="changePage(invoices.current_page + 1)">

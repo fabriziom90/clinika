@@ -39,7 +39,7 @@ class AppointmentController extends Controller
                 ->get();
         } else {
             // Admin o altri ruoli autorizzati
-            $appointments = Appointment::with(['doctor.user', 'nurse.user', 'patient', 'service'])->get();
+            $appointments = Appointment::with(['doctor.user', 'nurse.user', 'patient', 'service', 'invoice'])->get();
 
         }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreDoctorRequest extends FormRequest
 {
@@ -47,9 +48,51 @@ class StoreDoctorRequest extends FormRequest
             'pec' => 'required',
             'specialty_id' => 'required',
             'nationality_id' => 'required',
-            'services' => 'required|array',
             'zip_code' => 'required|string|max:7',
+            'services' => 'required|array',
+            'services.*.service_id' => 'required|exists:services,id',
+            'services.*.price' => 'required|numeric|min:0',
+            'services.*.duration' => 'required|numeric|min:1',
+            'services.*.compensation_type' => [
+                'required',
+                Rule::in(['percentage', 'fixed']),
+            ],
+            'services.*.compensation_value' => 'required|numeric|min:0',
+            'services.*.active' => 'required|boolean',
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            foreach ($this->input('services', []) as $index => $service) {
+                $type = $service['compensation_type'] ?? null;
+                $value = isset($service['compensation_value'])
+                    ? (float) $service['compensation_value']
+                    : null;
+                $price = isset($service['price'])
+                    ? (float) $service['price']
+                    : null;
+
+                if ($value === null || $price === null) {
+                    continue;
+                }
+
+                if ($type === 'percentage' && $value > 100) {
+                    $validator->errors()->add(
+                        "services.{$index}.compensation_value",
+                        'Il compenso percentuale non può essere superiore al 100%.'
+                    );
+                }
+
+                if ($type === 'fixed' && $value > $price) {
+                    $validator->errors()->add(
+                        "services.{$index}.compensation_value",
+                        'Il compenso non può essere superiore al prezzo della prestazione.'
+                    );
+                }
+            }
+        });
     }
 
     public function messages()
@@ -79,6 +122,21 @@ class StoreDoctorRequest extends FormRequest
             'pec.required' => 'La pec è obbligatoria',
             'nationality_id' => 'La nazionalità è obbligatoria',
             'specialty_id' => 'La specializzazione è obbligatoria',
+
+            'services.*.service_id.required' => 'La prestazione è obbligatoria.',
+            'services.*.service_id.exists' => 'La prestazione selezionata non esiste.',
+            'services.*.price.required' => 'Il prezzo della prestazione è obbligatorio.',
+            'services.*.price.numeric' => 'Il prezzo della prestazione deve essere numerico.',
+            'services.*.price.min' => 'Il prezzo della prestazione non può essere negativo.',
+            'services.*.duration.required' => 'La durata della prestazione è obbligatoria.',
+            'services.*.duration.numeric' => 'La durata della prestazione deve essere numerica.',
+            'services.*.duration.min' => 'La durata della prestazione deve essere maggiore di zero.',
+            'services.*.compensation_type.required' => 'La tipologia del compenso è obbligatoria.',
+            'services.*.compensation_type.in' => 'La tipologia del compenso non è valida.',
+            'services.*.compensation_value.required' => 'Il valore del compenso è obbligatorio.',
+            'services.*.compensation_value.numeric' => 'Il valore del compenso deve essere numerico.',
+            'services.*.compensation_value.min' => 'Il valore del compenso non può essere negativo.',
+            'services.*.active.required' => 'Lo stato della prestazione è obbligatorio.',
         ];
     }
 }

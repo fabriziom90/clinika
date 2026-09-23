@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AppointmentController;
 use App\Http\Controllers\Admin\AppointmentReminderController;
+use App\Http\Controllers\Admin\AuditExportController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\ClinicRoomController;
 use App\Http\Controllers\Admin\ConsentTypeController;
@@ -95,6 +96,7 @@ Route::middleware(['tenant', 'auth'])->group(function () {
         Route::put('medical-entries/{medical_entry}', [MedicalEntryController::class, 'update'])->name('medical-entries.update');
         Route::get('/medical-entries/{version}/pdf', [MedicalEntryController::class, 'versionPdf'])->name('medical-entries.pdf');
         Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
+        Route::post('audits/export', [AuditExportController::class, 'store'])->name('audits.export');
         Route::put('inventory-products/{inventoryProduct}/update-quantity', [InventoryProductController::class, 'updateQuantity'])->name('inventory-products.update-quantity');
         Route::put('inventory-products/{inventoryProduct}/update-expiration', [InventoryProductController::class, 'updateExpiryDate'])->name('inventory-products.update-expiration');
         Route::put('inventory-drugs/{inventoryDrug}/update-quantity', [InventoryDrugController::class, 'updateQuantity'])->name('inventory-drugs.update-quantity');

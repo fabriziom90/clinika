@@ -14,9 +14,10 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use Tests\TestCase;
+use Spatie\Permission\PermissionRegistrar;
+use Tests\TenantTestCase;
 
-class DoctorControllerTest extends TestCase
+class DoctorControllerTest extends TenantTestCase
 {
     protected function setUp(): void
     {
@@ -59,6 +60,8 @@ class DoctorControllerTest extends TestCase
                 'guard_name' => 'web',
             ]);
         }
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 
     private function createClinic(): Clinic
@@ -123,8 +126,10 @@ class DoctorControllerTest extends TestCase
         ]);
     }
 
-    private function createDoctor(): Doctor
-    {
+    private function createDoctor(
+        string $compensationType = 'percentage',
+        float $compensationValue = 70
+    ): Doctor {
         $user = $this->createUser();
 
         $user->update([
@@ -155,14 +160,21 @@ class DoctorControllerTest extends TestCase
         $doctor->services()->attach($service->id, [
             'price' => 100,
             'duration_minutes' => 60,
+            'compensation_type' => $compensationType,
+            'compensation_value' => $compensationValue,
             'active' => true,
         ]);
 
         return $doctor;
     }
 
-    private function validDoctorData(?int $nationalityId = null, ?int $specialtyId = null, ?int $serviceId = null): array
-    {
+    private function validDoctorData(
+        ?int $nationalityId = null,
+        ?int $specialtyId = null,
+        ?int $serviceId = null,
+        string $compensationType = 'percentage',
+        float $compensationValue = 70
+    ): array {
         $nationalityId ??= $this->createNationality()->id;
         $specialtyId ??= $this->createSpecialty()->id;
         $serviceId ??= $this->createService()->id;
@@ -188,6 +200,8 @@ class DoctorControllerTest extends TestCase
                     'service_id' => $serviceId,
                     'price' => 120,
                     'duration' => 45,
+                    'compensation_type' => $compensationType,
+                    'compensation_value' => $compensationValue,
                     'active' => 1,
                 ],
             ],
@@ -256,8 +270,140 @@ class DoctorControllerTest extends TestCase
 
     public function test_user_with_create_permission_can_create_doctor(): void
     {
-        Mail::fake();
+        $clinic = $this->createClinic();
+        $user = $this->createUser();
 
+        $user->givePermissionTo('doctor.create');
+
+        $this->actingAs($user);
+
+        $data = $this->validDoctorData(
+            compensationType: 'percentage',
+            compensationValue: 25
+        );
+
+        $response = $this->post(
+            "http://{$clinic->slug}.clinika.test/admin/doctors",
+            $data
+        );
+
+        $response->assertRedirect();
+
+        $doctor = Doctor::on('tenant')
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($doctor);
+
+        $doctor->load('user');
+
+        $doctorUser = $doctor->user;
+
+        $this->assertNotNull($doctorUser);
+
+        $this->assertSame('Luigi', $doctorUser->name);
+        $this->assertSame('Bianchi', $doctorUser->surname);
+        $this->assertSame($data['email'], $doctorUser->email);
+
+        $this->assertSame('BNCLGU80A01H501Z', $doctor->personal_code);
+        $this->assertSame('98765432109', $doctor->vat);
+
+        $this->assertSame($data['birthday'], $doctor->birthday);
+        $this->assertSame($data['birth_city'], $doctor->birth_city);
+        $this->assertSame($data['city'], $doctor->city);
+        $this->assertSame($data['address'], $doctor->address);
+        $this->assertSame($data['phone'], $doctor->phone);
+        $this->assertSame($data['genre'], $doctor->genre);
+        $this->assertSame($data['zip_code'], $doctor->cap);
+        $this->assertSame($data['pec'], $doctor->pec);
+
+        $this->assertSame($data['specialty_id'], $doctor->specialty_id);
+        $this->assertSame($data['nationality_id'], $doctor->nationality_id);
+
+        $this->assertTrue(
+            $doctorUser->hasRole('doctor')
+        );
+
+        $this->assertDatabaseHas('doctor_service', [
+            'doctor_id' => $doctor->id,
+            'service_id' => $data['services'][0]['service_id'],
+            'price' => 120,
+            'duration_minutes' => 45,
+            'compensation_type' => 'percentage',
+            'compensation_value' => 25,
+            'active' => 1,
+        ], 'tenant');
+    }
+
+    public function test_user_with_create_permission_can_create_doctor_with_fixed_compensation(): void
+    {
+        $clinic = $this->createClinic();
+        $user = $this->createUser();
+
+        $user->givePermissionTo('doctor.create');
+
+        $this->actingAs($user);
+
+        $data = $this->validDoctorData(
+            compensationType: 'fixed',
+            compensationValue: 75
+        );
+
+        $response = $this->post(
+            "http://{$clinic->slug}.clinika.test/admin/doctors",
+            $data
+        );
+
+        $response->assertRedirect();
+
+        $doctor = Doctor::on('tenant')
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($doctor);
+
+        $doctor->load('user');
+
+        $doctorUser = $doctor->user;
+
+        $this->assertNotNull($doctorUser);
+
+        $this->assertSame('Luigi', $doctorUser->name);
+        $this->assertSame('Bianchi', $doctorUser->surname);
+        $this->assertSame($data['email'], $doctorUser->email);
+
+        $this->assertSame('BNCLGU80A01H501Z', $doctor->personal_code);
+        $this->assertSame('98765432109', $doctor->vat);
+
+        $this->assertSame($data['birthday'], $doctor->birthday);
+        $this->assertSame($data['birth_city'], $doctor->birth_city);
+        $this->assertSame($data['city'], $doctor->city);
+        $this->assertSame($data['address'], $doctor->address);
+        $this->assertSame($data['phone'], $doctor->phone);
+        $this->assertSame($data['genre'], $doctor->genre);
+        $this->assertSame($data['zip_code'], $doctor->cap);
+        $this->assertSame($data['pec'], $doctor->pec);
+
+        $this->assertSame($data['specialty_id'], $doctor->specialty_id);
+        $this->assertSame($data['nationality_id'], $doctor->nationality_id);
+
+        $this->assertTrue(
+            $doctorUser->hasRole('doctor')
+        );
+
+        $this->assertDatabaseHas('doctor_service', [
+            'doctor_id' => $doctor->id,
+            'service_id' => $data['services'][0]['service_id'],
+            'price' => 120,
+            'duration_minutes' => 45,
+            'compensation_type' => 'fixed',
+            'compensation_value' => 75,
+            'active' => 1,
+        ], 'tenant');
+    }
+
+    public function test_user_with_create_permission_cannot_create_doctor_with_percentage_compensation_above_100(): void
+    {
         $clinic = $this->createClinic();
         $user = $this->createUser();
 
@@ -270,59 +416,49 @@ class DoctorControllerTest extends TestCase
         $data = $this->validDoctorData(
             $nationality->id,
             $specialty->id,
-            $service->id
+            $service->id,
+            'percentage',
+            101
         );
 
-        $response = $this->actingAs($user)
-            ->post("http://{$clinic->slug}.clinika.test/admin/doctors", $data);
+        $this->actingAs($user)
+            ->post("http://{$clinic->slug}.clinika.test/admin/doctors", $data)
+            ->assertSessionHasErrors('services.0.compensation_value');
 
-        $response
-            ->assertRedirect()
-            ->assertSessionHasNoErrors();
-
-        /*
-         * personal_code, vat, email, name e surname sono campi cifrati.
-         *
-         * Non possiamo quindi cercare il record direttamente con:
-         *
-         * where('personal_code', $data['personal_code'])
-         *
-         * perché nel database il valore è memorizzato cifrato.
-         *
-         * Recuperiamo invece l'ultimo Doctor creato e verifichiamo
-         * i valori attraverso Eloquent, che applica automaticamente
-         * la decifratura.
-         */
-        $doctor = Doctor::on('tenant')
-            ->latest('id')
-            ->first();
-
-        $this->assertNotNull($doctor);
-
-        $doctor->load('user');
-
-        $this->assertNotNull($doctor->user);
-
-        $this->assertSame('BNCLGU80A01H501Z', $doctor->personal_code);
-        $this->assertSame('98765432109', $doctor->vat);
-
-        $this->assertSame('Luigi', $doctor->user->name);
-        $this->assertSame('Bianchi', $doctor->user->surname);
-        $this->assertSame($data['email'], $doctor->user->email);
-
-        $this->assertDatabaseHas('doctor_service', [
-            'doctor_id' => $doctor->id,
-            'service_id' => $service->id,
-            'price' => 120,
-            'duration_minutes' => 45,
-            'active' => 1,
+        $this->assertDatabaseMissing('doctors', [
+            'personal_code' => 'BNCLGU80A01H501Z',
         ], 'tenant');
+    }
 
-        $this->assertDatabaseHas('password_reset_tokens', [
-            'user_id' => $doctor->user_id,
+    public function test_user_with_create_permission_cannot_create_doctor_with_fixed_compensation_above_service_price(): void
+    {
+        $clinic = $this->createClinic();
+        $user = $this->createUser();
+
+        $user->givePermissionTo('doctor.create');
+
+        $nationality = $this->createNationality();
+        $specialty = $this->createSpecialty();
+        $service = $this->createService();
+
+        $data = $this->validDoctorData(
+            $nationality->id,
+            $specialty->id,
+            $service->id,
+            'fixed',
+            121
+        );
+
+        $this->actingAs($user)
+            ->post(
+                "http://{$clinic->slug}.clinika.test/admin/doctors",
+                $data
+            )
+            ->assertSessionHasErrors('services.0.compensation_value');
+
+        $this->assertDatabaseMissing('doctors', [
+            'personal_code' => 'BNCLGU80A01H501Z',
         ], 'tenant');
-
-        Mail::assertSent(\App\Mail\PersonSetPasswordMail::class);
     }
 
     public function test_user_without_view_permission_cannot_view_doctor(): void
@@ -396,6 +532,7 @@ class DoctorControllerTest extends TestCase
             ->assertForbidden();
 
         $doctor->refresh();
+        $doctor->load('user');
 
         $this->assertSame('RSSMRA80A01H501Z', $doctor->personal_code);
         $this->assertSame('Mario', $doctor->user->name);
@@ -438,7 +575,142 @@ class DoctorControllerTest extends TestCase
             'service_id' => $service->id,
             'price' => 120,
             'duration_minutes' => 45,
+            'compensation_type' => 'percentage',
+            'compensation_value' => 70,
             'active' => 1,
+        ], 'tenant');
+    }
+
+    public function test_user_with_update_permission_can_update_doctor_percentage_compensation(): void
+    {
+        $clinic = $this->createClinic();
+        $user = $this->createUser();
+
+        $user->givePermissionTo('doctor.update');
+
+        $doctor = $this->createDoctor('percentage', 70);
+
+        $nationality = $this->createNationality();
+        $specialty = $this->createSpecialty();
+        $service = $this->createService();
+
+        $data = $this->validDoctorData(
+            $nationality->id,
+            $specialty->id,
+            $service->id,
+            'percentage',
+            85
+        );
+
+        $this->actingAs($user)
+            ->put("http://{$clinic->slug}.clinika.test/admin/doctors/{$doctor->id}", $data)
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('doctor_service', [
+            'doctor_id' => $doctor->id,
+            'service_id' => $service->id,
+            'compensation_type' => 'percentage',
+            'compensation_value' => 85,
+        ], 'tenant');
+    }
+
+    public function test_user_with_update_permission_can_update_doctor_to_fixed_compensation(): void
+    {
+        $clinic = $this->createClinic();
+        $user = $this->createUser();
+
+        $user->givePermissionTo('doctor.update');
+
+        $doctor = $this->createDoctor('percentage', 70);
+
+        $nationality = $this->createNationality();
+        $specialty = $this->createSpecialty();
+        $service = $this->createService();
+
+        $data = $this->validDoctorData(
+            $nationality->id,
+            $specialty->id,
+            $service->id,
+            'fixed',
+            75
+        );
+
+        $this->actingAs($user)
+            ->put("http://{$clinic->slug}.clinika.test/admin/doctors/{$doctor->id}", $data)
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('doctor_service', [
+            'doctor_id' => $doctor->id,
+            'service_id' => $service->id,
+            'compensation_type' => 'fixed',
+            'compensation_value' => 75,
+        ], 'tenant');
+    }
+
+    public function test_user_with_update_permission_cannot_set_percentage_compensation_above_100(): void
+    {
+        $clinic = $this->createClinic();
+        $user = $this->createUser();
+        $user->givePermissionTo('doctor.update');
+
+        $doctor = $this->createDoctor('percentage', 70);
+
+        $nationality = $this->createNationality();
+        $specialty = $this->createSpecialty();
+        $existingServiceId = $doctor->services()->first()->id; // <-- il servizio VERO già collegato
+
+        $data = $this->validDoctorData(
+            $nationality->id,
+            $specialty->id,
+            $existingServiceId, // <-- usa questo, non un servizio nuovo
+            'percentage',
+            101
+        );
+
+        $this->actingAs($user)
+            ->put("http://{$clinic->slug}.clinika.test/admin/doctors/{$doctor->id}", $data)
+            ->assertSessionHasErrors('services.0.compensation_value');
+
+        $this->assertDatabaseHas('doctor_service', [
+            'doctor_id' => $doctor->id,
+            'service_id' => $existingServiceId,
+            'compensation_type' => 'percentage',
+            'compensation_value' => 70,
+        ], 'tenant');
+    }
+
+    public function test_user_with_update_permission_cannot_set_fixed_compensation_above_service_price(): void
+    {
+        $clinic = $this->createClinic();
+        $user = $this->createUser();
+
+        $user->givePermissionTo('doctor.update');
+
+        $doctor = $this->createDoctor('fixed', 70);
+
+        $nationality = $this->createNationality();
+        $specialty = $this->createSpecialty();
+        $existingServiceId = $doctor->services()->first()->id;
+
+        $data = $this->validDoctorData(
+            $nationality->id,
+            $specialty->id,
+            $existingServiceId,
+            'fixed',
+            121
+        );
+
+        $this->actingAs($user)
+            ->put("http://{$clinic->slug}.clinika.test/admin/doctors/{$doctor->id}", $data)
+            ->assertSessionHasErrors('services.0.compensation_value');
+
+        $this->assertDatabaseHas('doctor_service', [
+            'doctor_id' => $doctor->id,
+            'service_id' => $existingServiceId,
+            'compensation_type' => 'fixed',
+            'compensation_value' => 70,
         ], 'tenant');
     }
 

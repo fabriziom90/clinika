@@ -7,6 +7,7 @@ use App\Http\Requests\ChangeInvoiceStatusRequest;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\UpdateInvoiceRequest;
 use App\Models\Appointment;
+use App\Models\DoctorCompensation;
 use App\Models\Invoice;
 use App\Services\InvoicePdfService;
 use Illuminate\Http\Request;
@@ -79,6 +80,14 @@ class InvoiceController extends Controller
         $grandTotal = $totalsByStatus->sum('total_amount');
         $grandCount = $totalsByStatus->sum('count');
 
+        $doctorCompensationTotal = (float) (DoctorCompensation::query()
+            ->where('status', 'accrued')
+            ->whereHas('invoice', function ($query) use ($applyFilters) {
+                $applyFilters($query);
+                $query->where('status', 'paid');
+            })
+            ->sum('compensation_amount') ?? 0);
+
         // 3. QUERY PAGINATA: Dettagli della pagina corrente + Eager Loading relazioni
         $invoicesQuery = Invoice::query()
             ->select([
@@ -119,6 +128,7 @@ class InvoiceController extends Controller
             'statistics' => [
                 'grand_total' => $grandTotal,
                 'grand_count' => $grandCount,
+                'doctor_compensation_total' => $doctorCompensationTotal,
                 'by_status' => [
                     'paid' => ['amount' => $totalsByStatus->get('paid')->total_amount ?? 0, 'count' => $totalsByStatus->get('paid')->count ?? 0],
                     'issued' => ['amount' => $totalsByStatus->get('issued')->total_amount ?? 0, 'count' => $totalsByStatus->get('issued')->count ?? 0],
@@ -155,10 +165,27 @@ class InvoiceController extends Controller
         return Inertia::render('Invoices/CreateInvoice', [
             'appointment' => $appointment,
             'services' => $appointment->doctor->services->map(function ($service) {
+                $price = (float) $service->pivot->price;
+                $compensationType = $service->pivot->compensation_type;
+                $compensationValue = (float) $service->pivot->compensation_value;
+
+                if ($compensationType === 'percentage') {
+                    $doctorCompensation = $price * ($compensationValue / 100);
+                } else {
+                    $doctorCompensation = $compensationValue;
+                }
+
+                $maxDiscountAmount = max(0, $price - $doctorCompensation);
+
+                $maxDiscountPercentage = $price > 0
+                    ? ($maxDiscountAmount / $price) * 100
+                    : 0;
+
                 return [
                     'id' => $service->id,
                     'name' => $service->name,
-                    'price' => $service->pivot->price,
+                    'price' => $price,
+                    'max_discount_percentage' => round($maxDiscountPercentage, 2),
                 ];
             }),
             'invoice' => [
@@ -202,9 +229,10 @@ class InvoiceController extends Controller
      */
     public function store(StoreInvoiceRequest $request)
     {
-        DB::beginTransaction();
-
-        $alreadyExists = Invoice::where('appointment_id', $request->appointment_id)->exists();
+        $alreadyExists = Invoice::where(
+            'appointment_id',
+            $request->appointment_id
+        )->exists();
 
         if ($alreadyExists) {
             return back()->withErrors([
@@ -212,8 +240,9 @@ class InvoiceController extends Controller
             ]);
         }
 
-        try {
+        DB::beginTransaction();
 
+        try {
             $year = now()->year;
 
             $lastInvoice = Invoice::where('year', $year)
@@ -229,14 +258,23 @@ class InvoiceController extends Controller
                 );
 
             $vatAmount = collect($request->items)
-                ->sum(function ($item) {
-                    return (
-                        $item['quantity']
-                        * $item['unit_price']
-                        * $item['vat_percentage']
-                    ) / 100;
-                });
-            $total = $subtotal + $vatAmount + $request->stamp_duty - $request->discount_amount;
+                ->sum(fn ($item) => (
+                    $item['quantity']
+                    * $item['unit_price']
+                    * $item['vat_percentage']
+                ) / 100
+                );
+
+            $discount = $subtotal * (
+                $request->discount_amount / 100
+            );
+
+            $total =
+                $subtotal +
+                $vatAmount +
+                $request->stamp_duty -
+                $discount;
+
             $amount = $total;
 
             $invoice = Invoice::create([
@@ -274,7 +312,6 @@ class InvoiceController extends Controller
             ]);
 
             foreach ($request->items as $item) {
-
                 $invoice->invoiceItems()->create([
                     'service_id' => $item['service_id'] ?? null,
                     'description' => $item['description'],
@@ -299,17 +336,17 @@ class InvoiceController extends Controller
 
             DB::commit();
 
-            return redirect()->route('admin.invoices.index')->with([
-                'toast' => [
-                    'type' => 'success',
-                    'message' => 'Fattura creata correttamente.',
-                ]]);
+            return redirect()
+                ->route('admin.invoices.index')
+                ->with([
+                    'toast' => [
+                        'type' => 'success',
+                        'message' => 'Fattura creata correttamente.',
+                    ],
+                ]);
 
         } catch (\Throwable $e) {
-
             DB::rollBack();
-
-            // report($e);
 
             return back()
                 ->withErrors([
@@ -317,7 +354,6 @@ class InvoiceController extends Controller
                 ])
                 ->withInput();
         }
-
     }
 
     /**
@@ -524,8 +560,12 @@ class InvoiceController extends Controller
         ]);
     }
 
-    public function changeStatus(ChangeInvoiceStatusRequest $request, Invoice $invoice, InvoicePdfService $pdfService)
-    {
+    public function changeStatus(
+        ChangeInvoiceStatusRequest $request,
+        Invoice $invoice,
+        InvoicePdfService $pdfService
+    ) {
+
         $this->authorize('changeStatus', $invoice);
 
         $allowedTransitions = [
@@ -545,24 +585,116 @@ class InvoiceController extends Controller
         }
 
         if ($newStatus === 'issued') {
-            $path = $pdfService->getPdfPath($invoice);
+            $pdfService->getPdfPath($invoice);
         }
 
-        $oldStatus = $invoice->status;
+        DB::transaction(function () use ($invoice, $newStatus) {
+            $invoice->update([
+                'status' => $newStatus,
+            ]);
 
-        $invoice->update(['status' => $newStatus]);
+            if ($newStatus === 'paid') {
+                $invoice->loadMissing([
+                    'invoiceItems',
+                    'doctor',
+                ]);
 
-        Audit::forceCreate([
-            'user_id' => auth()->id(),
-            'user_type' => get_class(auth()->user()),
-            'event' => 'status changed',
-            'auditable_type' => Invoice::class,
-            'auditable_id' => $invoice->id,
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-            'old_values' => [],
-            'new_values' => [],
-        ]);
+                if ($invoice->doctor) {
+                    $discountPercentage = (float) $invoice->discount_amount;
+
+                    foreach ($invoice->invoiceItems as $invoiceItem) {
+                        if (! $invoiceItem->service_id) {
+                            continue;
+                        }
+
+                        $service = $invoice->doctor
+                            ->services()
+                            ->where('services.id', $invoiceItem->service_id)
+                            ->first();
+
+                        if (! $service) {
+                            continue;
+                        }
+
+                        $quantity = (float) $invoiceItem->quantity;
+                        $unitPrice = (float) $invoiceItem->unit_price;
+
+                        $lineAmount = $quantity * $unitPrice;
+
+                        if ($lineAmount <= 0) {
+                            continue;
+                        }
+
+                        /*
+                         * Lo sconto della fattura viene ripartito
+                         * proporzionalmente sulla singola prestazione.
+                         */
+                        $discountAmount = $lineAmount * (
+                            $discountPercentage / 100
+                        );
+
+                        $serviceAmount = round(
+                            $lineAmount - $discountAmount,
+                            2
+                        );
+
+                        $compensationType =
+                            $service->pivot->compensation_type;
+
+                        $compensationValue =
+                            (float) $service->pivot->compensation_value;
+
+                        if ($compensationType === 'percentage') {
+                            $compensationAmount = round(
+                                $serviceAmount
+                                * ($compensationValue / 100),
+                                2
+                            );
+                        } else {
+                            $compensationAmount = round(
+                                $compensationValue * $quantity,
+                                2
+                            );
+                        }
+
+                        if ($compensationAmount > $serviceAmount) {
+                            throw new \RuntimeException(
+                                'Il compenso del medico supera l\'importo effettivo della prestazione.'
+                            );
+                        }
+
+                        DoctorCompensation::firstOrCreate(
+                            [
+                                'invoice_item_id' => $invoiceItem->id,
+                            ],
+                            [
+                                'doctor_id' => $invoice->doctor_id,
+                                'service_id' => $invoiceItem->service_id,
+                                'invoice_id' => $invoice->id,
+                                'compensation_type' => $compensationType,
+                                'compensation_value' => $compensationValue,
+                                'service_amount' => $serviceAmount,
+                                'compensation_amount' => $compensationAmount,
+                                'status' => 'accrued',
+                                'accrued_at' => now(),
+                            ]
+                        );
+                    }
+                }
+            }
+
+            Audit::forceCreate([
+                'user_id' => auth()->id(),
+                'user_type' => get_class(auth()->user()),
+                'event' => 'status changed',
+                'auditable_type' => Invoice::class,
+                'auditable_id' => $invoice->id,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'old_values' => [],
+                'new_values' => [],
+            ]);
+        });
 
         return back();
     }
