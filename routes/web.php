@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SecretaryController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SpecialtyController;
+use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Superadmin\AdminController;
 use App\Http\Controllers\Superadmin\ClinicController;
@@ -42,6 +43,21 @@ use Inertia\Inertia;
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::domain('prenota.clinika.test')->group(function () {
+    Route::get('/', [BookingController::class, 'index'])->name('booking');
+
+    Route::get('/clinics/{clinic}/doctors', [BookingController::class, 'doctors'])
+        ->name('booking.clinics.doctors');
+
+    Route::get('/clinics/{clinic}/doctors/{doctor}/services', [BookingController::class, 'services'])
+        ->name('booking.doctors.services');
+
+    Route::get('/clinics/{clinic}/doctors/{doctor}/appointments', [BookingController::class, 'appointments'])
+        ->name('booking.doctors.appointments');
+
+    Route::post('/', [BookingController::class, 'store'])
+        ->name('booking.store');
+});
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [

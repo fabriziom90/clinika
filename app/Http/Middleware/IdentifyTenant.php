@@ -17,7 +17,6 @@ class IdentifyTenant
 
     public function handle(Request $request, Closure $next): Response
     {
-
         $clinic = $this->tenantResolver->resolve($request);
 
         if (! $clinic) {

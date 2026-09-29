@@ -11,6 +11,10 @@ class TenantResolver
     {
         $host = $request->getHost();
 
+        if ($host === 'prenota.clinika.test') {
+            return null;
+        }
+
         $parts = explode('.', $host);
 
         if (count($parts) < 3) {

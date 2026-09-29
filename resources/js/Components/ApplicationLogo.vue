@@ -6,6 +6,10 @@ const props = defineProps({
     width: String,
     color: String,
     fontSize: String,
+    title: {
+        default: 'Clinika',
+        type: String
+    }
 });
 
 const logoStyle = computed(() => {
@@ -25,7 +29,7 @@ const titleStyle = computed(() => {
 <template>
     <div class="d-flex align-items-center">
         <img :src="logoUrl" :style="logoStyle" alt="Clinka - Elpis Medica" />
-        <h2 :style="titleStyle">Clinika</h2>
+        <h2 :style="titleStyle">{{ title }}</h2>
     </div>
 </template>
 

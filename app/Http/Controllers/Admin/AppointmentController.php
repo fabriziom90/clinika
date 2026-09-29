@@ -87,6 +87,7 @@ class AppointmentController extends Controller
         $appointment->start_time = $startTime;
         $appointment->end_time = $endTime;
         $appointment->duration_minutes = $duration;
+        $appointment->first_visit = $form_data['first_visit'];
         $appointment->notes = $form_data['notes'] ?? null;
 
         $appointment->save();
@@ -133,6 +134,7 @@ class AppointmentController extends Controller
         $appointment->start_time = $startTime;
         $appointment->end_time = $endTime;
         $appointment->duration_minutes = $duration;
+        $appointment->first_visit = $form_data['first_visit'];
         $appointment->notes = $form_data['notes'] ?? null;
 
         $appointment->save();
