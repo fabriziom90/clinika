@@ -57,6 +57,9 @@ Route::domain('prenota.clinika.test')->group(function () {
 
     Route::post('/', [BookingController::class, 'store'])
         ->name('booking.store');
+
+    Route::get('/booking/success', [BookingController::class, 'success'])
+        ->name('booking.success');
 });
 
 Route::get('/', function () {
@@ -102,6 +105,7 @@ Route::middleware(['tenant', 'auth'])->group(function () {
         Route::resource('services', ServiceController::class);
         Route::get('/patients/{patient}/consents/{consent}/document', [PatientConsentController::class, 'document'])->name('patient.consents.document');
         Route::get('/patients/search', [PatientController::class, 'search'])->name('patients.search');
+        Route::post('/patients/inline', [PatientController::class, 'storeInline'])->name('patients.store-inline');
         Route::resource('patients', PatientController::class);
         Route::resource('clinic-rooms', ClinicRoomController::class);
         Route::resource('products', ProductController::class);

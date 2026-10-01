@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreInlinePatientRequest;
 use App\Http\Requests\StorePatientRequest;
 use App\Http\Requests\UpdatePatientRequest;
 use App\Models\Appointment;
@@ -310,5 +311,26 @@ class PatientController extends Controller
 
         return response()->json($patients);
 
+    }
+
+    public function storeInline(StoreInlinePatientRequest $request)
+    {
+        $this->authorize('create', Patient::class);
+
+        $patient = new Patient;
+        $patient->fill($request->validated());
+        $patient->save();
+
+        app(\App\Observers\PatientObserver::class)->created($patient);
+
+        return redirect()
+            ->back()
+            ->with('newPatient', [
+                'id' => $patient->id,
+                'name' => $patient->name,
+                'surname' => $patient->surname,
+                'phone' => $patient->phone,
+                'email' => $patient->email,
+            ]);
     }
 }

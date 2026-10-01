@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AppointmentStatus;
 use App\Http\Requests\StoreBookingRequest;
+use App\Mail\BookingConfirmationMail;
 use App\Models\Appointment;
 use App\Models\Clinic;
 use App\Models\Doctor;
@@ -10,6 +12,7 @@ use App\Models\Patient;
 use App\Services\Connection\TenantDatabaseService;
 use App\Services\TenantResolver;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
 class BookingController extends Controller
@@ -117,7 +120,7 @@ class BookingController extends Controller
                 'cancelled',
                 'no_show',
             ])
-            ->where('start_time', '>=', now())
+            ->where('start_time', '>=', now()->startOfDay())
             ->orderBy('start_time')
             ->get([
                 'id',
@@ -202,7 +205,7 @@ class BookingController extends Controller
             ])
             ->where('start_time', '<', $end)
             ->whereRaw(
-                'DATE_ADD(start_time, INTERVAL duration MINUTE) > ?',
+                'DATE_ADD(start_time, INTERVAL duration_minutes MINUTE) > ?',
                 [$start]
             )
             ->exists();
@@ -252,19 +255,31 @@ class BookingController extends Controller
             ]);
         }
 
-        $appointment = Appointment::create([
-            'doctor_id' => $doctor->id,
-            'patient_id' => $patient->id,
-            'service_id' => $service->id,
-            'start_time' => $start,
-            'duration_minutes' => $duration,
-            'status' => 'scheduled',
-            'first_visit' => $data['first_visit'],
-        ]);
+        $appointment = new Appointment;
+        $appointment->doctor_id = $doctor->id;
+        $appointment->status = AppointmentStatus::Scheduled;
+        $appointment->nurse_id = null;
+        $appointment->patient_id = $patient->id;
+        $appointment->service_id = $service->id;
+        $appointment->start_time = $start;
+        $appointment->end_time = $end;
+        $appointment->duration_minutes = $duration;
+        $appointment->first_visit = $data['first_visit'];
+        $appointment->notes = $data['notes'] ?? null;
+
+        $appointment->save();
+
+        Mail::to($patient->email)
+            ->send(new BookingConfirmationMail($appointment));
 
         return response()->json([
-            'message' => 'Prenotazione effettuata con successo.',
-            'appointment_id' => $appointment->id,
-        ], 201);
+            'success' => true,
+            'redirect' => route('booking.success'),
+        ]);
+    }
+
+    public function success()
+    {
+        return Inertia::render('BookingSuccess');
     }
 }

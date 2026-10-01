@@ -29,6 +29,7 @@ class UpdateAppointmentRequest extends FormRequest
             'patient_id' => ['required', 'exists:patients,id'],
             'nurse_id' => ['nullable', 'exists:nurses,id'],
             'duration' => ['required', 'integer', 'min:1'],
+            'first_visit' => ['required', 'boolean'],
             'notes' => ['nullable', 'string', 'max:2000'],
         ];
     }

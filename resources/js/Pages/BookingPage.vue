@@ -31,7 +31,6 @@ const loadingAppointments = ref(false);
 const loadingServices = ref(false);
 const loadingBooking = ref(false);
 
-const bookingSuccess = ref(false);
 const bookingErrors = ref({});
 
 const calendarEvents = ref([]);
@@ -78,42 +77,6 @@ const loadDoctors = async () => {
         doctors.value = []
     } finally {
         loadingDoctors.value = false
-    }
-}
-
-const loadServices = async () => {
-    if (!selectedDoctor.value) {
-        services.value = []
-        selectedService.value = null
-        return
-    }
-
-    loadingServices.value = true
-
-    try {
-        const response = await fetch(
-            `/doctors/${selectedDoctor.value}/services`,
-            {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            }
-        )
-
-        if (!response.ok) {
-            throw new Error('Errore nel caricamento dei servizi')
-        }
-
-        services.value = await response.json()
-        selectedService.value = null
-        selectedTime.value = null
-    } catch (error) {
-        console.error(error)
-        services.value = []
-        selectedService.value = null
-        selectedTime.value = null
-    } finally {
-        loadingServices.value = false
     }
 }
 
@@ -286,7 +249,7 @@ const onServiceChange = () => {
 
 const submitBooking = async () => {
     bookingErrors.value = {};
-    bookingSuccess.value = false;
+
 
     if (
         !selectedClinic.value ||
@@ -333,6 +296,11 @@ const submitBooking = async () => {
 
         const responseData = await response.json();
 
+        if (responseData.success) {
+            window.location.href = responseData.redirect;
+            return;
+        }
+
         if (response.status === 422) {
             bookingErrors.value = responseData.errors || {};
 
@@ -344,8 +312,6 @@ const submitBooking = async () => {
                 responseData.message || 'Errore durante la prenotazione.'
             );
         }
-
-        bookingSuccess.value = true;
 
         selectedDate.value = '';
         selectedTime.value = null;
@@ -381,6 +347,7 @@ const submitBooking = async () => {
     } finally {
         loadingBooking.value = false;
     }
+    console.log(bookingErrors)
 };
 </script>
 
@@ -450,12 +417,8 @@ const submitBooking = async () => {
 
                 <div class="col-12 col-md-4">
 
-                    <div v-if="bookingSuccess" class="alert alert-success">
-                        Prenotazione effettuata con successo.
-                    </div>
-
                     <div v-if="bookingErrors.booking" class="alert alert-danger">
-                        {{ bookingErrors.booking[0] || bookingErrors.booking }}
+                        {{ bookingErrors.booking }}
                     </div>
 
                     <div class="mb-3">

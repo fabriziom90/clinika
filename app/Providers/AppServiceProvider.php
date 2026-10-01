@@ -75,6 +75,7 @@ class AppServiceProvider extends ServiceProvider
                 return [
                     'service' => session('service'),
                     'toast' => session('toast'),
+                    'newPatient' => session('newPatient'),
                 ];
             },
             'appointmentEntry' => fn () => session('appointmentEntry'),
