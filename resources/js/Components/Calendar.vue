@@ -7,7 +7,6 @@ import { useToast } from "vue-toast-notification";
 import Modal from "@/Components/Modal.vue";
 import DetailModal from "@/Pages/Calendar/DetailModal.vue";
 import { useConfigStore } from "@/stores/main";
-import PersonForm from "@/Components/PersonForm.vue";
 import { useAppointmentStore } from "@/stores/appointments";
 
 // debounce variable to handle click or doubleClick
@@ -48,6 +47,10 @@ const suppressClickAfterDrag = ref(false);
 //check if there is an event handling
 const isInteractingWithEvent = ref(false);
 
+//inline patient
+const newPatientErrors = ref({});
+const creatingPatient = ref(false);
+
 // new appointment data
 const newAppointmentData = ref({
     date: null,
@@ -58,7 +61,16 @@ const newAppointmentData = ref({
     nurseId: "",
     newPatient: false,
     duration: 30,
+    first_visit: false,
     notes: "",
+});
+
+//new patient inline data
+const newPatientData = ref({
+    name: "",
+    surname: "",
+    phone: "",
+    email: "",
 });
 
 // form appointment
@@ -70,7 +82,16 @@ const formAppointment = useForm({
     nurse_id: "",
     service_id: "",
     duration: 30,
+    first_visit: false,
     notes: "",
+});
+
+//form new patient
+const formNewPatient = useForm({
+    name: "",
+    surname: "",
+    phone: "",
+    email: "",
 });
 
 onMounted(() => {
@@ -142,6 +163,7 @@ const handleNewAppointment = () => {
     formAppointment.nurse_id = newAppointmentData.value.nurseId;
     formAppointment.service_id = newAppointmentData.value.serviceId;
     formAppointment.duration = newAppointmentData.value.duration;
+    formAppointment.first_visit = newAppointmentData.value.first_visit;
     formAppointment.notes = newAppointmentData.value.notes;
 
     if (editingEventId.value) {
@@ -167,6 +189,7 @@ const handleNewAppointment = () => {
                         nurseId: "",
                         newPatient: false,
                         duration: 30,
+                        first_visit: false,
                         notes: "",
                     });
                 },
@@ -196,6 +219,7 @@ const handleNewAppointment = () => {
                     nurseId: "",
                     newPatient: false,
                     duration: 30,
+                    first_visit: false,
                     notes: "",
                 });
             },
@@ -207,6 +231,30 @@ const handleNewAppointment = () => {
             },
         });
     }
+};
+
+// save new patient
+const handleNewPatient = () => {
+    formNewPatient.post(route("admin.patients.store-inline"), {
+        preserveScroll: true,
+
+        onSuccess: (page) => {
+            const patient = page.props.flash?.newPatient;
+
+            if (!patient) {
+                return;
+            }
+
+            props.patients.push(patient);
+
+            newAppointmentData.value.patientId = patient.id;
+            newAppointmentData.value.newPatient = false;
+
+            formNewPatient.reset();
+
+            $toast.success("Paziente aggiunto correttamente.");
+        },
+    });
 };
 
 // define function to handle single click
@@ -315,6 +363,7 @@ const openEditFromCalendar = (payload) => {
         serviceId: appointment.service_id ?? appointment.service?.id ?? "",
         newPatient: false,
         duration: durationMinutes,
+        first_visit: Boolean(appointment.first_visit),
         notes: appointment.notes ?? "",
     };
 
@@ -326,6 +375,7 @@ const openEditFromCalendar = (payload) => {
     formAppointment.nurse_id = newAppointmentData.value.nurseId;
     formAppointment.service_id = newAppointmentData.value.serviceId;
     formAppointment.duration = newAppointmentData.value.duration;
+    formAppointment.first_visit = newAppointmentData.value.first_visit;
     formAppointment.notes = newAppointmentData.value.notes;
 
     showNewAppointmentModal.value = true;
@@ -341,17 +391,6 @@ const editFromButton = (event) => {
     });
 };
 
-// function that create new patient from modal
-const handleNewPatient = (newPatient) => {
-    // Aggiunge il nuovo paziente alla lista
-    props.patients.push(newPatient);
-
-    // Preseleziona nella select
-    newAppointmentData.value.patientId = newPatient.id;
-
-    // Chiudi il form di creazione paziente
-    newAppointmentData.value.newPatient = false;
-};
 
 //
 function isoToLocalDate(iso) {
@@ -496,9 +535,70 @@ function formatDateForInput(date) {
                             formAppointment.errors.patient_id }}</span>
                     </div>
 
-                    <div v-if="newAppointmentData.newPatient" class="mt-4">
-                        <PersonForm :nationalities="nationalities" formType="patient" :inlineMode="true"
-                            @savedInline="handleNewPatient" />
+                    <div v-if="newAppointmentData.newPatient" class="col-12 mt-3">
+                        <div class="border rounded p-3">
+                            <h6 class="mb-3">Nuovo paziente</h6>
+
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">Nome</label>
+
+                                    <input type="text" class="form-control"
+                                        :class="{ 'is-invalid': formNewPatient.errors.name }"
+                                        v-model="formNewPatient.name">
+
+                                    <span v-if="formNewPatient.errors.name" class="text-danger">
+                                        {{ formNewPatient.errors.name }}
+                                    </span>
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">Cognome</label>
+
+                                    <input type="text" class="form-control"
+                                        :class="{ 'is-invalid': formNewPatient.errors.surname }"
+                                        v-model="formNewPatient.surname">
+
+                                    <span v-if="formNewPatient.errors.surname" class="text-danger">
+                                        {{ formNewPatient.errors.surname }}
+                                    </span>
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">Telefono</label>
+
+                                    <input type="text" class="form-control"
+                                        :class="{ 'is-invalid': formNewPatient.errors.phone }"
+                                        v-model="formNewPatient.phone">
+
+                                    <span v-if="formNewPatient.errors.phone" class="text-danger">
+                                        {{ formNewPatient.errors.phone }}
+                                    </span>
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">Email</label>
+
+                                    <input type="email" class="form-control"
+                                        :class="{ 'is-invalid': formNewPatient.errors.email }"
+                                        v-model="formNewPatient.email">
+
+                                    <span v-if="formNewPatient.errors.email" class="text-danger">
+                                        {{ formNewPatient.errors.email }}
+                                    </span>
+                                </div>
+
+                                <div class="col-12 d-flex justify-content-end">
+                                    <button type="button" class="main-button" @click="handleNewPatient"
+                                        :disabled="formNewPatient.processing">
+                                        {{ formNewPatient.processing
+                                        ? "Salvataggio..."
+                                        : "Salva paziente"
+                                        }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="col-12 col-md-6 mt-3">
@@ -537,7 +637,13 @@ function formatDateForInput(date) {
                         <span v-if="formAppointment.errors.duration" class="text-danger">{{
                             formAppointment.errors.duration }}</span>
                     </div>
-
+                    <div class="col-12 mt-3">
+                        <div class="form-check">
+                            <input type="checkbox" name="" id="" class="form-check-input"
+                                v-model="newAppointmentData.first_visit">
+                            <label for="" class="form-check-label">Prima visita</label>
+                        </div>
+                    </div>
                     <div class="col-12 mt-3">
                         <label class="form-label">Note</label>
                         <textarea v-model="newAppointmentData.notes" class="form-control" rows="3"

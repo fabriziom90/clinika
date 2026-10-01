@@ -21,6 +21,7 @@ class Appointment extends Model implements AuditableContract
         'duration',
         'notes',
         'status',
+        'first_visit',
     ];
 
     // protected $casts = [
