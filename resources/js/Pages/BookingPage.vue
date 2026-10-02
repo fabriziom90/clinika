@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import { VueCal } from 'vue-cal';
+import Footer from '@/Components/Footer.vue';
 import "../../../node_modules/vue-cal/dist/vue-cal.css";
 
 const props = defineProps({
@@ -619,17 +620,7 @@ const submitBooking = async () => {
         </div>
 
     </main>
-    <footer class="bg-main-red">
-        <div class="container">
-            <div class="row">
-                <div class="col-12">
-                    <div class="text-center text-white py-5">
-                        <h2>Clinika</h2>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <Footer />
 
 </template>
 

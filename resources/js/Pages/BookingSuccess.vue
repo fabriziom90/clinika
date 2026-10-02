@@ -1,6 +1,7 @@
 <script setup>
 import { Head } from '@inertiajs/vue3';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
+import Footer from '@/Components/Footer.vue';
 </script>
 
 <template>
@@ -58,5 +59,6 @@ import ApplicationLogo from '@/Components/ApplicationLogo.vue';
         </div>
 
     </main>
+    <Footer />
 
 </template>
